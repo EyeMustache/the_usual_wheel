@@ -4,26 +4,33 @@ about: Something is broken or not behaving as expected
 labels: bug
 ---
 
-## What happened?
+## Goal
+Fix the bug and confirm expected behavior on device/emulator.
 
-<!-- Describe the problem. What did you see? -->
-
-## What did you expect to happen?
-
-<!-- What should have happened instead? -->
-
-## Steps to reproduce
-
-1. 
-2. 
-3. 
-
-## Device / Environment
-
-- OS: Android / iOS
-- Device: 
-- App version or commit: 
+## Tasks
+**Reproduction**
+- [ ] Reproduce the bug consistently
+- [ ] Capture exact trigger steps
+**Root cause**
+- [ ] Identify the underlying cause
+- [ ] Confirm impacted files/components
+**Fix**
+- [ ] Implement focused fix
+- [ ] Verify no regressions in related flow
+**Validation**
+- [ ] Build succeeds
+- [ ] Bug no longer reproduces
+- [ ] Add/adjust tests if applicable
 
 ## Notes
-
-<!-- Logs, screenshots, or anything else that might help -->
+- Expected behavior:
+- Actual behavior:
+- Steps to reproduce:
+  1.
+  2.
+  3.
+- Device / Environment:
+  - OS: Android / iOS
+  - Device:
+  - App version or commit:
+- Logs / screenshots / extra context:

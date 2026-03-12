@@ -4,25 +4,28 @@ about: Adding a new movie, wheel, or smoke break data entry
 labels: movie-data
 ---
 
-## Movie / Wheel
+## Goal
+Add one movie/wheel data entry with complete metadata and smoke break info.
 
-**Movie title:** 
-**Year:** 
-**Wheel:** <!-- e.g. Russell Crowe -->
-
-## Checklist
-
+## Tasks
+**Movie / Wheel**
+- [ ] Movie title filled in
+- [ ] Year filled in
+- [ ] Target wheel selected
+**Data entry**
 - [ ] Movie searched and added via TMDB in the app
 - [ ] Letterboxd rating looked up and entered manually (if applicable)
 - [ ] Gemini prompt run for smoke breaks
-- [ ] Break JSON file created (`breaks_{slug}.json`) and added to `Resources/Raw/`
-- [ ] Build Action on JSON file set to `MauiAsset`
-- [ ] Break timestamps and vibe checks tested and displaying correctly in app
-
-## Break file name
-
-`breaks_[slug].json`
+**Break file**
+- [ ] Break JSON file created as breaks_{slug}.json
+- [ ] JSON added to Resources/Raw/
+- [ ] Build Action set to MauiAsset
+**Validation**
+- [ ] Break timestamps/vibe checks display correctly in app
 
 ## Notes
-
-<!-- Any quirks about this movie, manual overrides, or things worth remembering -->
+- Movie title:
+- Year:
+- Wheel:
+- Break file name: breaks_[slug].json
+- Quirks / overrides / reminders:

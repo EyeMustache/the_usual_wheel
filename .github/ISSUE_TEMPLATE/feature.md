@@ -4,26 +4,20 @@ about: A new feature or piece of functionality
 labels: feature
 ---
 
-## What do I want?
+## Goal
+Describe the end result in one sentence.
 
-<!-- Describe the feature in plain language. What should it do? -->
-
-## Why do I want it?
-
-<!-- What problem does this solve or what does it improve? -->
-
-## Acceptance criteria
-
-<!-- A checklist — this issue is "done" when all of these are ticked -->
-
-- [ ] 
-- [ ] 
-- [ ] 
-
-## Phase
-
-<!-- Which phase does this belong to? e.g. Phase 2 — Database -->
+## Tasks
+**Implementation**
+- [ ] Add/modify required models, services, and UI
+- [ ] Wire dependencies and navigation if needed
+- [ ] Handle edge cases and error states
+**Validation**
+- [ ] Build succeeds
+- [ ] Feature verified on Android emulator/device
+- [ ] Any relevant tests added/updated
 
 ## Notes
-
-<!-- Edge cases, design thoughts, links to relevant docs, anything else -->
+Read before starting:
+- Link docs or references here
+- Add constraints, assumptions, or out-of-scope details
