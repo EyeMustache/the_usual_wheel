@@ -4,9 +4,9 @@ using TheUsualWheelProject.Services;
 
 namespace TheUsualWheelProject.ViewModels;
 
-public class WheelViewModel
+public class WheelListViewModel
 {
-    public WheelViewModel()
+    public WheelListViewModel()
     {
         throw new NotImplementedException();
     }   

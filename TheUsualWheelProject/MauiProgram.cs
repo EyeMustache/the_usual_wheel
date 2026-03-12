@@ -4,7 +4,7 @@ using TheUsualWheelProject.Repositories;
 using TheUsualWheelProject.Repositories.Interfaces;
 using TheUsualWheelProject.Services;
 using Plugin.Maui.Audio;
-
+using Dapper;
 
 namespace TheUsualWheelProject;
 
@@ -21,6 +21,7 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 		
+		SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 		// Add dependencies
 		builder.UseSkiaSharp();
 		builder.Services.AddSingleton<IMovieRepository, MovieRepository>();
@@ -28,10 +29,10 @@ public static class MauiProgram
    		builder.Services.AddSingleton<MovieService>();
    		builder.Services.AddSingleton<WheelService>();
    		builder.Services.AddSingleton<TmdbService>();
-   		builder.Services.AddSingleton<MovieService>();
    		builder.Services.AddSingleton(AudioManager.Current);
 		builder.Services.AddSingleton<AudioService>();
-
+		builder.Services.AddSingleton<DatabaseService>(
+			new DatabaseService(DatabaseConfig.ConnectionString));
 
 #if DEBUG
 		builder.Logging.AddDebug();

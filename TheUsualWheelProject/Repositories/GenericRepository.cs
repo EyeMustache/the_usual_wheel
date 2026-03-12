@@ -1,46 +1,51 @@
 using Dapper;
+using Dapper.Contrib.Extensions;
 using Microsoft.Data.Sqlite;
-using Microsoft.VisualBasic;
-using TheUsualWheelProject.Repositories.Interfaces;
 using TheUsualWheelProject.Models;
+using TheUsualWheelProject.Repositories.Interfaces;
 
 namespace TheUsualWheelProject.Repositories;
 
-public class GenericRepository<T, TId> : IGenericRepository<T, TId>
-{   
+public class GenericRepository<T, TId> : IGenericRepository<T, TId> where T : class, IModel
+{
     private readonly string TableName;
-    private readonly TId Id;
     private readonly string _conString;
 
-    public GenericRepository(string tableName, TId id, string conString)
+    public GenericRepository(string tableName, string conString)
     {
         TableName = tableName;
-        Id = id;
         _conString = conString;
     }
 
-    public IEnumerable<T> GetAll()
+    public async Task<IEnumerable<T>> GetAll()
     {
-        throw new NotImplementedException();
+        using var connection = new SqliteConnection(_conString);
+        return await connection.GetAllAsync<T>();
     }
 
-    public T GetById(TId id)
+    public async Task<T?> GetById(TId id)
     {
-        throw new NotImplementedException();
+        using var connection = new SqliteConnection(_conString);
+        return await connection.GetAsync<T>(id);
     }
 
-    public void Insert(T entity)
+    public async Task Insert(T model)
     {
-        throw new NotImplementedException();
+        using var connection = new SqliteConnection(_conString);
+        await connection.InsertAsync(model);
     }
 
-    public void Update(T entity)
+    public async Task Update(T model)
     {
-        throw new NotImplementedException();
+        using var connection = new SqliteConnection(_conString);
+        await connection.UpdateAsync(model);
     }
-    
-    public void Delete(TId id)
+
+    // Dapper.Contrib does not have a DeleteAsync method that takes an id, so the old way here.
+    public async Task Delete(TId id)
     {
-        throw new NotImplementedException();
+        using var connection = new SqliteConnection(_conString);
+        var query = $"DELETE FROM {TableName} WHERE Id = @Id";
+        await connection.ExecuteAsync(query, new { Id = id });
     }
 }
