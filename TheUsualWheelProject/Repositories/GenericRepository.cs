@@ -41,7 +41,7 @@ public class GenericRepository<T, TId> : IGenericRepository<T, TId> where T : cl
         await connection.UpdateAsync(model);
     }
 
-    // Dapper.Contrib does not have a DeleteAsync method that takes an id, so the old way here.
+    // Dapper.Contrib does not have a DeleteAsync method that takes an id, so the old way here but that's fine.
     public async Task Delete(TId id)
     {
         using var connection = new SqliteConnection(_conString);

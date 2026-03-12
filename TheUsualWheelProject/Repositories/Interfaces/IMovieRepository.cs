@@ -10,4 +10,5 @@ public interface IMovieRepository : IGenericRepository<Models.Movie, int>
     Task SetWatchedDateAsync(int wheelId, int movieId, DateOnly? watchedDate); // Joint table
     Task<IEnumerable<Models.Movie>> GetRemainingByWheelAsync(int wheelId); // For the wheel spin
     Task<IEnumerable<Models.Movie>> GetLastWatchedAsync(int wheelId, int count); // For the history section, to show the last X watched movies for a wheel. For future
+    Task<bool> MovieExistsAsync(string title, string director, int year, int? tmdbId); // To prevent duplicates when adding new movies
 }
