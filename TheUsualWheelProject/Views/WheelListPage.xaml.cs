@@ -1,9 +1,12 @@
-namespace TheUsualWheelProject.ViewModels;
+using TheUsualWheelProject.ViewModels;
 
-public class WheelListPage
+namespace TheUsualWheelProject.Views;
+
+public partial class WheelListPage : ContentPage
 {
-    public WheelListPage()
+    public WheelListPage(WheelListViewModel viewModel)
     {
-        throw new NotImplementedException();
+        InitializeComponent();
+        BindingContext = viewModel;
     }
 }

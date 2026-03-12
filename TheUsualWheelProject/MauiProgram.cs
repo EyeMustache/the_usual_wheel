@@ -3,6 +3,8 @@ using SkiaSharp.Views.Maui.Controls.Hosting;
 using TheUsualWheelProject.Repositories;
 using TheUsualWheelProject.Repositories.Interfaces;
 using TheUsualWheelProject.Services;
+using TheUsualWheelProject.ViewModels;
+using TheUsualWheelProject.Views;
 using Plugin.Maui.Audio;
 using Dapper;
 
@@ -22,6 +24,7 @@ public static class MauiProgram
 			});
 		
 		SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
 		// Add dependencies
 		builder.UseSkiaSharp();
 		builder.Services.AddSingleton<IMovieRepository>(_ => new MovieRepository(DatabaseConfig.ConnectionString));
@@ -33,6 +36,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<AudioService>();
 		builder.Services.AddSingleton<DatabaseService>(
 			new DatabaseService(DatabaseConfig.ConnectionString));
+		builder.Services.AddSingleton<WheelListViewModel>();
+		builder.Services.AddSingleton<WheelListPage>();	
 
 #if DEBUG
 		builder.Logging.AddDebug();

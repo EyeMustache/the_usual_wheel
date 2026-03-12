@@ -1,9 +1,11 @@
-namespace TheUsualWheelProject.ViewModels;
+using TheUsualWheelProject.ViewModels;
 
-public class WheelPage
+namespace TheUsualWheelProject.Views;
+
+public partial class WheelPage : ContentPage
 {
     public WheelPage()
     {
-        throw new NotImplementedException();
+        InitializeComponent();
     }
 }
