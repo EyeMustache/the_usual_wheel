@@ -36,6 +36,7 @@ wheel starts fresh (e.g. Denzel Washington).
 | Deployment | Sideloaded APK | Personal use only for now |
 | Gemini Integration | Not in MVP | Planned future feature |
 | Host Tracking | Not included | Handled informally between friends |
+| Testing | MSTest + Moq, separate test project | Catch regressions as the codebase grows |
 
 ---
 
@@ -448,6 +449,77 @@ the docs. There is no shortcut to understanding this one.
 
 ---
 
+## Testing
+
+> The test project should be created early and left ready, even if it starts empty.
+> The habit of writing a test when you add a feature (or when you fix a bug) is what
+> makes it useful. You do not need to test everything — focus on business logic in
+> Services and repository query correctness.
+
+### Setup
+
+1. Create a separate test project alongside your main project:
+   ```
+   dotnet new mstest -n TheUsualWheelProject.Tests
+   ```
+2. Add a project reference from the test project to the main project:
+   ```
+   dotnet add TheUsualWheelProject.Tests/TheUsualWheelProject.Tests.csproj reference TheUsualWheelProject/TheUsualWheelProject.csproj
+   ```
+3. Install Moq in the test project:
+   ```
+   dotnet add TheUsualWheelProject.Tests package Moq
+   ```
+4. Your solution should now look like:
+   ```
+   The Usual Wheel Project/
+   ├── TheUsualWheelProject/          ← main app
+   └── TheUsualWheelProject.Tests/    ← test project
+       └── Services/
+           ├── WheelServiceTests.cs
+           └── MovieServiceTests.cs
+   ```
+
+### What to test
+
+Focus test coverage on the **Services layer** — that is where your business logic lives.
+Repositories are harder to unit test because they talk to a real database; skip those
+for now or test them with an in-memory SQLite connection if needed later.
+
+| Layer | Test? | Why |
+|---|---|---|
+| ViewModels | Optional | Mostly wiring, low logic density |
+| Services | Yes | Business rules, elimination logic, last-standing check |
+| Repositories | Skip for now | Requires DB setup, integration test territory |
+| TmdbService | Skip / mock | External API, not your logic |
+
+### What to mock
+
+Use Moq to mock your repository interfaces so your service tests never touch a real
+database. This is exactly why you defined `IMovieRepository` and `IWheelRepository`
+interfaces — they make services testable in isolation.
+
+For example, a `WheelService` test would create a `Mock<IWheelRepository>`, set up
+its return values, pass it into `WheelService`, call the method under test, and
+assert the result.
+
+### Examples of good test cases
+
+- `WheelService.ResetWheel` calls `SetEliminatedAsync` on all movies with `false`
+- `WheelService.GetRemainingMovies` only returns non-eliminated entries
+- `WheelService.IsLastStanding` returns `true` when exactly one movie is not eliminated
+- `MovieService.AddMovieToWheel` does not add a duplicate if the movie already exists on that wheel
+
+### Running tests
+
+```
+dotnet test
+```
+
+Run this from the solution root after any significant change to confirm nothing is broken.
+
+---
+
 ## Gemini Prompt Template (Smoke Breaks)
 
 Use this in your Gemini chat when generating break data for a new movie.
@@ -516,9 +588,10 @@ Suggested initial issues to create:
 | 6 | Phase 6: Movie details page with breaks display | feature |
 | 7 | Phase 7: Stats and watch history | feature |
 | 8 | Phase 8: Audio playback on wheel spin | feature |
-| 9 | Add Russell Crowe wheel seed data | movie-data |
-| 10 | Add smoke breaks: Gladiator | movie-data |
-| 11 | Add smoke breaks: Master and Commander | movie-data |
+| 9 | Setup test project (MSTest + Moq) | feature |
+| 10 | Add Russell Crowe wheel seed data | movie-data |
+| 11 | Add smoke breaks: Gladiator | movie-data |
+| 12 | Add smoke breaks: Master and Commander | movie-data |
 
 ---
 
@@ -536,3 +609,5 @@ Suggested initial issues to create:
 | System.Text.Json | https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/overview |
 | Dapper | https://github.com/DapperLib/Dapper |
 | Microsoft.Data.Sqlite | https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/ |
+| MSTest | https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-mstest |
+| Moq | https://github.com/devlooped/moq |
