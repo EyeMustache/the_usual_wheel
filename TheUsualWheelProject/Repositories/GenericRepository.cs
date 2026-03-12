@@ -8,8 +8,8 @@ namespace TheUsualWheelProject.Repositories;
 
 public class GenericRepository<T, TId> : IGenericRepository<T, TId> where T : class, IModel
 {
-    private readonly string TableName;
-    private readonly string _conString;
+    protected readonly string TableName;
+    protected readonly string _conString;
 
     public GenericRepository(string tableName, string conString)
     {

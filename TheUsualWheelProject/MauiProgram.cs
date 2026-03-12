@@ -24,12 +24,12 @@ public static class MauiProgram
 		SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 		// Add dependencies
 		builder.UseSkiaSharp();
-		builder.Services.AddSingleton<IMovieRepository, MovieRepository>();
-   		builder.Services.AddSingleton<IWheelRepository, WheelRepository>();
-   		builder.Services.AddSingleton<MovieService>();
-   		builder.Services.AddSingleton<WheelService>();
-   		builder.Services.AddSingleton<TmdbService>();
-   		builder.Services.AddSingleton(AudioManager.Current);
+		builder.Services.AddSingleton<IMovieRepository>(_ => new MovieRepository(DatabaseConfig.ConnectionString));
+		builder.Services.AddSingleton<IWheelRepository>(_ => new WheelRepository(DatabaseConfig.ConnectionString));
+		builder.Services.AddSingleton<MovieService>();
+		builder.Services.AddSingleton<WheelService>();
+		builder.Services.AddSingleton<TmdbService>();
+		builder.Services.AddSingleton(AudioManager.Current);
 		builder.Services.AddSingleton<AudioService>();
 		builder.Services.AddSingleton<DatabaseService>(
 			new DatabaseService(DatabaseConfig.ConnectionString));
@@ -37,6 +37,8 @@ public static class MauiProgram
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
+
+		builder.Services.AddTransient<MainPage>();
 
 		return builder.Build();
 	}

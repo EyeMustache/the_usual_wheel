@@ -1,9 +1,15 @@
+using TheUsualWheelProject.Repositories.Interfaces;
+
 namespace TheUsualWheelProject.Services;
 
 public class WheelService
 {
-    public WheelService()
+    private readonly IWheelRepository _wheelRepository;
+    private readonly IMovieRepository _movieRepository;
+
+    public WheelService(IWheelRepository wheelRepository, IMovieRepository movieRepository)
     {
-        throw new NotImplementedException();
+        _wheelRepository = wheelRepository;
+        _movieRepository = movieRepository;
     }
 }

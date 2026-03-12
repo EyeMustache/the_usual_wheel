@@ -7,8 +7,5 @@ namespace TheUsualWheelProject.Repositories;
 
 public class WheelRepository : GenericRepository<Wheel, int>, IWheelRepository
 {
-    public WheelRepository(string conString) : base("Wheel", conString)
-    {
-        throw new NotImplementedException();
-    }
+    public WheelRepository(string conString) : base("Wheel", conString) { }
 }

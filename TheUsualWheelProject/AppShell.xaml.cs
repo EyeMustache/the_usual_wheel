@@ -2,8 +2,14 @@
 
 public partial class AppShell : Shell
 {
-	public AppShell()
-	{
-		InitializeComponent();
-	}
+    public AppShell()
+    {
+        var mainPage = IPlatformApplication.Current!.Services.GetRequiredService<MainPage>();
+        Items.Add(new ShellContent
+        {
+            Title = "Home",
+            Content = mainPage,
+            Route = "MainPage"
+        });
+    }
 }
