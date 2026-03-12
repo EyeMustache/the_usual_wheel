@@ -18,7 +18,7 @@ public partial class App : Application
             var dbService = serviceProvider.GetRequiredService<DatabaseService>();
 
             dbService.InitAsync().GetAwaiter().GetResult();
-
+            dbService.ClearAllDataAsync().GetAwaiter().GetResult();
             var wheel = new Wheel { Name = "Russell Crowe" };
             wheelRepo.Insert(wheel).GetAwaiter().GetResult();
 

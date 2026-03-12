@@ -46,4 +46,16 @@ public class DatabaseService
             );
         ");
     }
+
+    // For testing purposes, to clear all data from the database
+    public async Task ClearAllDataAsync()
+    {
+        using var connection = new SqliteConnection(_conString);
+        await connection.OpenAsync();
+        await connection.ExecuteAsync(@"
+            DELETE FROM WheelMovie;
+            DELETE FROM Movie;
+            DELETE FROM Wheel;
+        ");
+    }
 }
