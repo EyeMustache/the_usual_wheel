@@ -1,5 +1,10 @@
 # The Usual Wheel — Developer Guide
 
+#### Quick Reference
+
+To run:
+dotnet build -t:Run -f net9.0-android
+
 ## Context
 
 This app was built for personal use by two friends who spin a wheel of movies starring a
