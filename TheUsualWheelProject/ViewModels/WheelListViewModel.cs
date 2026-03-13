@@ -20,6 +20,7 @@ public class WheelListViewModel
         var wheels = await _wheelService.GetAllWheelsAsync();
         foreach (Wheel wheel in wheels)
         {
+            System.Diagnostics.Debug.WriteLine($"Loaded wheel: {wheel.Name}");
             Wheels.Add(wheel);
         }
     }   

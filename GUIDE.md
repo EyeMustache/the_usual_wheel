@@ -27,9 +27,9 @@ wheel starts fresh (e.g. Denzel Washington).
 
 | Decision | Choice | Reason |
 |---|---|---|
-| Framework | .NET MAUI | Android + iOS from one C# codebase |
-| Language | C# | Learning-focused, familiar territory |
-| Architecture | MVVM + three-layer (Presentation → Business → Data) | Clean separation, maps to existing Dapper/DAL experience |
+| Framework | .NET MAUI Blazor Hybrid | Android + iOS from one C# codebase using web tech (HTML/CSS) for UI |
+| Language | C# / HTML / CSS / Razor | Learning-focused, fits existing web-dev skills |
+| Architecture | MVVM + three-layer (Presentation → Business → Data) | Clean separation, models/services mapped perfectly to Blazor |
 | Database | SQLite via `Microsoft.Data.Sqlite` + `Dapper` | Familiar manual SQL + Dapper pattern, full join support |
 | Smoke Break Data | JSON files (one per movie) | Hand-editable, easy to paste output from Gemini |
 | Movie Metadata | TMDB API via `TMDbLib` | Free, rich data, easy NuGet package |
@@ -73,7 +73,12 @@ wheel starts fresh (e.g. Denzel Washington).
 ```
 TheUsualWheelProject/
 ├── MauiProgram.cs
-├── AppShell.xaml
+├── App.xaml / App.xaml.cs
+├── Main.razor (Blazor root)
+├── _Imports.razor
+├── wwwroot/
+│   ├── index.html
+│   └── css/app.css
 ├── Models/
 │   ├── Movie.cs
 │   ├── Wheel.cs
@@ -96,11 +101,11 @@ TheUsualWheelProject/
 │   ├── WheelViewModel.cs
 │   ├── MovieListViewModel.cs
 │   └── MovieDetailsViewModel.cs
-├── Views/
-│   ├── WheelListPage.xaml
-│   ├── WheelPage.xaml
-│   ├── MovieListPage.xaml
-│   └── MovieDetailsPage.xaml
+├── Pages/
+│   ├── WheelListPage.razor
+│   ├── WheelPage.razor
+│   ├── MovieListPage.razor
+│   └── MovieDetailsPage.razor
 ├── Controls/
 │   └── WheelControl.cs
 └── Resources/
@@ -183,22 +188,14 @@ Filename convention: `breaks_{slug}.json` where slug is lowercase and hyphen-sep
 
 ### Phase 1 — Project Setup
 
-**Goal:** A running MAUI app shell with all dependencies wired up.
+**Goal:** A running MAUI Blazor Hybrid app shell with all dependencies wired up.
 
 **Steps:**
 
-1. Open a terminal in your project folder and run:
-   ```
-   dotnet new maui -n TheUsualWheelProject
-   ```
-2. Install NuGet packages (via `dotnet add package` or the NuGet Package Manager in VS):
-   - `Microsoft.Data.Sqlite` (SQLite ADO.NET driver — provides IDbConnection)
-   - `Dapper`
-   - `CommunityToolkit.Mvvm`
-   - `SkiaSharp.Views.Maui.Controls`
-   - `Plugin.Maui.Audio`
-   - `TMDbLib`
+1. The project was initially created as a MAUI app but has been converted to use the **MAUI Blazor Hybrid** model.
+2. Ensure you have the `Microsoft.AspNetCore.Components.WebView.Maui` NuGet package installed, and change the Sdk to `Microsoft.NET.Sdk.Razor` in the `.csproj`.
 3. Open `MauiProgram.cs` and register the following:
+   - `builder.Services.AddMauiBlazorWebView()`
    - `.UseSkiaSharp()` (SkiaSharp MAUI extension method)
    - `builder.Services.AddSingleton<IMovieRepository, MovieRepository>()`
    - `builder.Services.AddSingleton<IWheelRepository, WheelRepository>()`
@@ -207,16 +204,16 @@ Filename convention: `breaks_{slug}.json` where slug is lowercase and hyphen-sep
    - `builder.Services.AddSingleton<TmdbService>()`
    - `builder.Services.AddSingleton<JsonDataService>()`
    - `builder.Services.AddSingleton(AudioManager.Current)` (Plugin.Maui.Audio)
-4. Run the default app on an Android emulator or physical device and confirm it launches.
+4. Update `App.xaml.cs` to embed a `BlazorWebView` pointing to `wwwroot/index.html` and `typeof(Main)`.
+5. Run the app on an Android emulator or physical device and confirm it launches to the Blazor loading screen.
 
 **Key concept — Dependency Injection:**
 MAUI uses the same DI system as ASP.NET Core. You register services once in
-`MauiProgram.cs`. Your ViewModels request them via constructor parameters and the
-framework handles wiring them up. Pages and controls never directly access the database
-or APIs — that is always routed through a ViewModel or Service.
+`MauiProgram.cs`. Your Blazor Pages (`.razor`) request them via `@inject` or through ViewModels, and the
+framework handles wiring them up.
 
 **Read:**
-- https://learn.microsoft.com/en-us/dotnet/maui/get-started/first-app
+- https://learn.microsoft.com/en-us/aspnet/core/blazor/hybrid/tutorials/maui
 - https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/dependency-injection
 
 ---
@@ -333,44 +330,39 @@ That is intentional for this app since updates are infrequent.
 
 ---
 
-### Phase 5 — The Wheel (SkiaSharp)
+### Phase 5 — The Wheel (SkiaSharp with Blazor)
 
 **Goal:** A drawable, animated spinning wheel that selects a movie.
 
 This is the most involved phase visually. SkiaSharp gives you a raw 2D canvas — you are
-drawing every line, arc, and character yourself. Take your time, experiment, and read
-the docs. There is no shortcut to understanding this one.
+drawing every line, arc, and character yourself. In Blazor Hybrid, you use an `SKCanvasView` wrapper component.
 
 **Steps:**
 
-1. Create `Controls/WheelControl.cs` — a class inheriting from `SKCanvasView`.
-2. Override `OnPaintSurface`. This method is called every time the canvas needs to redraw.
-   Inside it:
+1. Use the `SkiaSharp.Views.Blazor` package (or interop with the MAUI `SKCanvasView`). 
+2. Create `Controls/WheelControl.razor` (or `.cs` component) that renders the canvas.
+3. On paint surface redraws:
    - Calculate canvas center (width / 2, height / 2) and radius.
    - Loop through your active movies and draw one arc segment per movie using `SKPath`.
    - Rotate the canvas context before drawing each segment's label so text sits upright
      inside its slice.
    - Use muted / greyed colours for eliminated movies.
-3. Store a `float _rotationDegrees` field on the control. This is what changes during
+4. Store a `float _rotationDegrees` field on the control. This is what changes during
    the animation.
-4. Use `Dispatcher.CreateTimer()` (or a similar mechanism) to drive your animation loop.
-   Each tick: increment `_rotationDegrees` based on current speed, then call
-   `InvalidateSurface()` to trigger a repaint.
-5. Apply an easing function to slow the wheel down naturally. A simple approach:
+5. Use Blazor timers or JSInterop `requestAnimationFrame` to drive your animation loop.
+   Each tick: increment `_rotationDegrees` based on current speed, then trigger a canvas repaint.
+6. Apply an easing function to slow the wheel down naturally. A simple approach:
    multiply the current speed by a decay factor (e.g. `speed *= 0.985f`) each tick.
    When speed drops below a threshold, stop the timer.
-6. On stop, determine which segment is at the top (12 o'clock). The pointer/indicator
-   is static; the wheel rotates beneath it. Determine the winner by checking which
-   segment's angle range contains `360 - (_rotationDegrees % 360)`.
-7. Expose an event or command (e.g. `SpinCompleted`) that the ViewModel subscribes to,
-   passing the winning movie.
+7. On stop, determine which segment is at the top (12 o'clock). 
+8. Invoke an `EventCallback` that the parent Page subscribes to, passing the winning movie.
 
 **Key SkiaSharp types to know:**
 `SKCanvas`, `SKPaint`, `SKPath`, `SKCanvasView`, `SKColor`, `SKRect`, `SKMatrix`
 
 **Read:**
-- https://learn.microsoft.com/en-us/dotnet/maui/user-interface/graphics/skiasharp/
-- Arc drawing reference (Xamarin docs, fully applicable to MAUI SkiaSharp):
+- https://learn.microsoft.com/en-us/dotnet/api/skiasharp.views.blazor
+- Arc drawing reference:
   https://learn.microsoft.com/en-us/xamarin/xamarin-forms/user-interface/graphics/skiasharp/curves/arcs
 
 ---
@@ -381,23 +373,23 @@ the docs. There is no shortcut to understanding this one.
 
 **Steps:**
 
-1. Create `Views/MovieDetailsPage.xaml` with a `ScrollView` wrapping a
-   `VerticalStackLayout`.
-2. Bind it to `MovieDetailsViewModel` which loads:
+1. Create `Pages/MovieDetailsPage.razor`.
+2. `@inject MovieDetailsViewModel` which loads:
    - Movie data from `DatabaseService`
    - Break data from `JsonDataService`
-3. Layout sections:
-   - Poster + title header
-   - Metadata row: director, year, duration, rating
-   - Synopsis block
-   - Smoke Breaks section: list each break with its number, timestamp, and vibe check
-   - A spacer (tall `BoxView`) with a label: **"↓ Scroll only after you are back inside ↓"**
+3. Layout sections using HTML/CSS:
+   - `<header>` with Poster + title
+   - Metadata row (flexbox): director, year, duration, rating
+   - `<p>` Synopsis block
+   - Smoke Breaks section: `<ul>` listing each break with its number, timestamp, and vibe check
+   - A spacer (`<div style="height: 100vh;"></div>`) with a label: **"↓ Scroll only after you are back inside ↓"**
    - Recaps section below: one recap per break, revealed only by scrolling past the spacer
-4. Bind the poster `Image.Source` directly to the TMDB poster URL string — MAUI handles
-   async image loading natively.
-5. Use a `CollectionView` or `BindableLayout` for the breaks list.
+4. Bind the image tag `<img src="@Movie.PosterUrl" />` directly to the TMDB poster URL string.
+5. Use standard Blazor `@foreach` loops to render your collections.
 
 **Read:**
+- https://learn.microsoft.com/en-us/aspnet/core/blazor/components/data-binding
+- https://learn.microsoft.com/en-us/aspnet/core/blazor/components/event-handling
 - https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/data-binding/
 - https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/collectionview/
 
@@ -605,6 +597,7 @@ Suggested initial issues to create:
 | Resource | URL |
 |---|---|
 | .NET MAUI Docs | https://learn.microsoft.com/en-us/dotnet/maui/ |
+| Blazor Hybrid Docs | https://learn.microsoft.com/en-us/aspnet/core/blazor/hybrid/tutorials/maui |
 | CommunityToolkit.Mvvm | https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/ |
 | SkiaSharp in MAUI | https://learn.microsoft.com/en-us/dotnet/maui/user-interface/graphics/skiasharp/ |
 | sqlite-net-pcl | https://github.com/praeclarum/sqlite-net |

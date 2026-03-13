@@ -8,6 +8,6 @@ public class MovieListViewModel
 {
     public MovieListViewModel()
     {
-        throw new NotImplementedException();
+        // throw new NotImplementedException();
     }   
 }

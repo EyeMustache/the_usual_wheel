@@ -20,6 +20,7 @@ public class GenericRepository<T, TId> : IGenericRepository<T, TId> where T : cl
     public async Task<IEnumerable<T>> GetAll()
     {
         using var connection = new SqliteConnection(_conString);
+        await connection.OpenAsync();
         return await connection.GetAllAsync<T>();
     }
 

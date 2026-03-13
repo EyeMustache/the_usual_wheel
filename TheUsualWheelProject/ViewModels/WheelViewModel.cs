@@ -8,6 +8,6 @@ public class WheelViewModel
 {
     public WheelViewModel()
     {
-        throw new NotImplementedException();
+        // throw new NotImplementedException();
     }   
 }
