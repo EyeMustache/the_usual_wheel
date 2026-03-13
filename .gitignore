@@ -38,4 +38,4 @@ appsettings.Development.json
 # Hide docs
 docs/
 
-.idea/
+TheUsualWheelProject/TmdbApiKey.cs

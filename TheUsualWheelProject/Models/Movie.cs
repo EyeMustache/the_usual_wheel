@@ -11,6 +11,7 @@ public class Movie : IModel
     public int Year { get; set; }
     public required string Genre { get; set; }
     public required string Director { get; set; }
+    public required string Cast { get; set; }
     public int DurationInMinutes { get; set; }
     public string? Synopsis { get; set; }
     public string? PosterUrl { get; set; }

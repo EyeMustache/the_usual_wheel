@@ -33,6 +33,7 @@ public class DatabaseService
                 Year INTEGER,
                 Genre TEXT,
                 Director TEXT,
+                Cast TEXT,
                 DurationInMinutes INTEGER,
                 Synopsis TEXT,
                 PosterUrl TEXT,

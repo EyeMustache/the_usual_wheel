@@ -42,7 +42,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<AudioService>();
         
         builder.UseSkiaSharp();
-        // Trying out Blazor
         builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG

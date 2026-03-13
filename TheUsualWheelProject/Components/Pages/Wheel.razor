@@ -1,4 +1,5 @@
 @page "/wheel/{id:int}"
+@implements IDisposable
 
 @inject WheelViewModel ViewModel
 
@@ -9,6 +10,10 @@
 else
 {
     <h1>@ViewModel.CurrentWheel.Name</h1>
+    @if (ViewModel.IsEnriching)
+    {
+        <p>Fetching missing details from TMDB...</p>
+    }
     @if (ViewModel.WheelMovies == null || !ViewModel.WheelMovies.Any())
     {
         <p>No movies found for this wheel.</p>
@@ -18,7 +23,22 @@ else
         <ul>
             @foreach (Movie movie in ViewModel.WheelMovies)
             {
-                <li>@movie.Title</li>
+                <li>
+                    <strong>@movie.Title</strong> (@movie.Year)<br />
+                    <em>Genre:</em> @movie.Genre<br />
+                    <em>Director:</em> @movie.Director<br />
+                    <em>Cast:</em> @movie.Cast<br />
+                    <em>Duration:</em> @movie.DurationInMinutes min<br />
+                    <em>TMDb Rating:</em> @movie.TmdbRating<br />
+                    @if (!string.IsNullOrWhiteSpace(movie.Synopsis))
+                    {
+                        <em>Synopsis:</em> @movie.Synopsis<br />
+                    }
+                    @if (!string.IsNullOrWhiteSpace(movie.PosterUrl))
+                    {
+                        <img src="@movie.PosterUrl" alt="Poster for @movie.Title" style="height:100px;" />
+                    }
+                </li>
             }
         </ul>
     }
@@ -29,6 +49,17 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        ViewModel.DataUpdated += HandleDataUpdated;
         await ViewModel.LoadWheelAsync(id);
+    }
+
+    private void HandleDataUpdated()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ViewModel.DataUpdated -= HandleDataUpdated;
     }
 }
