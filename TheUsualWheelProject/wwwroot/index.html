@@ -22,8 +22,15 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-
+    
     <script src="_framework/blazor.webview.js" autostart="false"></script>
+    
+    <!--Back button-->
+    <script>
+        window.blazorGoBack = function () {
+            window.history.back();
+        }
+    </script>
 
 </body>
 

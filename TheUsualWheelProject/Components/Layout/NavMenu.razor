@@ -1,4 +1,7 @@
-﻿<nav>
+﻿@inject NavigationManager Navigation
+@inject IJSRuntime JS
+<nav>
+    <button class ="back-btn" @onclick="GoBack">◀</button>
     <span class="nav-title">The Usual Wheel</span>
     <button class="burger-btn" @onclick="ToggleMenu">☰</button>
 </nav>
@@ -14,11 +17,12 @@
             <hr class="sidebar-separator" />
             <a href="/" @onclick="CloseMenu">Home</a>
             <hr class="sidebar-separator" />
+            <a href="/wheellist" @onclick="CloseMenu">Wheels</a>
+            <hr class="sidebar-separator" />
             <a href="/movies" @onclick="CloseMenu">Movies</a>
             <hr class="sidebar-separator" />
-            <a href="/wheels" @onclick="CloseMenu">Wheels</a>
-            <hr class="sidebar-separator" />
             <a href="/about" @onclick="CloseMenu">About</a>
+            <hr class="sidebar-separator" />
         </div>
     </div>
 }
@@ -34,5 +38,10 @@
     private void CloseMenu()
     {
         isMenuOpen = false;
+    }
+
+    private void GoBack()
+    {
+        JS.InvokeVoidAsync(identifier: "blazorGoBack");
     }
 }

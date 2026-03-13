@@ -6,8 +6,21 @@ namespace TheUsualWheelProject.ViewModels;
 
 public class WheelViewModel
 {
-    public WheelViewModel()
+    private readonly WheelService _wheelService;
+    private readonly MovieService _movieService;
+
+    public Wheel? CurrentWheel { get; private set; }
+    public List<Movie>? WheelMovies { get; private set; } = [];
+
+    public WheelViewModel(WheelService wheelService, MovieService movieService)
     {
-        // throw new NotImplementedException();
-    }   
+        _wheelService = wheelService;
+        _movieService = movieService;
+    }
+
+    public async Task LoadWheelAsync(int id)
+    {
+        CurrentWheel = await _wheelService.GetWheelByIdAsync(id);
+        WheelMovies = (await _movieService.GetMoviesByWheelAsync(id)).ToList();
+    }
 }

@@ -37,7 +37,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<DatabaseService>(
 			new DatabaseService(DatabaseConfig.ConnectionString, new WheelRepository(DatabaseConfig.ConnectionString), new MovieRepository(DatabaseConfig.ConnectionString)));
         builder.Services.AddSingleton<WheelListViewModel>();
-
+		builder.Services.AddTransient<WheelViewModel>();
         builder.Services.AddSingleton(AudioManager.Current);
         builder.Services.AddSingleton<AudioService>();
         

@@ -1,4 +1,4 @@
-@page "/wheels"
+@page "/wheellist"
 
 @inject WheelListViewModel ViewModel
 
@@ -10,10 +10,12 @@
     }
     else
     {
-        @foreach (Wheel wheel in ViewModel.Wheels)
+        @foreach (var wheel in ViewModel.Wheels)
         {
             <div class="wheel-card">
-                <h2>@wheel.Name</h2>
+                <h2>
+                    <NavLink href="@($"/wheel/{wheel.Id}")">@wheel.Name</NavLink>
+                </h2>
                 <p>@wheel.Description</p>
             </div>
         }

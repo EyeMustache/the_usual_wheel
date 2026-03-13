@@ -29,3 +29,7 @@
     background: #36393f;
     box-shadow: 0 4px 16px rgba(0,0,0,0.25);
 }
+
+.home-header {
+    text-align: center;
+}
