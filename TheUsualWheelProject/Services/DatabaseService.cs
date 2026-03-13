@@ -1,17 +1,22 @@
 using Dapper;
 using Microsoft.Data.Sqlite; 
+using TheUsualWheelProject.Repositories.Interfaces;
+using TheUsualWheelProject.Models;
 
 namespace TheUsualWheelProject.Services;
 
 public class DatabaseService
 {
     private readonly string _conString;
+    private readonly IWheelRepository _wheelRepository;
+    private readonly IMovieRepository _movieRepository;
 
-    public DatabaseService(string conString)
+    public DatabaseService(string conString, IWheelRepository wheelRepository, IMovieRepository movieRepository)
     {
-        _conString = conString;
+         _conString = conString;
+         _wheelRepository = wheelRepository;
+         _movieRepository = movieRepository;
     }
-
     public async Task InitAsync()
     {
         using var connection = new SqliteConnection(_conString);
@@ -45,6 +50,7 @@ public class DatabaseService
                 FOREIGN KEY (MovieId) REFERENCES Movie(Id)
             );
         ");
+        // SeedTestWheelsAsync()
     }
 
     // For testing purposes, to clear all data from the database
@@ -57,5 +63,15 @@ public class DatabaseService
             DELETE FROM Movie;
             DELETE FROM Wheel;
         ");
+    }
+
+    private async Task SeedTestWheelsAsync()
+    {
+        var wheels = await _wheelRepository.GetAll();
+        if (!wheels.Any())
+        {
+            await _wheelRepository.Insert(new Wheel { Name = "Denzel Washington", Description = "Sample description" });
+            await _wheelRepository.Insert(new Wheel { Name = "Willem Dafoe", Description = "Sample description" });
+        }
     }
 }

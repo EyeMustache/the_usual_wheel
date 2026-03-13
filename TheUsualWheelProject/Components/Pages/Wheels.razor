@@ -1,0 +1,28 @@
+@page "/wheels"
+
+@inject WheelListViewModel ViewModel
+
+<h1>All Wheels</h1>
+<div class="wheel-grid">
+    @if (ViewModel.Wheels == null || !ViewModel.Wheels.Any())
+    {
+        <p>No wheels found.</p>
+    }
+    else
+    {
+        @foreach (Wheel wheel in ViewModel.Wheels)
+        {
+            <div class="wheel-card">
+                <h2>@wheel.Name</h2>
+                <p>@wheel.Description</p>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadWheelAsync();
+    }
+}
