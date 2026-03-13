@@ -13,6 +13,7 @@ nav {
     font-size: 1.2rem;
     font-weight: 600;
     text-align: center;
+    color: #ffa400;
 }
 
 .burger-btn {
@@ -22,7 +23,7 @@ nav {
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: #e3e3e3;
+    color: #ffa400;
     font-size: 1.5rem;
     cursor: pointer;
 }

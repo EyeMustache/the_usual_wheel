@@ -2,6 +2,8 @@
 
 #### Quick Reference
 
+1/100 kans dat de wheel spin een scheet geluid maakt lol
+
 To run:
 dotnet build -t:Run -f net9.0-android
 

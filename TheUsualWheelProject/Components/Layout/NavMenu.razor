@@ -2,7 +2,7 @@
 @inject IJSRuntime JS
 <nav>
     <button class ="back-btn" @onclick="GoBack">◀</button>
-    <span class="nav-title">The Usual Wheel</span>
+    <span class="nav-title">(logo placeholder)</span>
     <button class="burger-btn" @onclick="ToggleMenu">☰</button>
 </nav>
 
@@ -20,6 +20,8 @@
             <a href="/wheellist" @onclick="CloseMenu">Wheels</a>
             <hr class="sidebar-separator" />
             <a href="/movies" @onclick="CloseMenu">Movies</a>
+            <hr class="sidebar-separator" />
+            <a href="/settings" @onclick="CloseMenu">Settings</a>
             <hr class="sidebar-separator" />
             <a href="/about" @onclick="CloseMenu">About</a>
             <hr class="sidebar-separator" />
