@@ -1,0 +1,38 @@
+﻿<nav>
+    <span class="nav-title">The Usual Wheel</span>
+    <button class="burger-btn" @onclick="ToggleMenu">☰</button>
+</nav>
+
+@if (isMenuOpen)
+{
+    <div class="sidebar-overlay" @onclick="CloseMenu">
+        <div class="sidebar" @onclick:stopPropagation>
+            <div class="sidebar-header">
+                <span>The Usual Wheel</span>
+                <button class="close-btn" @onclick="CloseMenu">×</button>
+            </div>
+            <hr class="sidebar-separator" />
+            <a href="/" @onclick="CloseMenu">Home</a>
+            <hr class="sidebar-separator" />
+            <a href="/movies" @onclick="CloseMenu">Movies</a>
+            <hr class="sidebar-separator" />
+            <a href="/wheels" @onclick="CloseMenu">Wheels</a>
+            <hr class="sidebar-separator" />
+            <a href="/about" @onclick="CloseMenu">About</a>
+        </div>
+    </div>
+}
+
+@code {
+    private bool isMenuOpen = false;
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+    }
+
+    private void CloseMenu()
+    {
+        isMenuOpen = false;
+    }
+}

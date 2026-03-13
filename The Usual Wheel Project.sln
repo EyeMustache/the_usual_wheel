@@ -1,8 +1,12 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheUsualWheelProject", "TheUsualWheelProject\TheUsualWheelProject.csproj", "{F4902DE4-08A2-3208-CFD6-A87DCF13D3BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheUsualWheelProject.SharedUI", "TheUsualWheelProject.SharedUI\TheUsualWheelProject.SharedUI.csproj", "{EC3E5B06-2B85-4AD4-8A43-29E8397192E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheUsualWheelProject.Web", "TheUsualWheelProject.Web\TheUsualWheelProject.Web.csproj", "{908D05DB-E98F-485A-829E-96EB1A17AB82}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +18,14 @@ Global
 		{F4902DE4-08A2-3208-CFD6-A87DCF13D3BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4902DE4-08A2-3208-CFD6-A87DCF13D3BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4902DE4-08A2-3208-CFD6-A87DCF13D3BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC3E5B06-2B85-4AD4-8A43-29E8397192E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC3E5B06-2B85-4AD4-8A43-29E8397192E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC3E5B06-2B85-4AD4-8A43-29E8397192E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC3E5B06-2B85-4AD4-8A43-29E8397192E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{908D05DB-E98F-485A-829E-96EB1A17AB82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{908D05DB-E98F-485A-829E-96EB1A17AB82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{908D05DB-E98F-485A-829E-96EB1A17AB82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{908D05DB-E98F-485A-829E-96EB1A17AB82}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

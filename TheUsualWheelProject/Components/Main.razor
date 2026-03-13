@@ -1,9 +1,10 @@
 @namespace TheUsualWheelProject.Components
 @inject DatabaseService DatabaseService
 
-<Router AppAssembly="@typeof(Main).Assembly">
+<Router AppAssembly="@typeof(Main).Assembly"
+    AdditionalAssemblies="new[] { typeof(TheUsualWheelProject.SharedUI.Components.Pages.About).Assembly }">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(TheUsualWheelProject.SharedUI.Components.Layout.MainLayout)" />
     </Found>
     <NotFound>
         <p>Sorry, there's nothing at this address.</p>
