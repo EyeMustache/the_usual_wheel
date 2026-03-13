@@ -1,14 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using SkiaSharp.Views.Maui.Controls.Hosting;
-using TheUsualWheelProject.Repositories;
-using TheUsualWheelProject.Repositories.Interfaces;
-using TheUsualWheelProject.Services;
-using TheUsualWheelProject.ViewModels;
-using TheUsualWheelProject.Models;
-// using TheUsualWheelProject.Pages;
-using Plugin.Maui.Audio;
-using Dapper;
-using Microsoft.AspNetCore.Components.WebView.Maui;
 
 namespace TheUsualWheelProject;
 
@@ -22,28 +12,9 @@ public static class MauiProgram
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
-		
-		SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
-        // TEMPORARILY COMMENTING OUT THESE SO THEY DON'T CRASH STARTUP
-        // builder.Services.AddSingleton<IGenericRepository<Movie, int>>(_ => new GenericRepository<Movie, int>("Movies", DatabaseConfig.ConnectionString));
-        // builder.Services.AddSingleton<IGenericRepository<Wheel, int>>(_ => new GenericRepository<Wheel, int>("Wheels", DatabaseConfig.ConnectionString));
-        // builder.Services.AddSingleton<IMovieRepository>(_ => new MovieRepository(DatabaseConfig.ConnectionString));
-        // builder.Services.AddSingleton<IWheelRepository>(_ => new WheelRepository(DatabaseConfig.ConnectionString));
-        // builder.Services.AddSingleton<MovieService>();
-        // builder.Services.AddSingleton<WheelService>();
-        // builder.Services.AddSingleton<TmdbService>();
-        // builder.Services.AddSingleton<DatabaseService>(new DatabaseService(DatabaseConfig.ConnectionString));
-        // builder.Services.AddSingleton<WheelListViewModel>();
-
-        builder.Services.AddSingleton(AudioManager.Current);
-        builder.Services.AddSingleton<AudioService>();
-        
-        builder.UseSkiaSharp();
-        // Trying out Blazor
-        builder.Services.AddMauiBlazorWebView();
+		builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();

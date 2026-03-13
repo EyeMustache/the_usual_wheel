@@ -1,6 +1,7 @@
-using TheUsualWheelProject.Models;
+﻿using TheUsualWheelProject.Models;
 using TheUsualWheelProject.Repositories.Interfaces;
 using TheUsualWheelProject.Services;
+using TheUsualWheelProject.Components;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 
 namespace TheUsualWheelProject;
