@@ -4,9 +4,10 @@ using TheUsualWheelProject.Repositories;
 using TheUsualWheelProject.Repositories.Interfaces;
 using TheUsualWheelProject.Services;
 using TheUsualWheelProject.ViewModels;
-using TheUsualWheelProject.Views;
+// using TheUsualWheelProject.Pages;
 using Plugin.Maui.Audio;
 using Dapper;
+using Microsoft.AspNetCore.Components.WebView.Maui;
 
 namespace TheUsualWheelProject;
 
@@ -26,7 +27,6 @@ public static class MauiProgram
 		SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
 		// Add dependencies
-		builder.UseSkiaSharp();
 		builder.Services.AddSingleton<IMovieRepository>(_ => new MovieRepository(DatabaseConfig.ConnectionString));
 		builder.Services.AddSingleton<IWheelRepository>(_ => new WheelRepository(DatabaseConfig.ConnectionString));
 		builder.Services.AddSingleton<MovieService>();
@@ -37,13 +37,14 @@ public static class MauiProgram
 		builder.Services.AddSingleton<DatabaseService>(
 			new DatabaseService(DatabaseConfig.ConnectionString));
 		builder.Services.AddSingleton<WheelListViewModel>();
-		builder.Services.AddSingleton<WheelListPage>();	
+		builder.UseSkiaSharp();
+		// Trying out Blazor
+		builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
+		builder.Services.AddBlazorWebViewDeveloperTools();
 		builder.Logging.AddDebug();
 #endif
-
-		builder.Services.AddTransient<MainPage>();
 
 		return builder.Build();
 	}

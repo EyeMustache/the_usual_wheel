@@ -1,0 +1,26 @@
+@page "/wheels"
+@inject WheelListViewModel ViewModel
+
+<h1>Wheels</h1>
+
+@if (ViewModel.Wheels == null || !ViewModel.Wheels.Any())
+{
+    <p><em>Loading or no wheels found...</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var wheel in ViewModel.Wheels)
+        {
+            <li>@wheel.Name - @wheel.Description</li>
+        }
+    </ul>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // This replaces the OnAppearing logic
+        await ViewModel.LoadWheelAsync();
+    }
+}
