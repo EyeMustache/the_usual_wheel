@@ -82,7 +82,7 @@ public static class MauiProgram
 		logger?.LogInformation("App startup sequence complete.");
 
 		var db = app.Services.GetRequiredService<DatabaseService>();
-		db.ResetAndSeedTestDataAsync().GetAwaiter().GetResult();
+		// db.ResetAndSeedTestDataAsync().GetAwaiter().GetResult();
 
 		return app;
 	}

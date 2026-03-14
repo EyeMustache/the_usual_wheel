@@ -142,12 +142,6 @@ public class DatabaseService : LoggingBase<DatabaseService>
             (17, 34, 0, NULL),
             (17, 36, 0, NULL);
 
-            INSERT INTO WatchProvider (ProviderId, Name, LogoUrl, DisplayPriority) VALUES
-            (337, 'Disney Plus', '/7rwgEs15tFwyR9NPQ5vpzxTj19Q.jpg', 1),
-            (1001, 'KPN', '/kpn-placeholder.png', 2),
-            (444, 'Pathé Thuis', '/pathé-placeholder.png', 3),
-            (2, 'Apple TV', '/peURlLlr8jggOwK53fJ5wdQl05y.jpg', 4);
-
             INSERT INTO MovieProvider (MovieId, ProviderId, Type) VALUES
             (34, 337, 'flatrate'),
             (34, 1001, 'flatrate'),

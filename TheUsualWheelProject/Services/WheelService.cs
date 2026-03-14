@@ -17,7 +17,13 @@ public class WheelService : LoggingBase<WheelService>
     public async Task<IEnumerable<Models.Wheel>> GetAllWheelsAsync()
     {
         Logger.LogInformation("Fetching all wheels.");
-        return await _wheelRepository.GetAll();
+        IEnumerable<Models.Wheel> wheels = await _wheelRepository.GetAll();
+        // debug log
+        foreach (var wheel in wheels)
+        {
+            Logger.LogDebug("Fetched wheel with ID {wheelId} and name {wheelName}.", wheel.Id, wheel.Name);
+        }
+        return wheels;
     }
 
     public async Task<Models.Wheel?> GetWheelByIdAsync(int id)
