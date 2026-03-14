@@ -18,4 +18,6 @@ public class Movie : IModel
     public double TmdbRating { get; set; }
     public double? LetterboxdRating { get; set; }
     public int TmdbId { get; set; }
+    [Computed]
+    public IEnumerable<WatchProvider>? WatchProviders { get; set; }
 }

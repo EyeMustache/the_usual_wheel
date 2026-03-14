@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace TheUsualWheelProject.Services;
 
-public class MovieService : ServiceBase<MovieService>
+public class MovieService : LoggingBase<MovieService>
 {
     private readonly IMovieRepository _movieRepository;
 
@@ -15,19 +15,19 @@ public class MovieService : ServiceBase<MovieService>
 
     public async Task<IEnumerable<Movie>> GetAllMoviesAsync()
     {
-        Logger.LogInformation("MovieService: Fetching all movies.");
+        Logger.LogInformation("Fetching all movies.");
         return await _movieRepository.GetAll();
     }
 
     public async Task<Movie?> GetMovieByIdAsync(int id)
     {
-        Logger.LogInformation("MovieService: Fetching movie by ID:{id}.", id);
+        Logger.LogInformation("Fetching movie by ID:{id}.", id);
         return await _movieRepository.GetById(id);
     }
 
     public async Task AddMovieAsync(Movie movie)
     {
-            Logger.LogInformation("MovieService: Adding new movie:{movie.Title} directed by {movie.Director} ({movie.Year}).", movie.Title, movie.Director, movie.Year);
+        Logger.LogInformation("Adding new movie:{movie.Title} directed by {movie.Director} ({movie.Year}).", movie.Title, movie.Director, movie.Year);
         if (await MovieExistsAsync(movie.Title, movie.Director, movie.Year, movie.TmdbId))
             throw new InvalidOperationException("Movie already exists.");
 
@@ -36,7 +36,7 @@ public class MovieService : ServiceBase<MovieService>
 
     public async Task UpdateMovieAsync(Movie movie)
     {
-        Logger.LogInformation("MovieService: Updating movie with ID {movie.Id}.", movie.Id);
+        Logger.LogInformation("Updating movie with ID {movie.Id}.", movie.Id);
         var existingMovie = await _movieRepository.GetById(movie.Id);
         if (existingMovie == null)
             throw new InvalidOperationException("Movie does not exist.");
@@ -50,7 +50,7 @@ public class MovieService : ServiceBase<MovieService>
 
     public async Task DeleteMovieAsync(int id)
     {
-        Logger.LogInformation("MovieService: Deleting movie with ID {id}.", id);
+        Logger.LogInformation("Deleting movie with ID {id}.", id);
         var movie = await _movieRepository.GetById(id);
         if (movie == null)
             throw new InvalidOperationException("Movie does not exist.");
@@ -60,13 +60,13 @@ public class MovieService : ServiceBase<MovieService>
 
     public async Task<IEnumerable<Movie>> GetMoviesByWheelAsync(int wheelId)
     {
-        Logger.LogInformation("MovieService: Fetching movies for wheel ID {wheelId}.", wheelId);
+        Logger.LogInformation("Fetching movies for wheel ID {wheelId}.", wheelId);
         return await _movieRepository.GetByWheelAsync(wheelId);
     }
 
     public async Task SetMovieEliminatedAsync(int wheelId, int movieId, bool eliminated)
     {
-        Logger.LogInformation("MovieService: Setting movie with ID {movieId} as {status} for wheel ID {wheelId}.", movieId, eliminated ? "eliminated" : "not eliminated", wheelId);
+        Logger.LogInformation("Setting movie with ID {movieId} as {status} for wheel ID {wheelId}.", movieId, eliminated ? "eliminated" : "not eliminated", wheelId);
         var moviesOnWheel = await _movieRepository.GetByWheelAsync(wheelId);
         if (!moviesOnWheel.Any(m => m.Id == movieId))
             throw new InvalidOperationException("Movie is not part of this wheel.");
@@ -76,7 +76,7 @@ public class MovieService : ServiceBase<MovieService>
 
     public async Task SetMovieWatchedDateAsync(int wheelId, int movieId, DateOnly? watchedDate)
     {
-        Logger.LogInformation("MovieService: Setting watched date for movie with ID {movieId} on wheel ID {wheelId}.", movieId, wheelId);
+        Logger.LogInformation("Setting watched date for movie with ID {movieId} on wheel ID {wheelId}.", movieId, wheelId);
         var moviesOnWheel = await _movieRepository.GetByWheelAsync(wheelId);
         if (!moviesOnWheel.Any(m => m.Id == movieId))
             throw new InvalidOperationException("Movie is not part of this wheel.");
@@ -89,19 +89,19 @@ public class MovieService : ServiceBase<MovieService>
 
     public async Task<IEnumerable<Movie>> GetRemainingMoviesByWheelAsync(int wheelId)
     {
-        Logger.LogInformation("MovieService: Fetching remaining movies for wheel ID {wheelId}.", wheelId);
+        Logger.LogInformation("Fetching remaining movies for wheel ID {wheelId}.", wheelId);
         return await _movieRepository.GetRemainingByWheelAsync(wheelId);
     }
 
     public async Task<IEnumerable<Movie>> GetLastWatchedMoviesAsync(int wheelId, int count)
     {
-        Logger.LogInformation("MovieService: Fetching last watched movies for wheel ID {wheelId}.", wheelId);
+        Logger.LogInformation("Fetching last watched movies for wheel ID {wheelId}.", wheelId);
         return await _movieRepository.GetLastWatchedAsync(wheelId, count);
     }
 
     private async Task<bool> MovieExistsAsync(string title, string director, int year, int? tmdbId)
     {
-        Logger.LogInformation("MovieService: Checking if movie exists with title:{title}, director:{director}, year:{year}, tmdbId:{tmdbId}.", title, director, year, tmdbId);
+        Logger.LogInformation("Checking if movie exists with title:{title}, director:{director}, year:{year}, tmdbId:{tmdbId}.", title, director, year, tmdbId);
         return await _movieRepository.MovieExistsAsync(title, director, year, tmdbId);
     }
 }

@@ -7,13 +7,23 @@
     <em>Cast:</em> @movie.Cast<br />
     <em>Duration:</em> @movie.DurationInMinutes min<br />
     <em>TMDb Rating:</em> @movie.TmdbRating<br />
-    @if (!string.IsNullOrWhiteSpace(movie.Synopsis))
-    {
-        <em>Synopsis:</em> @movie.Synopsis<br />
-    }
+    <em>Synopsis:</em> @movie.Synopsis<br />
     @if (!string.IsNullOrWhiteSpace(movie.PosterUrl))
     {
         <img src="@movie.PosterUrl" alt="Poster for @movie.Title" style="height:100px;" />
+    }
+    @if (movie.WatchProviders?.Any() == true)
+    {
+        <div class="watch-providers" style="margin-top: 10px;">
+            <em>Available on:</em><br />
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;">
+                @foreach (var provider in movie.WatchProviders)
+                {
+                    <img src="@provider.LogoUrl" alt="@provider.Name" title="@provider.Name" style="height:40px; border-radius:8px;" />
+                }
+            </div>
+            <small style="display:block; margin-top:5px; color:#888;">Watch provider data powered by JustWatch.</small>
+        </div>
     }
 </div>
 

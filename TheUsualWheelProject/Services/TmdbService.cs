@@ -1,13 +1,14 @@
 using TheUsualWheelProject.APIKeys;
 using TheUsualWheelProject.Models;
 using TMDbLib.Client;
+using TMDbLib.Objects.General;
 using TMDbLib.Objects.Search;
 using TMDbLib.Objects.Movies;
 using Microsoft.Extensions.Logging;
 
 namespace TheUsualWheelProject.Services;
 
-public class TmdbService : ServiceBase<TmdbService>
+public class TmdbService : LoggingBase<TmdbService>
 {
     private readonly TMDbClient _tmdbClient;
     public TmdbService(ILogger<TmdbService> logger) : base(logger)
@@ -17,7 +18,7 @@ public class TmdbService : ServiceBase<TmdbService>
 
     public async Task<List<SearchMovie>?> SearchMoviesAsync(string title)
     {
-        Logger.LogInformation("TmdbService: Searching for movies with title:{title}.", title);
+        Logger.LogInformation("Searching for movies with title:{title}.", title);
         var searchResults = await _tmdbClient.SearchMovieAsync(title);
         if (searchResults?.Results == null) 
             return null;
@@ -25,11 +26,25 @@ public class TmdbService : ServiceBase<TmdbService>
         return searchResults.Results.ToList();
     }
 
+    public async Task<SingleResultContainer<Dictionary<string, WatchProviders>>?> GetMovieWatchProvidersAsync(int tmdbId)
+    {
+        try
+        {
+            Logger.LogInformation("Fetching watch providers from TMDb for ID {tmdbId}.", tmdbId);
+            return await _tmdbClient.GetMovieWatchProvidersAsync(tmdbId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error fetching watch providers for TMDb ID {tmdbId}.", tmdbId);
+            return null;
+        }
+    }
+
     public async Task<Models.Movie?> GetMovieDetailsAsync(int tmdbId)
     {
         try
         {
-            Logger.LogInformation("TmdbService: Fetching movie details from TMDb for ID {tmdbId}.", tmdbId);
+            Logger.LogInformation("Fetching movie details from TMDb for ID {tmdbId}.", tmdbId);
             var tmdbMovie = await _tmdbClient.GetMovieAsync(tmdbId, MovieMethods.Credits);
             if (tmdbMovie == null)
                 return null;
@@ -54,7 +69,7 @@ public class TmdbService : ServiceBase<TmdbService>
                 ? string.Join(", ", tmdbMovie.Credits.Cast.Take(5).Select(c => c.Name))
                 : "Unknown Cast";
             // Debug output
-            Logger.LogInformation("TmdbService: Constructed movie details for TMDb ID {tmdbId}.", tmdbId);
+            Logger.LogInformation("Constructed movie details for TMDb ID {tmdbId}.", tmdbId);
 
             Models.Movie constructedMovie = new()
             {
@@ -71,13 +86,13 @@ public class TmdbService : ServiceBase<TmdbService>
                 TmdbId = tmdbMovie.Id
             };
 
-            Logger.LogInformation("TmdbService: Constructed movie details for TMDb ID {tmdbId}: {@movie}", tmdbId, constructedMovie);
+            Logger.LogInformation("Constructed movie details for TMDb ID {tmdbId}: {@movie}", tmdbId, constructedMovie);
 
             return constructedMovie;
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "TmdbService: Error fetching movie details from TMDb for ID {tmdbId}.", tmdbId);
+            Logger.LogError(ex, "Error fetching movie details from TMDb for ID {tmdbId}.", tmdbId);
             return null;
         }
     }

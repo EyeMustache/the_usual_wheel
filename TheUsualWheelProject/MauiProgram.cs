@@ -31,11 +31,14 @@ public static class MauiProgram
         builder.Services.AddSingleton<IGenericRepository<Wheel, int>>(_ => new GenericRepository<Wheel, int>("Wheels", DatabaseConfig.ConnectionString));
         builder.Services.AddSingleton<IMovieRepository>(_ => new MovieRepository(DatabaseConfig.ConnectionString));
         builder.Services.AddSingleton<IWheelRepository>(_ => new WheelRepository(DatabaseConfig.ConnectionString));
+		builder.Services.AddSingleton<IWatchProviderRepository>(_ => new WatchProviderRepository(DatabaseConfig.ConnectionString));
+		builder.Services.AddSingleton<IMovieProviderRepository>(_ => new MovieProviderRepository(DatabaseConfig.ConnectionString));
         builder.Services.AddSingleton<MovieService>();
         builder.Services.AddSingleton<WheelService>();
         builder.Services.AddSingleton<TmdbService>();
+		builder.Services.AddSingleton<WatchProviderService>();
         builder.Services.AddSingleton<DatabaseService>(
-			new DatabaseService(DatabaseConfig.ConnectionString, new WheelRepository(DatabaseConfig.ConnectionString), new MovieRepository(DatabaseConfig.ConnectionString)));
+			new DatabaseService(DatabaseConfig.ConnectionString, new WheelRepository(DatabaseConfig.ConnectionString), new MovieRepository(DatabaseConfig.ConnectionString), new LoggerFactory().CreateLogger<DatabaseService>()));
         builder.Services.AddSingleton<WheelListViewModel>();
 		builder.Services.AddTransient<WheelViewModel>();
         builder.Services.AddSingleton(AudioManager.Current);
@@ -59,24 +62,27 @@ public static class MauiProgram
 		var logger = loggerFactory?.CreateLogger("MauiProgram");
 
 		// Startup log
-		logger?.LogInformation("MauiProgram: App startup sequence initiated");
+		logger?.LogInformation("App startup sequence initiated");
 
 		// Log DI registrations
-		logger?.LogInformation("MauiProgram: Registering repositories and services...");
-		logger?.LogDebug("MauiProgram: IGenericRepository<Movie, int> registered with Movies table.");
-		logger?.LogDebug("MauiProgram: IGenericRepository<Wheel, int> registered with Wheels table.");
-		logger?.LogDebug("MauiProgram: IMovieRepository and IWheelRepository registered.");
-		logger?.LogDebug("MauiProgram: MovieService, WheelService, TmdbService registered.");
-		logger?.LogDebug("MauiProgram: DatabaseService registered with connection string: {ConnectionString}", DatabaseConfig.ConnectionString);
-		logger?.LogDebug("MauiProgram: WheelListViewModel and WheelViewModel registered.");
-		logger?.LogDebug("MauiProgram: AudioManager and AudioService registered.");
+		logger?.LogInformation("Registering repositories and services...");
+		logger?.LogDebug("IGenericRepository<Movie, int> registered with Movies table.");
+		logger?.LogDebug("IGenericRepository<Wheel, int> registered with Wheels table.");
+		logger?.LogDebug("IMovieRepository and IWheelRepository registered.");
+		logger?.LogDebug("MovieService, WheelService, TmdbService registered.");
+		logger?.LogDebug("DatabaseService registered with connection string: {ConnectionString}", DatabaseConfig.ConnectionString);
+		logger?.LogDebug("WheelListViewModel and WheelViewModel registered.");
+		logger?.LogDebug("AudioManager and AudioService registered.");
 		logger?.LogInformation("DI registration complete.");
 
 		// Log SkiaSharp and Blazor setup
-		logger?.LogInformation("MauiProgram: SkiaSharp and BlazorWebView configured.");
+		logger?.LogInformation("SkiaSharp and BlazorWebView configured.");
 
 		// Final startup log
-		logger?.LogInformation("MauiProgram: App startup sequence complete.");
+		logger?.LogInformation("App startup sequence complete.");
+
+		var db = app.Services.GetRequiredService<DatabaseService>();
+		db.ResetAndSeedTestDataAsync().GetAwaiter().GetResult();
 
 		return app;
 	}
