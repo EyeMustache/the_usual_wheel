@@ -23,22 +23,7 @@ else
         <ul>
             @foreach (Movie movie in ViewModel.WheelMovies)
             {
-                <li>
-                    <strong>@movie.Title</strong> (@movie.Year)<br />
-                    <em>Genre:</em> @movie.Genre<br />
-                    <em>Director:</em> @movie.Director<br />
-                    <em>Cast:</em> @movie.Cast<br />
-                    <em>Duration:</em> @movie.DurationInMinutes min<br />
-                    <em>TMDb Rating:</em> @movie.TmdbRating<br />
-                    @if (!string.IsNullOrWhiteSpace(movie.Synopsis))
-                    {
-                        <em>Synopsis:</em> @movie.Synopsis<br />
-                    }
-                    @if (!string.IsNullOrWhiteSpace(movie.PosterUrl))
-                    {
-                        <img src="@movie.PosterUrl" alt="Poster for @movie.Title" style="height:100px;" />
-                    }
-                </li>
+                <MovieCard Movie="movie" />
             }
         </ul>
     }

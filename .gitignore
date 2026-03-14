@@ -38,4 +38,7 @@ appsettings.Development.json
 # Hide docs
 docs/
 
+.idea/
+.idea/workspace.xml
+.__override__/
 TheUsualWheelProject/TmdbApiKey.cs
