@@ -49,6 +49,35 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-		return builder.Build();
+		builder.Logging.AddConsole(); 
+		builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+		var app = builder.Build();
+
+
+		var loggerFactory = app.Services.GetService<ILoggerFactory>();
+		var logger = loggerFactory?.CreateLogger("MauiProgram");
+
+		// Startup log
+		logger?.LogInformation("MauiProgram: App startup sequence initiated");
+
+		// Log DI registrations
+		logger?.LogInformation("MauiProgram: Registering repositories and services...");
+		logger?.LogDebug("MauiProgram: IGenericRepository<Movie, int> registered with Movies table.");
+		logger?.LogDebug("MauiProgram: IGenericRepository<Wheel, int> registered with Wheels table.");
+		logger?.LogDebug("MauiProgram: IMovieRepository and IWheelRepository registered.");
+		logger?.LogDebug("MauiProgram: MovieService, WheelService, TmdbService registered.");
+		logger?.LogDebug("MauiProgram: DatabaseService registered with connection string: {ConnectionString}", DatabaseConfig.ConnectionString);
+		logger?.LogDebug("MauiProgram: WheelListViewModel and WheelViewModel registered.");
+		logger?.LogDebug("MauiProgram: AudioManager and AudioService registered.");
+		logger?.LogInformation("DI registration complete.");
+
+		// Log SkiaSharp and Blazor setup
+		logger?.LogInformation("MauiProgram: SkiaSharp and BlazorWebView configured.");
+
+		// Final startup log
+		logger?.LogInformation("MauiProgram: App startup sequence complete.");
+
+		return app;
 	}
 }

@@ -3,19 +3,21 @@ using TheUsualWheelProject.Models;
 using TMDbLib.Client;
 using TMDbLib.Objects.Search;
 using TMDbLib.Objects.Movies;
+using Microsoft.Extensions.Logging;
 
 namespace TheUsualWheelProject.Services;
 
-public class TmdbService
+public class TmdbService : ServiceBase<TmdbService>
 {
     private readonly TMDbClient _tmdbClient;
-    public TmdbService()
+    public TmdbService(ILogger<TmdbService> logger) : base(logger)
     {
         _tmdbClient = new TMDbClient(TmdbApiKey.APIKEY);
     }
 
     public async Task<List<SearchMovie>?> SearchMoviesAsync(string title)
     {
+        Logger.LogInformation("TmdbService: Searching for movies with title:{title}.", title);
         var searchResults = await _tmdbClient.SearchMovieAsync(title);
         if (searchResults?.Results == null) 
             return null;
@@ -27,6 +29,7 @@ public class TmdbService
     {
         try
         {
+            Logger.LogInformation("TmdbService: Fetching movie details from TMDb for ID {tmdbId}.", tmdbId);
             var tmdbMovie = await _tmdbClient.GetMovieAsync(tmdbId, MovieMethods.Credits);
             if (tmdbMovie == null)
                 return null;
@@ -50,8 +53,10 @@ public class TmdbService
             string castString = tmdbMovie.Credits?.Cast != null && tmdbMovie.Credits.Cast.Any()
                 ? string.Join(", ", tmdbMovie.Credits.Cast.Take(5).Select(c => c.Name))
                 : "Unknown Cast";
- 
-            return new Models.Movie
+            // Debug output
+            Logger.LogInformation("TmdbService: Constructed movie details for TMDb ID {tmdbId}.", tmdbId);
+
+            Models.Movie constructedMovie = new()
             {
                 Title = tmdbMovie.Title ?? "Unknown Title",
                 Year = tmdbMovie.ReleaseDate?.Year ?? 0,
@@ -65,10 +70,14 @@ public class TmdbService
                 LetterboxdRating = null, // Letterboxd rating is not available from TMDb
                 TmdbId = tmdbMovie.Id
             };
+
+            Logger.LogInformation("TmdbService: Constructed movie details for TMDb ID {tmdbId}: {@movie}", tmdbId, constructedMovie);
+
+            return constructedMovie;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching movie details from TMDb: {ex.Message}");
+            Logger.LogError(ex, "TmdbService: Error fetching movie details from TMDb for ID {tmdbId}.", tmdbId);
             return null;
         }
     }
