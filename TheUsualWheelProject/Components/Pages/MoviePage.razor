@@ -1,0 +1,21 @@
+@page "/movie/{tmdbId:int}"
+@inject MovieViewModel ViewModel
+
+<h1>Movie Details</h1>
+@if (ViewModel.CurrentMovie == null)
+{
+    <p>Movie not found.</p>
+}
+else
+{
+    <MovieDetailsCard Movie="ViewModel.CurrentMovie" />
+}
+
+@code {
+    [Parameter] public int tmdbId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadMovieByTmdbIdAsync(tmdbId);
+    }
+}

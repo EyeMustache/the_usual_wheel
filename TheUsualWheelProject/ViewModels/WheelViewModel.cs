@@ -9,7 +9,6 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
 {
     private const string PreferredWatchRegion = "NL";
 
-    private readonly TmdbService _tmdbService;
     private readonly WheelService _wheelService;
     private readonly MovieService _movieService;
     private readonly WatchProviderService _watchProviderService;
@@ -23,13 +22,11 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
     public WheelViewModel(
         WheelService wheelService,
         MovieService movieService,
-        TmdbService tmdbService,
         WatchProviderService watchProviderService,
         ILogger<WheelViewModel> logger) : base(logger)
     {
         _wheelService = wheelService;
         _movieService = movieService;
-        _tmdbService = tmdbService;
         _watchProviderService = watchProviderService;
     }
 
@@ -45,11 +42,10 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
 
         DataUpdated?.Invoke();
 
-        _ = EnrichMissingMovieDataAsync();
+        await EnrichMoviesAsync();
     }
 
-    // Calls enrichment logic in MovieService, updates UI state
-    private async Task EnrichMissingMovieDataAsync()
+    private async Task EnrichMoviesAsync()
     {
         if (WheelMovies == null || !WheelMovies.Any())
             return;
@@ -60,7 +56,6 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
         try
         {
             await _movieService.EnrichMoviesAsync(WheelMovies);
-            // Refresh providers after enrichment
             foreach (var movie in WheelMovies)
             {
                 movie.WatchProviders = (await _watchProviderService.GetProvidersByMovieAsync(movie.Id)).ToList();

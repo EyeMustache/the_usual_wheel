@@ -29,6 +29,12 @@ public class MovieService : LoggingBase<MovieService>
         return await _movieRepository.GetById(id);
     }
 
+    public async Task<Movie?> GetMovieByTmdbIdAsync(int tmdbId)
+    {
+        Logger.LogInformation("Fetching movie by TMDb ID:{tmdbId}.", tmdbId);
+        return await _movieRepository.GetByTmdbId(tmdbId);
+    }
+
     public async Task AddMovieAsync(Movie movie)
     {
         Logger.LogInformation("Adding new movie:{movie.Title} directed by {movie.Director} ({movie.Year}).", movie.Title, movie.Director, movie.Year);

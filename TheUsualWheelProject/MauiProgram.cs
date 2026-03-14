@@ -27,22 +27,28 @@ public static class MauiProgram
 		
 		SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
+		// Repositories
         builder.Services.AddSingleton<IGenericRepository<Movie, int>>(_ => new GenericRepository<Movie, int>("Movies", DatabaseConfig.ConnectionString));
         builder.Services.AddSingleton<IGenericRepository<Wheel, int>>(_ => new GenericRepository<Wheel, int>("Wheels", DatabaseConfig.ConnectionString));
         builder.Services.AddSingleton<IMovieRepository>(_ => new MovieRepository(DatabaseConfig.ConnectionString));
         builder.Services.AddSingleton<IWheelRepository>(_ => new WheelRepository(DatabaseConfig.ConnectionString));
 		builder.Services.AddSingleton<IWatchProviderRepository>(_ => new WatchProviderRepository(DatabaseConfig.ConnectionString));
 		builder.Services.AddSingleton<IMovieProviderRepository>(_ => new MovieProviderRepository(DatabaseConfig.ConnectionString));
+		// Services
         builder.Services.AddSingleton<MovieService>();
         builder.Services.AddSingleton<WheelService>();
         builder.Services.AddSingleton<TmdbService>();
 		builder.Services.AddSingleton<WatchProviderService>();
         builder.Services.AddSingleton<DatabaseService>(
 			new DatabaseService(DatabaseConfig.ConnectionString, new WheelRepository(DatabaseConfig.ConnectionString), new MovieRepository(DatabaseConfig.ConnectionString), new LoggerFactory().CreateLogger<DatabaseService>()));
-        builder.Services.AddSingleton<WheelListViewModel>();
-		builder.Services.AddTransient<WheelViewModel>();
         builder.Services.AddSingleton(AudioManager.Current);
         builder.Services.AddSingleton<AudioService>();
+		// ViewModels
+		builder.Services.AddSingleton<MainPageViewModel>();
+		builder.Services.AddTransient<WheelViewModel>();
+		builder.Services.AddSingleton<MovieViewModel>();
+		builder.Services.AddSingleton<WheelListViewModel>();
+		builder.Services.AddSingleton<MovieSearchViewModel>();
         
         builder.UseSkiaSharp();
         builder.Services.AddMauiBlazorWebView();
@@ -66,13 +72,7 @@ public static class MauiProgram
 
 		// Log DI registrations
 		logger?.LogInformation("Registering repositories and services...");
-		logger?.LogDebug("IGenericRepository<Movie, int> registered with Movies table.");
-		logger?.LogDebug("IGenericRepository<Wheel, int> registered with Wheels table.");
-		logger?.LogDebug("IMovieRepository and IWheelRepository registered.");
-		logger?.LogDebug("MovieService, WheelService, TmdbService registered.");
-		logger?.LogDebug("DatabaseService registered with connection string: {ConnectionString}", DatabaseConfig.ConnectionString);
-		logger?.LogDebug("WheelListViewModel and WheelViewModel registered.");
-		logger?.LogDebug("AudioManager and AudioService registered.");
+		
 		logger?.LogInformation("DI registration complete.");
 
 		// Log SkiaSharp and Blazor setup

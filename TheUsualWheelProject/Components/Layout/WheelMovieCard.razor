@@ -1,0 +1,49 @@
+@* @using TheUsualWheelProject.Models
+
+<div class="movie-card">
+    <strong>@m.Title</strong> (@m.Year)<br />
+    @if (!string.IsNullOrWhiteSpace(m.PosterUrl))
+    {
+        <img src="@m.PosterUrl" alt="Poster for @m.Title" style="height:100px;" />
+    }
+    <em>Genre:</em> @m.Genre<br />
+    <em>Director:</em> @m.Director<br />
+    <em>Cast:</em> @m.Cast<br />
+    <em>Duration:</em> @m.DurationInMinutes min<br />
+    <em>TMDb Rating:</em> @m.TmdbRating<br />
+    <em>Synopsis:</em> @m.Synopsis<br />
+    @if (m.WatchProviders?.Any() == true)
+    {
+        <div class="watch-providers" style="margin-top: 10px;">
+            <em>Available on:</em><br />
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;">
+                @foreach (var provider in m.WatchProviders)
+                {
+                    <img src="@provider.LogoUrl" alt="@provider.Name" title="@provider.Name" style="height:40px; border-radius:8px;" />
+                }
+            </div>
+            <small style="display:block; margin-top:5px; color:#888;">Watch provider data powered by JustWatch.</small>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Movie? m { get; set; };
+    [Parameter]
+    public WheelMovie? wm { get; set; }
+
+    public Movie GetMovie()
+    {
+        if (m != null) return m;
+        // ToMovie does not exist, I'd have to fetch by Wheel and Movie ID, 
+        //but that should be done in wherever the component gets rendered, this should be the template?
+        if (wm != null) return wm.();
+        throw new InvalidOperationException("Either 'm' or 'wm' must be provided.");
+        // Either get  movie by wheel or get movie by id if already fetched in the original razor?
+        // MovieService.GetMovieById(wm.MovieId);
+    }
+
+
+    }
+} *@
