@@ -70,5 +70,11 @@ public class WheelService : LoggingBase<WheelService>
         }
 
         await _wheelRepository.Delete(id);
-    }  
+    }
+
+    public async Task<IEnumerable<Models.WheelMovie>> GetWheelMoviesAsync(int wheelId)
+    {
+        Logger.LogInformation("Fetching wheel movies for wheel ID {wheelId}.", wheelId);
+        return await _wheelRepository.GetMoviesByWheelIdAsync(wheelId);
+    }
 }

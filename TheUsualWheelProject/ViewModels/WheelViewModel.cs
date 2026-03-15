@@ -16,8 +16,24 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
     public event Action? DataUpdated;
 
     public Wheel? CurrentWheel { get; private set; }
-    public List<Movie>? WheelMovies { get; private set; } = [];
-    public bool IsEnriching { get; private set; }
+    public List<Movie>? Movies { get; private set; } = [];
+    public List<WheelMovie>? WheelMovies { get; private set; }
+    public bool IsHidden { get; set; } = false;
+    public bool HasPeaked => IsHidden && WheelMovies?.Count(m => !m.IsEliminated) == 1;
+
+    private bool _isEnriching;
+    public bool IsEnriching
+    {
+        get => _isEnriching;
+        private set
+        {
+            if (_isEnriching != value)
+            {
+                _isEnriching = value;
+                Logger.LogInformation($"IsEnriching changed to {value}");
+            }
+        }
+    }
 
     public WheelViewModel(
         WheelService wheelService,
@@ -34,19 +50,22 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
     {
         // Fetch the wheel
         CurrentWheel = await _wheelService.GetWheelByIdAsync(id);
-        
-        // Offload the database loops to a background thread so the UI doesn't freeze
-        WheelMovies = await Task.Run(async () => 
+
+        // Load WheelMovies
+        WheelMovies = (await _wheelService.GetWheelMoviesAsync(id)).ToList();
+
+        // Load Movie details for each WheelMovie
+        Movies = new List<Movie>();
+        foreach (var wm in WheelMovies)
         {
-            var movies = (await _movieService.GetMoviesByWheelAsync(id)).ToList();
-            
-            foreach (var movie in movies)
+            Logger.LogInformation("Loading movie details for Movie ID {movieId} in Wheel ID {wheelId}.", wm.MovieId, id);
+            var movie = await _movieService.GetMovieByIdAsync(wm.MovieId);
+            if (movie != null)
             {
                 movie.WatchProviders = (await _watchProviderService.GetProvidersByMovieAsync(movie.Id)).ToList();
+                Movies.Add(movie);
             }
-            
-            return movies;
-        });
+        }
 
         DataUpdated?.Invoke();
 
@@ -63,8 +82,8 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
 
         try
         {
-            await _movieService.EnrichMoviesAsync(WheelMovies);
-            foreach (var movie in WheelMovies)
+            await _movieService.EnrichMoviesAsync(Movies);
+            foreach (var movie in Movies)
             {
                 movie.WatchProviders = (await _watchProviderService.GetProvidersByMovieAsync(movie.Id)).ToList();
             }

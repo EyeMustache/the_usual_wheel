@@ -14,14 +14,14 @@ else
     {
         <p>Fetching missing details from TMDB...</p>
     }
-    @if (ViewModel.WheelMovies == null || !ViewModel.WheelMovies.Any())
+    @if (ViewModel.Movies == null || !ViewModel.Movies.Any())
     {
         <p>No movies found for this wheel.</p>
     }
     else
     {
         <ul>
-            @foreach (Movie movie in ViewModel.WheelMovies)
+            @foreach (Movie? movie in ViewModel.Movies)
             {
                 <WheelMovieCard Movie="movie" />
             }
