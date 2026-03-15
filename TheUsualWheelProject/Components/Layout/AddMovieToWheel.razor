@@ -1,0 +1,26 @@
+@using TheUsualWheelProject.Models
+@using Microsoft.AspNetCore.Components
+
+<button class="add-movie-to-wheel-btn" @onclick="OnAddClicked" disabled="@IsDisabled">
+    Add to Wheel (+)
+</button>
+
+@code {
+    [Parameter]
+    public Movie Movie { get; set; } = default!;
+
+    [Parameter]
+    public bool IsDisabled { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<Movie> OnAdd { get; set; }
+
+    private async Task OnAddClicked()
+    {
+        if (OnAdd.HasDelegate)
+        {
+            await OnAdd.InvokeAsync(Movie);
+        }
+        // Later: open modal for wheel selection here
+    }
+}

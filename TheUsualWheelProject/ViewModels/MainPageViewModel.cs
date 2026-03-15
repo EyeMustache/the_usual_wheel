@@ -8,6 +8,8 @@ public class MainPageViewModel
     public ObservableCollection<Movie> Movies { get; set; } = new();
 
     public MainPageViewModel() { }
+    
+    // IDEA: Should display last (or couple) used wheels with a quick access to that model at some point.
 
     public async Task LoadDataAsync(WheelService wheelService, MovieService movieService)
     {

@@ -75,4 +75,14 @@ public class MovieRepository : GenericRepository<Models.Movie, int>, IMovieRepos
         var count = await connection.ExecuteScalarAsync<int>(query, param);
         return count > 0;
     }
+
+    public async Task<Models.Movie?> GetByTmdbId(int tmdbId)
+    {
+        using var connection = new SqliteConnection(_conString);
+        var query = @$"SELECT *
+                      FROM {TableName}
+                      WHERE TmdbId = @TmdbId";
+        var param = new { TmdbId = tmdbId };
+        return await connection.QuerySingleOrDefaultAsync<Models.Movie>(query, param);
+    }
 }

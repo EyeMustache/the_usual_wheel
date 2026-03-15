@@ -39,3 +39,7 @@ appsettings.Development.json
 docs/
 
 .idea/
+.idea/workspace.xml
+.__override__/
+TheUsualWheelProject/TmdbApiKey.cs
+.idea/workspace.xml

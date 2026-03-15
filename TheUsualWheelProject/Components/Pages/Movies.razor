@@ -1,3 +1,36 @@
 @page "/movies"
-<h1>Movies</h1>
-<p>Coming soon...</p>
+
+@inject MovieSearchViewModel ViewModel
+
+<h1>Movie Search</h1>
+
+<div class="movie-search">
+	<input @bind="ViewModel.SearchQuery" placeholder="Enter movie title..." />
+	<button @onclick="ViewModel.SearchMoviesAsync">Search</button>
+</div>
+
+@if (ViewModel.IsSearching)
+{
+	<p>Searching TMDB...</p>
+}
+else if (ViewModel.SearchResults != null && ViewModel.SearchResults.Any())
+{
+	<h2>Results</h2>
+	<div class="movie-results">
+		@foreach (var movie in ViewModel.SearchResults)
+		{
+			<MovieSearchCard movie="movie" />
+		}
+	</div>
+
+	@if (ViewModel.HasMoreResults)
+	{
+		<button @onclick="ViewModel.LoadMoreAsync" disabled="@ViewModel.IsSearching">
+			@(ViewModel.IsSearching ? "Loading..." : "Load More")
+		</button>
+	}
+}
+else if (ViewModel.HasSearched)
+{
+	<p>No results found.</p>
+}

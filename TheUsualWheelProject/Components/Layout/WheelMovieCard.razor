@@ -1,0 +1,33 @@
+@using TheUsualWheelProject.Models
+
+<div class="Movie-card">
+    <strong>@Movie.Title</strong> (@Movie.Year)<br />
+    @if (!string.IsNullOrWhiteSpace(Movie.PosterUrl))
+    {
+        <img src="@Movie.PosterUrl" alt="Poster for @Movie.Title" style="height:100px;" />
+    }
+    <em>Genre:</em> @Movie.Genre<br />
+    <em>Director:</em> @Movie.Director<br />
+    <em>Cast:</em> @Movie.Cast<br />
+    <em>Duration:</em> @Movie.DurationInMinutes min<br />
+    <em>TMDb Rating:</em> @Movie.TmdbRating<br />
+    <em>Synopsis:</em> @Movie.Synopsis<br />
+    @if (Movie.WatchProviders?.Any() == true)
+    {
+        <div class="watch-providers" style="margin-top: 10px;">
+            <em>Available on:</em><br />
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;">
+                @foreach (var provider in Movie.WatchProviders)
+                {
+                    <img src="@provider.LogoUrl" alt="@provider.Name" title="@provider.Name" style="height:40px; border-radius:8px;" />
+                }
+            </div>
+            <small style="display:block; margin-top:5px; color:#888;">Watch provider data powered by JustWatch.</small>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Movie? Movie { get; set; }
+}

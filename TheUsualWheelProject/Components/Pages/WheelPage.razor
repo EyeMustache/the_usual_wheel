@@ -1,0 +1,50 @@
+@page "/wheel/{id:int}"
+@implements IDisposable
+
+@inject WheelViewModel ViewModel
+
+@if (ViewModel.CurrentWheel == null)
+{
+    <p>Wheel not found.</p>
+}
+else
+{
+    <h1>@ViewModel.CurrentWheel.Name</h1>
+    @if (ViewModel.IsEnriching)
+    {
+        <p>Fetching missing details from TMDB...</p>
+    }
+    @if (ViewModel.Movies == null || !ViewModel.Movies.Any())
+    {
+        <p>No movies found for this wheel.</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (Movie? movie in ViewModel.Movies)
+            {
+                <WheelMovieCard Movie="movie" />
+            }
+        </ul>
+    }
+}
+
+@code {
+    [Parameter] public int id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ViewModel.DataUpdated += HandleDataUpdated;
+        await ViewModel.LoadWheelAsync(id);
+    }
+
+    private void HandleDataUpdated()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ViewModel.DataUpdated -= HandleDataUpdated;
+    }
+}
