@@ -25,9 +25,16 @@
             <small style="display:block; margin-top:5px; color:#888;">Watch provider data powered by JustWatch.</small>
         </div>
     }
+    <AddMovieToWheel Movie="movie" OnAdd="HandleAddMovieToWheel" />
 </div>
 
 @code {
     [Parameter]
     public Movie movie { get; set; } = default!;
+
+    private void HandleAddMovieToWheel(Movie movie)
+    {
+        // TODO: Implement logic to add the movie to a wheel, possibly by opening a modal for wheel selection
+    }
+
 }
