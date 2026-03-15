@@ -16,10 +16,12 @@ public class TmdbService : LoggingBase<TmdbService>
         _tmdbClient = new TMDbClient(TmdbApiKey.APIKEY);
     }
 
-    public async Task<List<SearchMovie>?> SearchMoviesAsync(string title)
+    public async Task<List<SearchMovie>?> SearchMoviesAsync(string title, int page = 1)
     {
-        Logger.LogInformation("Searching for movies with title:{title}.", title);
-        var searchResults = await _tmdbClient.SearchMovieAsync(title);
+        Logger.LogInformation("Searching for movies with title:{title} on page {page}.", title, page);
+        
+        // Pass the page to the TMDbClient
+        var searchResults = await _tmdbClient.SearchMovieAsync(title, page: page);
         if (searchResults?.Results == null) 
             return null;
 

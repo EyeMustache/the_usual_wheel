@@ -23,7 +23,7 @@ else
         <ul>
             @foreach (Movie movie in ViewModel.WheelMovies)
             {
-                <MovieDetailsCard Movie="movie" />
+                <WheelMovieCard Movie="movie" />
             }
         </ul>
     }
@@ -40,7 +40,7 @@ else
 
     private void HandleDataUpdated()
     {
-        _ = InvokeAsync(StateHasChanged);
+        InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()

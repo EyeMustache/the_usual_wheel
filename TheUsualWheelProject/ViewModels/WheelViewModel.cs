@@ -32,17 +32,25 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
 
     public async Task LoadWheelAsync(int id)
     {
+        // Fetch the wheel
         CurrentWheel = await _wheelService.GetWheelByIdAsync(id);
-        WheelMovies = (await _movieService.GetMoviesByWheelAsync(id)).ToList();
-
-        foreach (var movie in WheelMovies)
+        
+        // Offload the database loops to a background thread so the UI doesn't freeze
+        WheelMovies = await Task.Run(async () => 
         {
-            movie.WatchProviders = (await _watchProviderService.GetProvidersByMovieAsync(movie.Id)).ToList();
-        }
+            var movies = (await _movieService.GetMoviesByWheelAsync(id)).ToList();
+            
+            foreach (var movie in movies)
+            {
+                movie.WatchProviders = (await _watchProviderService.GetProvidersByMovieAsync(movie.Id)).ToList();
+            }
+            
+            return movies;
+        });
 
         DataUpdated?.Invoke();
 
-        await EnrichMoviesAsync();
+        // await EnrichMoviesAsync();
     }
 
     private async Task EnrichMoviesAsync()

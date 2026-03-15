@@ -1,0 +1,30 @@
+.wheel-movie-card {
+    background: #222;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.wheel-movie-card:hover {
+    background: #333;
+}
+.wheel-movie-card-content {
+    display: flex;
+    align-items: center;
+}
+.wheel-movie-card-image img {
+    height: 80px;
+    width: 55px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-right: 16px;
+}
+.wheel-movie-card-info {
+    flex: 1;
+}
+.wheel-movie-card-separator {
+    border: none;
+    border-top: 1px solid #444;
+    margin-top: 10px;
+}
