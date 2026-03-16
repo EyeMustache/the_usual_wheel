@@ -1,0 +1,142 @@
+@using SkiaSharp
+@using SkiaSharp.Views.Blazor
+
+<div class="wheel-container">
+    <SKCanvasView @ref="_canvasView" OnPaintSurface="OnPaintSurface" IgnorePixelScaling="true" Width="400" Height="400" />
+    <button @onclick="Spin" disabled="@_isSpinning">Spin Wheel</button>
+</div>
+
+@code {
+    [Parameter] public List<string> Items { get; set; } = new();
+    [Parameter] public EventCallback<string> OnItemLanded { get; set; }
+
+    private SKCanvasView? _canvasView;
+    private float _rotationAngle = 0f;
+    private bool _isSpinning = false;
+    private Random _random = new Random();
+
+    private void OnPaintSurface(SKPaintSurfaceEventArgs e)
+    {
+        SKCanvas? canvas = e.Surface.Canvas;
+        int width = e.Info.Width;
+        int height = e.Info.Height;
+        SKPoint center = new SKPoint(width / 2f, height / 2f);
+        float radius = Math.Min(width, height) * 0.45f;
+        int sliceCount = Items.Count;
+        float sweepAngle = 360f / sliceCount;
+
+        canvas.Clear(SKColors.Transparent);
+
+        canvas.Save();
+        canvas.RotateDegrees(_rotationAngle, center.X, center.Y);
+
+        for (int i = 0; i < sliceCount; i++)
+        {
+            float startAngle = i * sweepAngle;
+
+            using SKPaint? paint = new SKPaint
+            {
+                Style = SKPaintStyle.Fill,
+                Color = SKColor.FromHsv(i * 360f / sliceCount, 60, 90),
+                IsAntialias = true
+            };
+
+            using SKPath? path = new SKPath();
+            path.MoveTo(center);
+            path.ArcTo(new SKRect(center.X - radius, center.Y - radius, center.X + radius, center.Y + radius), startAngle, sweepAngle, false);
+            path.Close();
+            
+            canvas.DrawPath(path, paint);
+
+            using SKPaint? bgPaint = new SKPaint
+            {
+                Style = SKPaintStyle.Stroke,
+                Color = SKColors.White,
+                StrokeWidth = 2,
+                IsAntialias = true
+            };
+            canvas.DrawPath(path, bgPaint);
+
+            float textAngle = startAngle + (sweepAngle / 2f);
+            
+            canvas.Save();
+            canvas.RotateDegrees(textAngle, center.X, center.Y);
+
+            using SKPaint? textPaint = new SKPaint
+            {
+                Color = SKColors.Black,
+                IsAntialias = true
+            };
+
+            using SKFont textFont = new SKFont
+            {
+                Size = radius * 0.1f
+            };
+
+            float textX = center.X + radius * 0.85f;
+            float textY = center.Y + (textFont.Size / 3f);
+
+            canvas.DrawText(Items[i], textX, textY, SKTextAlign.Right, textFont, textPaint);
+            
+            canvas.Restore();
+        }
+
+        canvas.Restore();
+
+        using SKPath? pointerPath = new SKPath();
+        pointerPath.MoveTo(width / 2f + 15, height / 2f - radius - 10);
+        pointerPath.LineTo(width / 2f - 15, height / 2f - radius - 10);
+        pointerPath.LineTo(width / 2f, height / 2f - radius + 15);
+        pointerPath.Close();
+
+        using SKPaint? pointerPaint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            Color = SKColors.Black,
+            IsAntialias = true
+        };
+        canvas.DrawPath(pointerPath, pointerPaint);
+    }
+
+    public async Task Spin()
+    {
+        if (_isSpinning || Items.Count == 0) return;
+        
+        _isSpinning = true;
+
+        int extraSpins = 5 * 360;
+        int endAngle = _random.Next(0, 360);
+        int totalRotationOffset = extraSpins + endAngle;
+        
+        float targetRotation = _rotationAngle + totalRotationOffset;
+
+        int durationMs = 3000;
+        int steps = 120;
+        int delay = durationMs / steps;
+
+        float startRotation = _rotationAngle;
+
+        for (int i = 0; i <= steps; i++)
+        {
+            float t = (float)i / steps;
+            float easeOut = 1f - (float)Math.Pow(1f - t, 3); 
+            
+            _rotationAngle = startRotation + (totalRotationOffset * easeOut);
+            _canvasView?.Invalidate();
+            
+            await Task.Delay(delay);
+        }
+
+        _rotationAngle = _rotationAngle % 360f;
+        _isSpinning = false;
+
+        float sliceAngle = 360f / Items.Count;
+        float normalizedAngle = (360f - (_rotationAngle % 360f) + 270f) % 360f;
+        int winningIndex = (int)(normalizedAngle / sliceAngle) % Items.Count;
+
+        if (OnItemLanded.HasDelegate)
+        {
+            await OnItemLanded.InvokeAsync(Items[winningIndex]);
+        }
+    }
+}

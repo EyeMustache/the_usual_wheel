@@ -32,10 +32,11 @@ public class WheelService : LoggingBase<WheelService>
         return await _wheelRepository.GetById(id);
     }
 
-    public async Task AddWheelAsync(Models.Wheel wheel)
+    public async Task<Models.Wheel?> AddWheelAsync(Models.Wheel wheel)
     {
         Logger.LogInformation("Adding new wheel:{wheel.Id}.", wheel.Id);
         await _wheelRepository.Insert(wheel);
+        return await _wheelRepository.GetById(wheel.Id);
     }
 
     public async Task UpdateWheelAsync(Models.Wheel wheel)
@@ -72,6 +73,19 @@ public class WheelService : LoggingBase<WheelService>
         await _wheelRepository.Delete(id);
     }
 
+    public async Task AddMovieToWheelAsync(int wheelId, int movieId)
+    {
+        Logger.LogInformation("Adding movie with ID {movieId} to wheel with ID {wheelId}.", movieId, wheelId);
+        var wheel = await _wheelRepository.GetById(wheelId);
+        if (wheel == null)
+            throw new InvalidOperationException("Wheel does not exist.");
+    
+        var movie = await _movieRepository.GetById(movieId);
+        if (movie == null)
+            throw new InvalidOperationException("Movie does not exist.");
+    
+        await _wheelRepository.AddMovieToWheelAsync(wheelId, movieId);
+    }
     public async Task<IEnumerable<Models.WheelMovie>> GetWheelMoviesAsync(int wheelId)
     {
         Logger.LogInformation("Fetching wheel movies for wheel ID {wheelId}.", wheelId);

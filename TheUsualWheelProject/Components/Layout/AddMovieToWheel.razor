@@ -1,23 +1,47 @@
-<button class="add-movie-to-wheel-btn" @onclick="OnAddClicked" disabled="@IsDisabled">
+@inject WheelViewModel WheelViewModel
+
+<button class="add-movie-to-wheel-btn" @onclick="ShowWheelSelector" disabled="@IsDisabled">
     Add to Wheel (+)
 </button>
 
+@if (showSelector)
+{
+    <div class="wheel-selector-modal">
+        <select @bind="selectedWheelId">
+            @foreach (var wheel in Wheels)
+            {
+                <option value="@wheel.Id">@wheel.Name</option>
+            }
+        </select>
+        <button @onclick="AddMovieToSelectedWheel">Confirm</button>
+        <button @onclick="Cancel">Cancel</button>
+    </div>
+}
+
 @code {
-    [Parameter]
-    public Movie Movie { get; set; } = default!;
-
-    [Parameter]
+    [Parameter] 
+    public Models.Movie Movie { get; set; } = default!;
+    [Parameter] 
     public bool IsDisabled { get; set; } = false;
+    [Inject] public WheelListViewModel WheelListViewModel { get; set; } = default!;
 
     [Parameter]
-    public EventCallback<Movie> OnAdd { get; set; }
+    public EventCallback<Models.Movie> OnAdd { get; set; }
 
-    private async Task OnAddClicked()
+    private bool showSelector = false;
+    private int selectedWheelId;
+    private List<Models.Wheel> Wheels => WheelListViewModel.Wheels.ToList();
+
+    private void ShowWheelSelector() => showSelector = true;
+    private void Cancel() => showSelector = false;
+
+    private async Task AddMovieToSelectedWheel()
     {
+        await WheelViewModel.AddMovieToWheelAsync(selectedWheelId, Movie.Id);
+        showSelector = false;
         if (OnAdd.HasDelegate)
         {
             await OnAdd.InvokeAsync(Movie);
         }
-        // Later: open modal for wheel selection here
     }
 }

@@ -45,40 +45,57 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
         _movieService = movieService;
         _watchProviderService = watchProviderService;
     }
-
+    
     public async Task LoadWheelAsync(int id)
     {
-        // Fetch the wheel
-        CurrentWheel = await _wheelService.GetWheelByIdAsync(id);
+        Wheel wheel = await _wheelService.GetWheelByIdAsync(id) ?? throw new InvalidOperationException($"Wheel with ID {id} not found.");
+        WheelMovies = (await _wheelService.GetWheelMoviesAsync(id)).ToList();
         Movies = (await _movieService.GetMoviesByWheelAsync(id)).ToList();
+        CurrentWheel = wheel;
     }
 
-    private async Task EnrichMoviesAsync()
+    public async Task AddMovieToWheelAsync(int wheelId, int movieId)
     {
-        if (Movies == null || !Movies.Any())
-            return;
-
-        IsEnriching = true;
-        DataUpdated?.Invoke();
-
-        try
-        {
-            await _movieService.EnrichMoviesAsync(Movies);
-            foreach (var movie in Movies)
-            {
-                movie.WatchProviders = (await _watchProviderService.GetProvidersByMovieAsync(movie.Id)).ToList();
-            }
-            DataUpdated?.Invoke();
-        }
-        finally
-        {
-            IsEnriching = false;
-            DataUpdated?.Invoke();
-        }
+        await _wheelService.AddMovieToWheelAsync(wheelId, movieId);
+        await LoadWheelAsync(wheelId); // Refresh the wheel data after adding a movie
     }
+
+    public async Task EnrichMoviesBackgroundAsync()
+    {
+        if (Movies == null || Movies.Count == 0) return;
+        IsEnriching = true;
+        await _movieService.EnrichMoviesAsync(Movies);
+        IsEnriching = false;
+        DataUpdated?.Invoke();
+    }
+
+    // public async Task LoadWheelAsync(int id)
+    // {
+    //     // Fetch the wheel
+    //     CurrentWheel = await _wheelService.GetWheelByIdAsync(id);
+    //     Movies = (await _movieService.GetMoviesByWheelAsync(id)).ToList();
+
+    //     // Populate Slices
+    //     Slices.Clear();
+    //     foreach (var wm in WheelMovies)
+    //     {
+    //         var movieObj = Movies.FirstOrDefault(m => m.Id == wm.MovieId);
+    //         if (movieObj != null)
+    //         {
+    //             Slices.Add(new WheelSlice
+    //             {
+    //                 MovieId = movieObj.Id,
+    //                 Title = movieObj.Title,
+    //                 IsEliminated = wm.IsEliminated
+    //             });
+    //         }
+    //     }
+
+    //     DataUpdated?.Invoke();
+    // }
 }
 
-public class WheelSliceDto
+public class WheelSlice
 {
     public int MovieId { get; set; }
     public required string Title { get; set; }

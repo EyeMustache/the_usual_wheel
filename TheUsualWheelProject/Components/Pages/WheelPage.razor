@@ -1,4 +1,4 @@
-@page "/wheel/{id:int}"
+@page "/wheel/{Id:int}"
 @implements IDisposable
 
 @inject WheelViewModel ViewModel
@@ -10,6 +10,7 @@
 else
 {
     <h1>@ViewModel.CurrentWheel.Name</h1>
+    <Wheel Items="@MovieTitles" OnItemLanded="@HandleWheelLanded"/>
     @if (ViewModel.IsEnriching)
     {
         <p>Fetching missing details from TMDB...</p>
@@ -30,12 +31,23 @@ else
 }
 
 @code {
-    [Parameter] public int id { get; set; }
-
+    [Parameter] 
+    public int Id { get; set; }
+    private List<string> MovieTitles => ViewModel.Movies?.Select(m => m.Title).ToList() ?? new List<string>();
     protected override async Task OnInitializedAsync()
     {
-        ViewModel.DataUpdated += HandleDataUpdated;
-        await ViewModel.LoadWheelAsync(id);
+        await ViewModel.LoadWheelAsync(Id); 
+        _ = Task.Run(async () => 
+        {
+            await ViewModel.EnrichMoviesBackgroundAsync(); 
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private async Task HandleWheelLanded(string selectedTitle)
+    {
+        // Find selected movie by title, mark as eliminated, update wheel state
+        // await ViewModel.HandleWheelSelectionAsync(selectedTitle);
     }
 
     private void HandleDataUpdated()

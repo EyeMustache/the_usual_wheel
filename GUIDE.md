@@ -37,7 +37,7 @@ wheel starts fresh (e.g. Denzel Washington).
 | Smoke Break Data | JSON files (one per movie) | Hand-editable, easy to paste output from Gemini |
 | Movie Metadata | TMDB API via `TMDbLib` | Free, rich data, easy NuGet package |
 | Ratings | TMDB rating auto-fetched + optional manual Letterboxd override | Letterboxd has no public API |
-| Wheel Drawing | SkiaSharp (`SkiaSharp.Views.Maui.Controls`) | Custom 2D canvas, full control |
+| Wheel Drawing | SkiaSharp (`SkiaSharp.Views.Blazor`) | Custom 2D canvas, full control in Blazor Hybrid UI |
 | Audio | Bundled MP3 via `Plugin.Maui.Audio` | Price is Right music during wheel spin |
 | MVVM Toolkit | `CommunityToolkit.Mvvm` | Microsoft-maintained, modern, minimal boilerplate |
 | Break Entry | External JSON files, imported into Resources/Raw | Easy to write manually or paste from Gemini |
@@ -335,30 +335,28 @@ That is intentional for this app since updates are infrequent.
 
 ### Phase 5 — The Wheel (SkiaSharp with Blazor)
 
-**Goal:** A drawable, animated spinning wheel that selects a movie.
-
-This is the most involved phase visually. SkiaSharp gives you a raw 2D canvas — you are
 drawing every line, arc, and character yourself. In Blazor Hybrid, you use an `SKCanvasView` wrapper component.
+**Goal:** A drawable, animated spinning wheel that selects a movie, fully integrated in the Blazor Hybrid UI.
+
+This is the most visually involved phase. SkiaSharp gives you a raw 2D canvas — you draw every line, arc, and character yourself. In Blazor Hybrid, you use the `SkiaSharp.Views.Blazor` package to render `<SKCanvasView>` directly in your Razor components.
 
 **Steps:**
 
-1. Use the `SkiaSharp.Views.Blazor` package (or interop with the MAUI `SKCanvasView`). 
-2. Create `Controls/WheelControl.razor` (or `.cs` component) that renders the canvas.
-3. On paint surface redraws:
-   - Calculate canvas center (width / 2, height / 2) and radius.
+1. Install the `SkiaSharp.Views.Blazor` NuGet package. Remove MAUI-native SkiaSharp control if not needed.
+2. Create `Components/Wheel/SpinningWheel.razor` (or similar) as a Blazor component that renders the canvas.
+3. In your ViewModel, combine `Movies` and `WheelMovies` into a `List<WheelSlice>` property for UI drawing.
+4. In the Razor component:
+   - Add `<SKCanvasView OnPaintSurface="OnPaintSurface" />` to the markup.
+   - Calculate canvas center and radius based on the current size.
    - Loop through your active movies and draw one arc segment per movie using `SKPath`.
-   - Rotate the canvas context before drawing each segment's label so text sits upright
-     inside its slice.
+   - Rotate the canvas context before drawing each segment's label so text sits upright inside its slice.
    - Use muted / greyed colours for eliminated movies.
-4. Store a `float _rotationDegrees` field on the control. This is what changes during
-   the animation.
-5. Use Blazor timers or JSInterop `requestAnimationFrame` to drive your animation loop.
-   Each tick: increment `_rotationDegrees` based on current speed, then trigger a canvas repaint.
-6. Apply an easing function to slow the wheel down naturally. A simple approach:
-   multiply the current speed by a decay factor (e.g. `speed *= 0.985f`) each tick.
-   When speed drops below a threshold, stop the timer.
-7. On stop, determine which segment is at the top (12 o'clock). 
-8. Invoke an `EventCallback` that the parent Page subscribes to, passing the winning movie.
+5. Store a `float CurrentRotationAngle` field on the component. This is what changes during the animation.
+6. Use Blazor async loops (`Task.Delay(16)`) to drive your animation loop. Each tick: increment `CurrentRotationAngle` based on current speed, then call `canvasView.Invalidate()` to repaint.
+7. Apply an easing function to slow the wheel down naturally. Multiply the current speed by a decay factor (e.g. `speed *= 0.98f`) each tick. When speed drops below a threshold, stop the animation.
+8. On stop, determine which segment is at the top (12 o'clock).
+9. Invoke an `EventCallback` that the parent Page subscribes to, passing the winning movie.
+10. Add a Spin button and placeholder for modal logic (winner summary, smoke break data, etc.).
 
 **Key SkiaSharp types to know:**
 `SKCanvas`, `SKPaint`, `SKPath`, `SKCanvasView`, `SKColor`, `SKRect`, `SKMatrix`
