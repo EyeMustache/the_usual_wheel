@@ -38,8 +38,11 @@ appsettings.Development.json
 # Hide docs
 docs/
 
+# Random files idk
 .idea/
 .idea/workspace.xml
 .__override__/
+
+#Hide API key
 TheUsualWheelProject/TmdbApiKey.cs
-.idea/workspace.xml
+

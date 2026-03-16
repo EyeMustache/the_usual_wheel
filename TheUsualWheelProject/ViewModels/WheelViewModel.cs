@@ -8,7 +8,6 @@ namespace TheUsualWheelProject.ViewModels;
 public class WheelViewModel : LoggingBase<WheelViewModel>
 {
     private const string PreferredWatchRegion = "NL";
-
     private readonly WheelService _wheelService;
     private readonly MovieService _movieService;
     private readonly WatchProviderService _watchProviderService;
@@ -21,6 +20,7 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
     public bool IsHidden { get; set; } = false;
     public bool HasPeaked => IsHidden && WheelMovies?.Count(m => !m.IsEliminated) == 1;
 
+    // For logging to track enrichment status, aswell as to tell the program we loading data
     private bool _isEnriching;
     public bool IsEnriching
     {
@@ -50,31 +50,12 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
     {
         // Fetch the wheel
         CurrentWheel = await _wheelService.GetWheelByIdAsync(id);
-
-        // Load WheelMovies
-        WheelMovies = (await _wheelService.GetWheelMoviesAsync(id)).ToList();
-
-        // Load Movie details for each WheelMovie
-        Movies = new List<Movie>();
-        foreach (var wm in WheelMovies)
-        {
-            Logger.LogInformation("Loading movie details for Movie ID {movieId} in Wheel ID {wheelId}.", wm.MovieId, id);
-            var movie = await _movieService.GetMovieByIdAsync(wm.MovieId);
-            if (movie != null)
-            {
-                movie.WatchProviders = (await _watchProviderService.GetProvidersByMovieAsync(movie.Id)).ToList();
-                Movies.Add(movie);
-            }
-        }
-
-        DataUpdated?.Invoke();
-
-        // await EnrichMoviesAsync();
+        Movies = (await _movieService.GetMoviesByWheelAsync(id)).ToList();
     }
 
     private async Task EnrichMoviesAsync()
     {
-        if (WheelMovies == null || !WheelMovies.Any())
+        if (Movies == null || !Movies.Any())
             return;
 
         IsEnriching = true;
@@ -95,5 +76,11 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
             DataUpdated?.Invoke();
         }
     }
+}
 
+public class WheelSliceDto
+{
+    public int MovieId { get; set; }
+    public required string Title { get; set; }
+    public bool IsEliminated { get; set; }
 }

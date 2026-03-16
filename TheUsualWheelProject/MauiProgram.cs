@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using SkiaSharp.Views.Maui.Controls.Hosting;
 using TheUsualWheelProject.Repositories;
 using TheUsualWheelProject.Repositories.Interfaces;
 using TheUsualWheelProject.Services;
@@ -50,7 +49,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<WheelListViewModel>();
 		builder.Services.AddSingleton<MovieSearchViewModel>();
         
-        builder.UseSkiaSharp();
+        //builder.UseSkiaSharp();
+        // Trying out Blazor
         builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
