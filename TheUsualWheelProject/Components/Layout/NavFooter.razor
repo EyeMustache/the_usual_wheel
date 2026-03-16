@@ -1,9 +1,9 @@
 @inject NavigationManager Navigation
 
 <footer class="nav-footer">
-    <button class= "nav_footer_btn" @onClick="() => Navigation.NavigateTo("/wheellist")">Wheels</button>
-    <button class= "nav_footer_btn" @onClick="() => Navigation.NavigateTo("/")">Home</button>
-    <button class= "nav_footer_btn" @onClick="() => Navigation.NavigateTo("/movies")">Movies</button>
+    <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/wheellist"))">Wheels</button>
+    <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/"))">Home</button>
+    <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/movies"))">Movies</button>
 </footer>
 
 @code {
