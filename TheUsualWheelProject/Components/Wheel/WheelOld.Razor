@@ -1,18 +1,17 @@
 @using SkiaSharp
 @using SkiaSharp.Views.Blazor
-@inject TheUsualWheelProject.ViewModels.WheelViewModel ViewModel
-@implements IDisposable
+@inject WheelViewModel ViewModel
 
-<div class="wheel-container" style="position: relative; width: 320px; height: 320px; margin: 0 auto;">
+<div class="wheel-wrapper" style="width: 300px; height: 300px; margin: 0 auto; position: relative; background-color: #f0f0f0; border-radius: 50%;">
     <SKCanvasView @ref="_canvasView" OnPaintSurface="OnPaintSurface" style="width: 100%; height: 100%;" IgnorePixelScaling="true" />
     
-    @* Center Pin/Indicator (The Red Arrow) *@
-    <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #e74c3c; z-index: 10;"></div>
+    @* Center Pin/Indicator *@
+    <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid red; z-index: 10;"></div>
 </div>
 
-<div class="controls mt-4 text-center">
-    <button class="btn btn-primary" @onclick="SpinAsync" disabled="@(_isSpinning || GetActiveMovies().Count <= 1)">
-        @(_isSpinning ? "SPINNING..." : "SPIN THE WHEEL")
+<div class="controls mt-3 text-center">
+    <button class="btn btn-primary" @onclick="SpinAsync" disabled="@_isSpinning">
+        @(_isSpinning ? "Spinning..." : "SPIN THE WHEEL")
     </button>
 </div>
 
@@ -22,29 +21,10 @@
     private float _rotationAngle = 0f;
     private float _spinVelocity = 0f;
 
-    protected override void OnInitialized()
-    {
-        // Subscribe to ViewModel updates so the wheel redraws if a movie is eliminated
-        ViewModel.DataUpdated += RefreshWheel;
-    }
-
-    public void Dispose()
-    {
-        ViewModel.DataUpdated -= RefreshWheel;
-    }
-
-    private void RefreshWheel()
-    {
-        InvokeAsync(() =>
-        {
-            _canvasView?.Invalidate();
-            StateHasChanged();
-        });
-    }
-
+    // Safely get active movies, fallback to empty list if WheelMovies is null
     private List<WheelMovie> GetActiveMovies()
     {
-        if (ViewModel.WheelMovies == null) return new List<WheelMovie>();
+        if (ViewModel.WheelMovies == null) return new();
         return ViewModel.WheelMovies.Where(m => !m.IsEliminated).ToList();
     }
 
@@ -56,19 +36,20 @@
         var activeMovies = GetActiveMovies();
         int count = activeMovies.Count;
         
-        float radius = Math.Min(e.Info.Width, e.Info.Height) / 2f * 0.9f;
-        var center = new SKPoint(e.Info.Rect.MidX, e.Info.Rect.MidY);
-
         // --- Empty State ---
         if (count == 0)
         {
+            var emptyCenter = new SKPoint(e.Info.Rect.MidX, e.Info.Rect.MidY);
+            float emptyRadius = Math.Min(e.Info.Width, e.Info.Height) / 2f * 0.9f;
             using var emptyPaint = new SKPaint { Color = SKColors.LightGray, Style = SKPaintStyle.Fill, IsAntialias = true };
-            canvas.DrawCircle(center, radius, emptyPaint);
+            canvas.DrawCircle(emptyCenter, emptyRadius, emptyPaint);
             return;
         }
 
         // --- Populated State ---
         float sweepAngle = 360f / count;
+        float radius = Math.Min(e.Info.Width, e.Info.Height) / 2f * 0.9f;
+        var center = new SKPoint(e.Info.Rect.MidX, e.Info.Rect.MidY);
         var rect = new SKRect(center.X - radius, center.Y - radius, center.X + radius, center.Y + radius);
 
         canvas.Save();
@@ -92,23 +73,22 @@
             using var borderPaint = new SKPaint { Color = SKColors.White, Style = SKPaintStyle.Stroke, StrokeWidth = 2, IsAntialias = true };
             canvas.DrawPath(path, borderPaint);
 
-            // Draw Text (Rotated into slice)
+            // Draw Text (Rotated into slice) using Modern SKFont
             canvas.Save();
             canvas.RotateDegrees(i * sweepAngle + (sweepAngle / 2), center.X, center.Y);
             
-            var movieObj = ViewModel.Movies?.FirstOrDefault(m => m.Id == activeMovies[i].MovieId);
-            string title = movieObj?.Title ?? "Unknown Movie";
-            if(title.Length > 18) title = title.Substring(0, 18) + "...";
-
-            // FIX: Modern SkiaSharp Font & Alignment logic
-            using var textPaint = new SKPaint { 
-                Color = SKColors.White, 
-                IsAntialias = true,
-                TextAlign = SKTextAlign.Center // Alignment belongs here now
-            };
+            using var textPaint = new SKPaint { Color = SKColors.White, IsAntialias = true };
             using var font = new SKFont { Size = radius * 0.15f };
             
-            canvas.DrawText(title, center.X + (radius * 0.5f), center.Y + (font.Size * 0.3f), font, textPaint);
+            // --- FIX FOR TITLE LOOKUP ---
+            // Find the actual Movie object from the ViewModel using the MovieId
+            var movieObj = ViewModel.Movies?.FirstOrDefault(m => m.Id == activeMovies[i].MovieId);
+            string title = movieObj?.Title ?? "Unknown Movie";
+            
+            // Limit title length to prevent bleeding into other sections
+            if(title.Length > 15) title = title.Substring(0, 15) + "...";
+
+            canvas.DrawText(title, center.X + (radius * 0.5f), center.Y + (font.Size * 0.3f), SKTextAlign.Center, font, textPaint);
             canvas.Restore();
         }
         canvas.Restore();
@@ -126,28 +106,14 @@
         while (_spinVelocity > 0.1f)
         {
             _rotationAngle = (_rotationAngle + _spinVelocity) % 360;
-            _spinVelocity *= 0.97f; // Friction
+            _spinVelocity *= 0.97f; // Friction/Deceleration
             _canvasView?.Invalidate();
             await Task.Delay(16); // ~60 FPS
         }
 
         _isSpinning = false;
-        IdentifyWinner();
-    }
-
-    private void IdentifyWinner()
-    {
-        var activeMovies = GetActiveMovies();
-        int count = activeMovies.Count;
-        if (count == 0) return;
-
-        // Calculate which slice landed under the top pin (270 degrees in Skia)
-        float normalizedAngle = (360 - (_rotationAngle % 360) + 270) % 360;
-        int winnerIndex = (int)(normalizedAngle / (360f / count)) % count;
-
-        var winner = activeMovies[winnerIndex];
         
-        // TODO: Call your ViewModel to eliminate this movie in the database
-        Console.WriteLine($"The pointer landed on Movie ID: {winner.MovieId}");
+        // Re-render final resting place
+        _canvasView?.Invalidate();
     }
 }
