@@ -1,4 +1,5 @@
 @inject WheelViewModel WheelViewModel
+@inject WheelListViewModel WheelListViewModel
 
 <button class="add-movie-to-wheel-btn" @onclick="ShowWheelSelector" disabled="@IsDisabled">
     Add to Wheel (+)
@@ -15,33 +16,57 @@
         </select>
         <button @onclick="AddMovieToSelectedWheel">Confirm</button>
         <button @onclick="Cancel">Cancel</button>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="error-message">@errorMessage</div>
+        }
     </div>
 }
 
 @code {
-    [Parameter] 
-    public Models.Movie Movie { get; set; } = default!;
-    [Parameter] 
-    public bool IsDisabled { get; set; } = false;
-    [Inject] public WheelListViewModel WheelListViewModel { get; set; } = default!;
-
-    [Parameter]
-    public EventCallback<Models.Movie> OnAdd { get; set; }
+    [Parameter] public Models.Movie? DbMovie { get; set; }
+    [Parameter] public Models.TmdbMovie? TmdbMovie { get; set; }
+    [Parameter] public bool IsDisabled { get; set; } = false;
 
     private bool showSelector = false;
     private int selectedWheelId;
+    private string? errorMessage;
     private List<Models.Wheel> Wheels => WheelListViewModel.Wheels.ToList();
 
     private void ShowWheelSelector() => showSelector = true;
-    private void Cancel() => showSelector = false;
+    private void Cancel()
+    {
+        showSelector = false;
+        errorMessage = null;
+    }
 
     private async Task AddMovieToSelectedWheel()
     {
-        await WheelViewModel.AddMovieToWheelAsync(selectedWheelId, Movie.Id);
-        showSelector = false;
-        if (OnAdd.HasDelegate)
+        errorMessage = null;
+        try
         {
-            await OnAdd.InvokeAsync(Movie);
+            if (DbMovie != null)
+            {
+                await WheelViewModel.AddMovieToWheelByMovieIdAsync(DbMovie.Id, selectedWheelId);
+            }
+            else if (TmdbMovie != null)
+            {
+                await WheelViewModel.AddMovieToWheelByTmdbIdAsync(TmdbMovie.TmdbId, selectedWheelId);
+            }
+            else
+            {
+                errorMessage = "No movie provided.";
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error adding movie to wheel: {ex.Message}";
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            showSelector = false;
         }
     }
 }

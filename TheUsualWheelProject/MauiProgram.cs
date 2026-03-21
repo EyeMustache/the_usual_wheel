@@ -48,6 +48,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<MovieViewModel>();
 		builder.Services.AddSingleton<WheelListViewModel>();
 		builder.Services.AddSingleton<MovieSearchViewModel>();
+		builder.Services.AddTransient<MovieDetailsViewModel>();
         
         //builder.UseSkiaSharp();
         // Trying out Blazor

@@ -7,7 +7,7 @@ namespace TheUsualWheelProject.ViewModels;
 public class WheelListViewModel
 {
     private readonly WheelService _wheelService;
-    public ObservableCollection<Wheel> Wheels { get; private set; } = new();
+    public ObservableCollection<Wheel> Wheels { get; private set; } = [];
 
     public WheelListViewModel(WheelService wheel)
     {

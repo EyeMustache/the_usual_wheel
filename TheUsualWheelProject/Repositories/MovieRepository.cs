@@ -76,13 +76,20 @@ public class MovieRepository : GenericRepository<Models.Movie, int>, IMovieRepos
         return count > 0;
     }
 
-    public async Task<Models.Movie?> GetByTmdbId(int tmdbId)
+    public async Task<Models.Movie?> GetByTmdbIdAsync(int tmdbId)
     {
-        using var connection = new SqliteConnection(_conString);
-        var query = @$"SELECT *
-                      FROM {TableName}
-                      WHERE TmdbId = @TmdbId";
-        var param = new { TmdbId = tmdbId };
-        return await connection.QuerySingleOrDefaultAsync<Models.Movie>(query, param);
+        try
+        {
+            using var connection = new SqliteConnection(_conString);
+            var query = @$"SELECT * FROM {TableName} WHERE TmdbId = @TmdbId";
+            var param = new { TmdbId = tmdbId };
+            return await connection.QuerySingleOrDefaultAsync<Models.Movie>(query, param);
+        }
+        catch (Exception ex)
+        {
+            // Should be logger instead
+            Console.WriteLine($"Dapper exception in GetByTmdbIdAsync: {ex}");
+            return null;
+        }
     }
 }

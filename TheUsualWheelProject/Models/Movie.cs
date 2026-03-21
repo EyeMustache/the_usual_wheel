@@ -20,4 +20,9 @@ public class Movie : IModel
     public int TmdbId { get; set; }
     [Computed]
     public IEnumerable<WatchProvider>? WatchProviders { get; set; }
+
+    public override string ToString()
+    {
+        return $"{Title} ({Year}) - Directed by {Director}"; 
+    }
 }

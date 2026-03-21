@@ -54,20 +54,66 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
         CurrentWheel = wheel;
     }
 
-    public async Task AddMovieToWheelAsync(int wheelId, int movieId)
+    private async Task AddMovieToWheelAsync(TmdbMovie tmdbMovie, int wheelId)
     {
-        await _wheelService.AddMovieToWheelAsync(wheelId, movieId);
-        await LoadWheelAsync(wheelId); // Refresh the wheel data after adding a movie
+        Logger.LogInformation($"Inserting movie with TMDb ID {tmdbMovie.TmdbId} and adding to wheel ID {wheelId}.");
+        var movieToInsert = tmdbMovie.MapToDbMovie();
+        await _movieService.AddMovieAsync(movieToInsert);
+        var dbMovie = await _movieService.GetMovieByTmdbIdAsync(tmdbMovie.TmdbId);
+
+        if (dbMovie != null)
+        {
+            await _wheelService.AddMovieToWheelAsync(dbMovie.Id, wheelId);
+        }
+        else
+        {
+            Logger.LogError($"Failed to add movie with TMDb ID {tmdbMovie.TmdbId} to wheel ID {wheelId} after insert.");
+            throw new InvalidOperationException("Failed to add movie to wheel.");
+        }
     }
 
-    public async Task EnrichMoviesBackgroundAsync()
+    public async Task AddMovieToWheelByTmdbIdAsync(int tmdbId, int wheelId)
     {
-        if (Movies == null || Movies.Count == 0) return;
-        IsEnriching = true;
-        await _movieService.EnrichMoviesAsync(Movies);
-        IsEnriching = false;
-        DataUpdated?.Invoke();
+        Logger.LogInformation($"Adding movie with TMDb ID {tmdbId} to wheel ID {wheelId} by TMDb ID.");
+        var movieOrTmdb = await _movieService.GetMovieOrTmdbMovieByTmdbIdAsync(tmdbId);
+
+        if (movieOrTmdb is Movie dbMovie)
+        {
+            Logger.LogInformation($"Movie with TMDb ID {tmdbId} found in DB as '{dbMovie.Title}'. Adding it to wheel ID {wheelId}.");
+            await _wheelService.AddMovieToWheelAsync(dbMovie.Id, wheelId);
+        }
+        else if (movieOrTmdb is TmdbMovie tmdbMovie)
+        {
+            Logger.LogInformation($"Movie with TMDb ID {tmdbId} not found in DB. Fetched from TMDb as '{tmdbMovie.Title}'. Adding it to wheel ID {wheelId}.");
+            await AddMovieToWheelAsync(tmdbMovie, wheelId);
+        }
+        else
+        {
+            Logger.LogError($"Failed to add movie with TMDb ID {tmdbId} to wheel ID {wheelId} because it could not be found in DB or fetched from TMDb.");
+            throw new InvalidOperationException("Could not find or fetch movie.");
+        }
     }
+
+    public async Task AddMovieToWheelByMovieIdAsync(int movieId, int wheelId)
+    {
+        Logger.LogInformation($"Adding movie with DB ID {movieId} to wheel ID {wheelId}.");
+        var dbMovie = await _movieService.GetMovieByIdAsync(movieId);
+        if (dbMovie == null)
+        {
+            Logger.LogError($"Movie with DB ID {movieId} not found.");
+            throw new InvalidOperationException("Movie not found in database.");
+        }
+        await _wheelService.AddMovieToWheelAsync(dbMovie.Id, wheelId);
+    }
+
+    // public async Task EnrichMoviesBackgroundAsync()
+    // {
+    //     if (Movies == null || Movies.Count == 0) return;
+    //     IsEnriching = true;
+    //     await _movieService.EnrichMoviesAsync(Movies);
+    //     IsEnriching = false;
+    //     DataUpdated?.Invoke();
+    // }
 
     // public async Task LoadWheelAsync(int id)
     // {

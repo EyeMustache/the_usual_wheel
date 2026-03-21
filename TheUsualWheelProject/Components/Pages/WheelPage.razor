@@ -3,6 +3,11 @@
 
 @inject WheelViewModel ViewModel
 
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="error" style="color:red;">@_errorMessage</div>
+}
+
 @if (ViewModel.CurrentWheel == null)
 {
     <p>Wheel not found.</p>
@@ -10,7 +15,7 @@
 else
 {
     <h1>@ViewModel.CurrentWheel.Name</h1>
-    <Wheel Items="@MovieTitles" OnItemLanded="@HandleWheelLanded"/>
+    // <Wheel Items="@MovieTitles" OnItemLanded="@HandleWheelLanded"/> (broken still)
     @if (ViewModel.IsEnriching)
     {
         <p>Fetching missing details from TMDB...</p>
@@ -34,14 +39,33 @@ else
     [Parameter] 
     public int Id { get; set; }
     private List<string> MovieTitles => ViewModel.Movies?.Select(m => m.Title).ToList() ?? new List<string>();
+    private string? _errorMessage;
+
     protected override async Task OnInitializedAsync()
     {
-        await ViewModel.LoadWheelAsync(Id); 
-        _ = Task.Run(async () => 
+        try
         {
-            await ViewModel.EnrichMoviesBackgroundAsync(); 
-            InvokeAsync(StateHasChanged);
-        });
+            await ViewModel.LoadWheelAsync(Id); 
+            _ = Task.Run(async () => 
+            {
+                try
+                {
+                    // await ViewModel.EnrichMoviesBackgroundAsync();
+                    await InvokeAsync(StateHasChanged);
+                }
+                catch (Exception ex)
+                {
+                    _errorMessage = $"Background error: {ex.Message}";
+                    Console.WriteLine(ex);
+                    await InvokeAsync(StateHasChanged);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Initialization error: {ex.Message}";
+            Console.WriteLine(ex);
+        }
     }
 
     private async Task HandleWheelLanded(string selectedTitle)
