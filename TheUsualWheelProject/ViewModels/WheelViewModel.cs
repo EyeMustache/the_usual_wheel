@@ -96,7 +96,7 @@ public class WheelViewModel : LoggingBase<WheelViewModel>
 
     public async Task AddMovieToWheelByMovieIdAsync(int movieId, int wheelId)
     {
-        Logger.LogInformation($"Adding movie with DB ID {movieId} to wheel ID {wheelId}.");
+        // Logger.LogInformation($"Adding movie with DB ID {movieId} to wheel ID {wheelId}.");
         var dbMovie = await _movieService.GetMovieByIdAsync(movieId);
         if (dbMovie == null)
         {

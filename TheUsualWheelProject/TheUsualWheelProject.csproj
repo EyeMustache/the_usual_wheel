@@ -69,6 +69,7 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Plugin.Maui.Audio" Version="4.0.0" />
         <PackageReference Include="SkiaSharp.Views.Blazor" Version="3.119.2" />
+        <PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.119.2" />
 		<PackageReference Include="TMDbLib" Version="3.0.0" />
 		<PackageReference Include="Dapper" Version="2.1.72" />
 		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
