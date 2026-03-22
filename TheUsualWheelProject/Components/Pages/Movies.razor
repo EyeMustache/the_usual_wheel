@@ -19,7 +19,7 @@ else if (ViewModel.SearchResults != null && ViewModel.SearchResults.Any())
 	<div class="movie-results">
 		@foreach (var movie in ViewModel.SearchResults)
 		{
-			<MovieSearchCard movie="movie" />
+			<MovieSearchCard TmdbMovie="movie" />
 		}
 	</div>
 

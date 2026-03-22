@@ -6,13 +6,16 @@
 {
     <p>Movie not found.</p>
 }
-else
+else if (ViewModel.CurrentMovie is Movie dbMovie)
 {
-    <MovieDetailsCard Movie="ViewModel.CurrentMovie" />
+    <MovieDetailsCard DbMovie="dbMovie" />
+}
+else if (ViewModel.CurrentMovie is TmdbMovie tmdbMovie)
+{
+    <MovieDetailsCard TmdbMovie="tmdbMovie" />
 }
 
 @code {
-    // Should add an add to wheel button here in the future.
     [Parameter] public int tmdbId { get; set; }
 
     protected override async Task OnInitializedAsync()

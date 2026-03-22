@@ -7,7 +7,7 @@ namespace TheUsualWheelProject.ViewModels;
 public class WheelListViewModel
 {
     private readonly WheelService _wheelService;
-    public ObservableCollection<Wheel> Wheels { get; private set; } = new();
+    public ObservableCollection<Wheel> Wheels { get; private set; } = [];
 
     public WheelListViewModel(WheelService wheel)
     {
@@ -23,5 +23,20 @@ public class WheelListViewModel
             System.Diagnostics.Debug.WriteLine($"Loaded wheel: {wheel.Name}");
             Wheels.Add(wheel);
         }
-    }   
+    }
+
+    public async Task AddWheelAsync(string name, string description)
+    {
+        var newWheel = new Wheel
+        {
+            Name = name,
+            Description = description,
+        };
+
+        Wheel? createdWheel = await _wheelService.AddWheelAsync(newWheel);
+        if (createdWheel != null)
+        {
+            Wheels.Add(createdWheel);
+        }
+    }
 }

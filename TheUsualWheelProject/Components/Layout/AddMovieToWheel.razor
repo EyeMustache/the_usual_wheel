@@ -1,26 +1,72 @@
-@using TheUsualWheelProject.Models
-@using Microsoft.AspNetCore.Components
+@inject WheelViewModel WheelViewModel
+@inject WheelListViewModel WheelListViewModel
 
-<button class="add-movie-to-wheel-btn" @onclick="OnAddClicked" disabled="@IsDisabled">
+<button class="add-movie-to-wheel-btn" @onclick="ShowWheelSelector" disabled="@IsDisabled">
     Add to Wheel (+)
 </button>
 
-@code {
-    [Parameter]
-    public Movie Movie { get; set; } = default!;
-
-    [Parameter]
-    public bool IsDisabled { get; set; } = false;
-
-    [Parameter]
-    public EventCallback<Movie> OnAdd { get; set; }
-
-    private async Task OnAddClicked()
-    {
-        if (OnAdd.HasDelegate)
+@if (showSelector)
+{
+    <div class="wheel-selector-modal">
+        <select @bind="selectedWheelId">
+            @foreach (var wheel in Wheels)
+            {
+                <option value="@wheel.Id">@wheel.Name</option>
+            }
+        </select>
+        <button @onclick="AddMovieToSelectedWheel">Confirm</button>
+        <button @onclick="Cancel">Cancel</button>
+        @if (!string.IsNullOrEmpty(errorMessage))
         {
-            await OnAdd.InvokeAsync(Movie);
+            <div class="error-message">@errorMessage</div>
         }
-        // Later: open modal for wheel selection here
+    </div>
+}
+
+@code {
+    [Parameter] public Models.Movie? DbMovie { get; set; }
+    [Parameter] public Models.TmdbMovie? TmdbMovie { get; set; }
+    [Parameter] public bool IsDisabled { get; set; } = false;
+
+    private bool showSelector = false;
+    private int selectedWheelId;
+    private string? errorMessage;
+    private List<Models.Wheel> Wheels => WheelListViewModel.Wheels.ToList();
+
+    private void ShowWheelSelector() => showSelector = true;
+    private void Cancel()
+    {
+        showSelector = false;
+        errorMessage = null;
+    }
+
+    private async Task AddMovieToSelectedWheel()
+    {
+        errorMessage = null;
+        try
+        {
+            if (DbMovie != null)
+            {
+                await WheelViewModel.AddMovieToWheelByMovieIdAsync(DbMovie.Id, selectedWheelId);
+            }
+            else if (TmdbMovie != null)
+            {
+                await WheelViewModel.AddMovieToWheelByTmdbIdAsync(TmdbMovie.TmdbId, selectedWheelId);
+            }
+            else
+            {
+                errorMessage = "No movie provided.";
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error adding movie to wheel: {ex.Message}";
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            showSelector = false;
+        }
     }
 }

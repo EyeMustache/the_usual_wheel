@@ -1,5 +1,6 @@
 using TheUsualWheelProject.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
+using TheUsualWheelProject.Models;
 
 namespace TheUsualWheelProject.Services;
 
@@ -21,7 +22,7 @@ public class WheelService : LoggingBase<WheelService>
         // debug log
         foreach (var wheel in wheels)
         {
-            Logger.LogDebug("Fetched wheel with ID {wheelId} and name {wheelName}.", wheel.Id, wheel.Name);
+            Logger.LogDebug($"Fetched wheel with ID {wheel.Id} and name {wheel.Name}.");
         }
         return wheels;
     }
@@ -32,49 +33,79 @@ public class WheelService : LoggingBase<WheelService>
         return await _wheelRepository.GetById(id);
     }
 
-    public async Task AddWheelAsync(Models.Wheel wheel)
+    public async Task<Models.Wheel?> AddWheelAsync(Models.Wheel wheel)
     {
-        Logger.LogInformation("Adding new wheel:{wheel.Id}.", wheel.Id);
+        Logger.LogInformation($"Adding new wheel:{wheel.Id}.");
         await _wheelRepository.Insert(wheel);
+        return await _wheelRepository.GetById(wheel.Id);
     }
 
     public async Task UpdateWheelAsync(Models.Wheel wheel)
     {
-        Logger.LogInformation("Updating wheel with ID {wheel.Id}.", wheel.Id);
-        var existingWheel = await _wheelRepository.GetById(wheel.Id);
-        if (existingWheel == null)
+        Logger.LogInformation($"Updating wheel with ID {wheel.Id}.");
+        Models.Wheel? existingWheel = await _wheelRepository.GetById(wheel.Id);
+        if (wheel.CompareTo(existingWheel) == 0)
         {
-            
-            Logger.LogWarning("Wheel with ID {wheel.Id} does not exist.", wheel.Id);
+            Logger.LogInformation($"No changes detected for wheel with ID {wheel.Id}. Skipping update.");
+            return;
+        }
+        else if (wheel.CompareTo(existingWheel) != 0 && existingWheel != null)
+        {
+            Logger.LogInformation($"Changes detected for wheel with ID {wheel.Id}. Proceeding with update.");
+            await _wheelRepository.Update(wheel);
+        }
+        else
+        {
+            Logger.LogWarning($"Wheel with ID {wheel.Id} does not exist.");
             throw new InvalidOperationException("Wheel does not exist.");
         }
-
-
-        if (wheel.Id != existingWheel.Id)
-        {
-            Logger.LogWarning("Wheel ID mismatch: provided ID {wheel.Id} does not match existing ID {existingWheel.Id}.", wheel.Id, existingWheel.Id);
-            throw new InvalidOperationException("Wheel ID mismatch.");
-        }
-
-        await _wheelRepository.Update(wheel);
     }
 
     public async Task DeleteWheelAsync(int id)
     {
-        Logger.LogInformation("Deleting wheel with ID {id}.", id);
+        Logger.LogInformation($"Deleting wheel with ID {id}.");
         var wheel = await _wheelRepository.GetById(id);
         if (wheel == null)
         {
-            Logger.LogWarning("Wheel with ID {id} does not exist.", id);    
+            Logger.LogWarning($"Wheel with ID {id} does not exist.");
             throw new InvalidOperationException("Wheel does not exist.");
         }
 
         await _wheelRepository.Delete(id);
     }
 
+    public async Task AddMovieToWheelAsync(int movieId, int wheelId)
+    {
+        Logger.LogInformation($"Adding movie with ID {movieId} to wheel with ID {wheelId}.");
+        var wheel = await _wheelRepository.GetById(wheelId);
+        if (wheel == null)
+            throw new InvalidOperationException("Wheel does not exist.");
+    
+        var movie = await _movieRepository.GetById(movieId);
+        if (movie == null)
+            throw new InvalidOperationException("Movie does not exist.");
+    
+        await _wheelRepository.AddMovieToWheelAsync(wheelId, movieId);
+    }
     public async Task<IEnumerable<Models.WheelMovie>> GetWheelMoviesAsync(int wheelId)
     {
-        Logger.LogInformation("Fetching wheel movies for wheel ID {wheelId}.", wheelId);
+        Logger.LogInformation($"Fetching wheel movies for wheel ID {wheelId}.");
         return await _wheelRepository.GetMoviesByWheelIdAsync(wheelId);
+    }
+
+    public async Task UpdateMovieEliminationStatusAsync(int wheelId, int movieId, bool isEliminated)
+    {
+        Logger.LogInformation($"Updating elimination status for movie {movieId} in wheel {wheelId} to {isEliminated}.");
+        if (isEliminated)
+        {
+            WheelMovie wheelMovie = new WheelMovie
+            {
+                WheelId = wheelId,
+                MovieId = movieId,
+                IsEliminated = true,
+                WatchedDate = DateOnly.FromDateTime(DateTime.Now)
+            };
+        }
+        await _wheelRepository.UpdateMovieEliminationStatusAsync(wheelId, movieId, isEliminated);
     }
 }

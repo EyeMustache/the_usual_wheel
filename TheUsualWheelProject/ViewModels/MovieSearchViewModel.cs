@@ -18,7 +18,7 @@ public class MovieSearchViewModel
     private int _currentResultIndex = 0;
     private int _currentTmdbPage = 1;
 
-    public ObservableCollection<Movie> SearchResults { get; set; } = [];
+    public ObservableCollection<TmdbMovie> SearchResults { get; set; } = [];
     public string? SearchQuery { get; set; } = string.Empty;
     public bool IsSearching { get; set; }
     public bool HasSearched { get; set; }
@@ -84,7 +84,7 @@ public class MovieSearchViewModel
 
         foreach (var tmdbMovie in batch)
         {
-            var details = await _tmdbService.GetMovieDetailsAsync(tmdbMovie.Id);
+            var details = await _tmdbService.GetTmdbMovieDetailsAsync(tmdbMovie.Id);
             if (details != null)
             {
                 SearchResults.Add(details);

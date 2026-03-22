@@ -32,7 +32,26 @@ public class MovieService : LoggingBase<MovieService>
     public async Task<Movie?> GetMovieByTmdbIdAsync(int tmdbId)
     {
         Logger.LogInformation("Fetching movie by TMDb ID:{tmdbId}.", tmdbId);
-        return await _movieRepository.GetByTmdbId(tmdbId);
+        Movie? foundMovie = await _movieRepository.GetByTmdbIdAsync(tmdbId);
+        Logger.LogInformation("Fetched movie with TMDb ID:{tmdbId}: {movieTitle}.", tmdbId, foundMovie?.Title ?? "Not Found");
+        return foundMovie;
+    }
+
+    public async Task<object?> GetMovieOrTmdbMovieByTmdbIdAsync(int tmdbId)
+    {
+        Logger.LogInformation("Fetching movie or TMDb movie by TMDb ID:{tmdbId}.", tmdbId);
+        Movie? dbMovie = await GetMovieByTmdbIdAsync(tmdbId);
+        if (dbMovie != null && dbMovie.Id != 0)
+        {
+                Logger.LogInformation("Movie found in database for TMDb ID:{tmdbId}: {movieTitle}.", tmdbId, dbMovie.Title);
+                return dbMovie;
+        }
+        else
+        {
+            Logger.LogInformation("No movie found in database for TMDb ID:{tmdbId}. Fetching details from TMDb.", tmdbId);
+            TmdbMovie? tmdbMovie = await _tmdbService.GetTmdbMovieDetailsAsync(tmdbId);
+            return tmdbMovie;
+        }
     }
 
     public async Task AddMovieAsync(Movie movie)
@@ -70,7 +89,9 @@ public class MovieService : LoggingBase<MovieService>
     public async Task<IEnumerable<Movie>> GetMoviesByWheelAsync(int wheelId)
     {
         Logger.LogInformation("Fetching movies for wheel ID {wheelId}.", wheelId);
-        return await _movieRepository.GetByWheelAsync(wheelId);
+        var movies = await _movieRepository.GetByWheelAsync(wheelId);
+        Logger.LogInformation("Fetched {movieCount} movies for wheel ID {wheelId}.", movies.Count(), wheelId);
+        return movies;
     }
 
     public async Task SetMovieEliminatedAsync(int wheelId, int movieId, bool eliminated)
@@ -150,7 +171,7 @@ public class MovieService : LoggingBase<MovieService>
     private async Task EnrichMovieDetailsAsync(Movie movie)
     {
         Logger.LogInformation("Enriching movie details for movie ID {movieId} with TMDb ID {tmdbId}.", movie.Id, movie.TmdbId);
-        var fetchedMovie = await _tmdbService.GetMovieDetailsAsync(movie.TmdbId);
+        var fetchedMovie = await _tmdbService.GetTmdbMovieDetailsAsync(movie.TmdbId);
         if (fetchedMovie != null)
         {
             movie.Genre = string.IsNullOrWhiteSpace(movie.Genre) || movie.Genre == "Unknown Genre"

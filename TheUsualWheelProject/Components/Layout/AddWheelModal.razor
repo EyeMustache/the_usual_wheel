@@ -1,0 +1,46 @@
+<BaseModal IsVisible="@IsVisible" OnClose="@OnClose">
+    <h2>Add New Wheel</h2>
+    <div class="modal-form">
+        <label>
+            Wheel Name
+            <input @bind="WheelName" placeholder="Wheel Name" />
+        </label>
+        <label>
+            Description
+            <textarea @bind="WheelDescription" placeholder="Description"></textarea>
+        </label>
+        <div class="modal-actions">
+            <button @onclick="AddWheel" disabled="@IsAddDisabled">Add</button>
+            <button @onclick="Cancel">Cancel</button>
+        </div>
+    </div>
+</BaseModal>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<(string Name, string Description)> OnAddWheel { get; set; }
+
+    private string WheelName { get; set; } = string.Empty;
+    private string WheelDescription { get; set; } = string.Empty;
+
+    private bool IsAddDisabled => string.IsNullOrWhiteSpace(WheelName);
+
+    private async Task AddWheel()
+    {
+        if (OnAddWheel.HasDelegate && !IsAddDisabled)
+        {
+            await OnAddWheel.InvokeAsync((WheelName, WheelDescription));
+            WheelName = string.Empty;
+            WheelDescription = string.Empty;
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    private async Task Cancel()
+    {
+        WheelName = string.Empty;
+        WheelDescription = string.Empty;
+        await OnClose.InvokeAsync();
+    }
+}

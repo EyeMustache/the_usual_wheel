@@ -1,0 +1,189 @@
+@using TheUsualWheelProject.Models
+@inject TheUsualWheelProject.ViewModels.WheelViewModel ViewModel
+@implements IDisposable
+
+<div class="wheel-container">
+    @* Center Pin *@
+    <div class="wheel-pointer"></div>
+    
+    <svg viewBox="0 0 320 320" 
+         class="wheel-svg" 
+         style="transform: rotate(@(ViewModel.CurrentRotation)deg);">
+        @{
+            int count = ViewModel.ActiveSessionMovies.Count;
+        }
+        @if (count == 0)
+        {
+            <circle cx="160" cy="160" r="150" fill="#d3d3d3" />
+        }
+        else if (count == 1)
+        {
+            <g>
+                <circle cx="160" cy="160" r="150" fill="#2c3e50" />
+                <text x="160" y="160" fill="white" font-size="20" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="0.5">
+                    @Truncate(ViewModel.ActiveSessionMovies[0].Title)
+                </text>
+            </g>
+        }
+        else
+        {
+            foreach (WheelSlice slice in GetWheelSlices())
+            {
+                <WheelSliceDisplay Slice="slice" />
+            }
+        }
+    </svg>
+    
+    <div class="mt-2 text-danger font-weight-bold" style="position: absolute; top: -10px; left: 0;">
+        Count: @ViewModel.ActiveSessionMovies.Count
+    </div>
+
+    @if (ViewModel.LastRemovedMovie != null)
+    {
+        // TODO: Defo make this a component in the future
+        // The paragraph could be a pool of fun messages in the future instead of what it is now
+
+        <div class="modal show" style="display:block; background:rgba(0,0,0,0.5); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:1000;">
+            <div class="modal-dialog" style="margin:10% auto; background:white; padding:2em; border-radius:8px; max-width:400px; box-shadow:0 2px 16px rgba(0,0,0,0.3);">
+                <h4>Movie Removed</h4>
+                <p><strong>@ViewModel.LastRemovedMovie.Title</strong> was removed from the wheel!</p>
+                <button class="btn btn-primary" @onclick="() => ViewModel.LastRemovedMovie = null" tabindex="0" autofocus>OK</button>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="controls mt-4 text-center">
+    @if (ViewModel.ActiveSessionMovies.Count > 1)
+    {
+        // Maybe make this a component in the future if we add more controls
+        <button class="btn btn-primary" @onclick="Spin" disabled="@ViewModel.IsSpinning">
+            @(ViewModel.IsSpinning ? "SPINNING..." : "SPIN THE WHEEL")
+        </button>
+    }
+    else if (ViewModel.ActiveSessionMovies.Count == 1)
+    {
+        <h3 class="text-success mt-3">Winner: @ViewModel.ActiveSessionMovies[0].Title!</h3>
+        <button class="btn btn-secondary mt-2" @onclick="ResetSession">
+            Reset Wheel Session
+        </button>
+    }
+</div>
+
+@code {
+    // TODO: Make this palette user-configurable in the future
+    private List<string> SlicePalette = new()
+    {
+        "#e74c3c", // Red
+        "#3498db", // Blue
+        "#2ecc71", // Green
+        "#f1c40f", // Yellow
+        "#9b59b6", // Purple
+        "#e67e22", // Orange
+        "#1abc9c", // Teal
+        "#34495e", // Navy
+        "#fd79a8", // Pink
+        "#636e72"  // Gray
+    };
+
+    protected override void OnInitialized()
+    {
+        ViewModel.DataUpdated += RefreshWheel;
+        ViewModel.PropertyChanged += HandlePropertyChanged;
+    }
+
+    // Returns "#000" for black or "#fff" for white, based on background color luminance
+    private string GetContrastTextColor(string hexColor)
+    {
+        // Remove # if present
+        hexColor = hexColor.Replace(oldValue: "#", newValue: "");
+        int r = Convert.ToInt32(hexColor.Substring(startIndex: 0, length: 2), fromBase: 16);
+        int g = Convert.ToInt32(hexColor.Substring(startIndex: 2, length: 2), fromBase: 16);
+        int b = Convert.ToInt32(hexColor.Substring(startIndex: 4, length: 2), fromBase: 16);
+
+        // Calculate luminance
+        double luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+        return luminance > 0.6 ? "#000" : "#fff";
+    }
+
+    public void Dispose()
+    {
+        ViewModel.DataUpdated -= RefreshWheel;
+        ViewModel.PropertyChanged -= HandlePropertyChanged;
+    }
+
+    private void RefreshWheel()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandlePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        RefreshWheel();
+    }
+
+    private async Task Spin()
+    {
+        await ViewModel.SpinAsync();
+    }
+
+    private string Truncate(string title)
+    {
+        return title.Length > 18 ? title.Substring(0, 18) + "..." : title;
+    }
+
+    private async Task ResetSession()
+    {
+        await ViewModel.ResetSessionAsync();
+    }
+
+    private string GetSlicePath(double cx, double cy, double r, double startAngle, double sweepAngle)
+    {
+        double startAngleRad = (startAngle - 90) * Math.PI / 180.0;
+        double endAngleRad = (startAngle + sweepAngle - 90) * Math.PI / 180.0;
+
+        double x1 = cx + r * Math.Cos(startAngleRad);
+        double y1 = cy + r * Math.Sin(startAngleRad);
+
+        double x2 = cx + r * Math.Cos(endAngleRad);
+        double y2 = cy + r * Math.Sin(endAngleRad);
+
+        int largeArcFlag = sweepAngle > 180 ? 1 : 0;
+
+        return $"M {cx},{cy} L {x1},{y1} A {r},{r} 0 {largeArcFlag} 1 {x2},{y2} Z";
+    }
+
+
+
+    private List<WheelSlice> GetWheelSlices()
+    {
+        List<WheelSlice> slices = new();
+        int count = ViewModel.ActiveSessionMovies.Count;
+        if (count <= 1) return slices;
+
+        double sweepAngle = 360.0 / count;
+        double cx = 160, cy = 160, r = 150, labelRadius = 80, charWidth = 6;
+
+        for (int i = 0; i < count; i++)
+        {
+            var movie = ViewModel.ActiveSessionMovies[i];
+            double startAngle = i * sweepAngle;
+            string fillColor = SlicePalette[i % SlicePalette.Count];
+            string pathData = GetSlicePath(cx, cy, r, startAngle, sweepAngle);
+            string textColor = GetContrastTextColor(fillColor);
+
+            double midAngle = startAngle + (sweepAngle / 2);
+            double angleRad = (midAngle - 90) * Math.PI / 180.0;
+            double arcLength = 2 * Math.PI * labelRadius * (sweepAngle / 360.0);
+            int maxChars = (int)(arcLength / charWidth);
+            double labelX = cx + labelRadius * Math.Cos(angleRad);
+            double labelY = cy + labelRadius * Math.Sin(angleRad);
+            string label = movie.Title.Length > maxChars ? movie.Title.Substring(0, maxChars - 3) + "..." : movie.Title;
+            double textRotation = midAngle - 90;
+            if (midAngle > 180) textRotation += 180;
+
+            slices.Add(item: new WheelSlice(movie, pathData, fillColor, textColor, label, labelX, labelY, textRotation));
+        }
+        return slices;
+    }
+}

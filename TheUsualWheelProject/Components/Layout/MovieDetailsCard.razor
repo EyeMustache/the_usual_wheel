@@ -1,40 +1,48 @@
-@using TheUsualWheelProject.Models
+@inject MovieDetailsViewModel ViewModel
 
 <div class="movie-card">
-    <strong>@movie.Title</strong> (@movie.Year)<br />
-    <em>Genre:</em> @movie.Genre<br />
-    <em>Director:</em> @movie.Director<br />
-    <em>Cast:</em> @movie.Cast<br />
-    <em>Duration:</em> @movie.DurationInMinutes min<br />
-    <em>TMDb Rating:</em> @movie.TmdbRating<br />
-    <em>Synopsis:</em> @movie.Synopsis<br />
-    @if (!string.IsNullOrWhiteSpace(movie.PosterUrl))
+    @if (ViewModel.DbMovie != null)
     {
-        <img src="@movie.PosterUrl" alt="Poster for @movie.Title" style="height:100px;" />
+        <strong>@ViewModel.DbMovie.Title</strong> <br />
+        <em>Genre:</em> @ViewModel.DbMovie.Genre<br />
+        <em>Director:</em> @ViewModel.DbMovie.Director<br />
+        <em>Cast:</em> @ViewModel.DbMovie.Cast<br />
+        <em>Duration:</em> @ViewModel.DbMovie.DurationInMinutes<br />
+        <em>TMDb Rating:</em> @ViewModel.DbMovie.TmdbRating<br />
+        <em>Synopsis:</em> @ViewModel.DbMovie.Synopsis<br />
+        @if (!string.IsNullOrWhiteSpace(ViewModel.DbMovie.PosterUrl))
+        {
+            <img src="@ViewModel.DbMovie.PosterUrl" alt="Poster for @ViewModel.DbMovie.Title" style="height:100px;" />
+        }
+        <AddMovieToWheel DbMovie="ViewModel.DbMovie" />
     }
-    @if (movie.WatchProviders?.Any() == true)
+    else if (ViewModel.TmdbMovie != null)
     {
-        <div class="watch-providers" style="margin-top: 10px;">
-            <em>Available on:</em><br />
-            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px;">
-                @foreach (var provider in movie.WatchProviders)
-                {
-                    <img src="@provider.LogoUrl" alt="@provider.Name" title="@provider.Name" style="height:40px; border-radius:8px;" />
-                }
-            </div>
-            <small style="display:block; margin-top:5px; color:#888;">Watch provider data powered by JustWatch.</small>
-        </div>
+        <strong>@ViewModel.TmdbMovie.Title</strong> <br />
+        <em>Genre:</em> @ViewModel.TmdbMovie.Genre<br />
+        <em>Director:</em> @ViewModel.TmdbMovie.Director<br />
+        <em>Cast:</em> @ViewModel.TmdbMovie.Cast<br />
+        <em>Duration:</em> @ViewModel.TmdbMovie.DurationInMinutes<br />
+        <em>TMDb Rating:</em> @ViewModel.TmdbMovie.TmdbRating<br />
+        <em>Synopsis:</em> @ViewModel.TmdbMovie.Synopsis<br />
+        @if (!string.IsNullOrWhiteSpace(ViewModel.TmdbMovie.PosterUrl))
+        {
+            <img src="@ViewModel.TmdbMovie.PosterUrl" alt="Poster for @ViewModel.TmdbMovie.Title" style="height:100px;" />
+        }
+        <AddMovieToWheel TmdbMovie="ViewModel.TmdbMovie" />
     }
-    <AddMovieToWheel Movie="movie" OnAdd="HandleAddMovieToWheel" />
+    else
+    {
+        <div>Loading...</div>
+    }
 </div>
 
 @code {
-    [Parameter]
-    public Movie movie { get; set; } = default!;
+    [Parameter] public Movie? DbMovie { get; set; }
+    [Parameter] public TmdbMovie? TmdbMovie { get; set; }
 
-    private void HandleAddMovieToWheel(Movie movie)
+    protected override async Task OnInitializedAsync()
     {
-        // TODO: Implement logic to add the movie to a wheel, possibly by opening a modal for wheel selection
+        await ViewModel.LoadAsync(TmdbMovie?.TmdbId ?? DbMovie?.TmdbId ?? 0);
     }
-
 }

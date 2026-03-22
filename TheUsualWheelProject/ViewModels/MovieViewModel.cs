@@ -8,7 +8,7 @@ public class MovieViewModel
     private readonly MovieService _movieService;
     private readonly TmdbService _tmdbService;
 
-    public Movie? CurrentMovie { get; private set; }
+    public object? CurrentMovie { get; private set; } // Can be either Models.Movie or TmdbMovie
 
     public MovieViewModel(MovieService movieService, TmdbService tmdbService)
     {
@@ -23,10 +23,6 @@ public class MovieViewModel
 
     public async Task LoadMovieByTmdbIdAsync(int tmdbId)
     {
-        var localMovie = await _movieService.GetMovieByTmdbIdAsync(tmdbId);
-        if (localMovie != null && localMovie.Id != 0)
-            CurrentMovie = localMovie;
-        else
-            CurrentMovie = await _tmdbService.GetMovieDetailsAsync(tmdbId);
+        CurrentMovie = await _movieService.GetMovieOrTmdbMovieByTmdbIdAsync(tmdbId);
     }
 }
