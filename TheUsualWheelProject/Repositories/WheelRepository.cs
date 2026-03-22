@@ -27,4 +27,14 @@ public class WheelRepository : GenericRepository<Wheel, int>, IWheelRepository
         var param = new { WheelId = wheelId, MovieId = movieId };
         await connection.ExecuteAsync(query, param);
     }
+
+    public async Task UpdateMovieEliminationStatusAsync(int wheelId, int movieId, bool isEliminated)
+    {
+        using var connection = new SqliteConnection(_conString);
+        var query = @$"UPDATE WheelMovie
+                       SET IsEliminated = @IsEliminated
+                       WHERE WheelId = @WheelId AND MovieId = @MovieId";
+        var param = new { WheelId = wheelId, MovieId = movieId, IsEliminated = isEliminated ? 1 : 0 };
+        await connection.ExecuteAsync(query, param);
+    }
 }

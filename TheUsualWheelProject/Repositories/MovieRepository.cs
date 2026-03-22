@@ -21,13 +21,13 @@ public class MovieRepository : GenericRepository<Models.Movie, int>, IMovieRepos
         return await connection.QueryAsync<Models.Movie>(query, param);
     }
 
-    public async Task SetEliminatedAsync(int wheelId, int movieId, bool eliminated)
+    public async Task SetEliminatedAsync(int wheelId, int movieId, bool isEliminated)
     {
         using var connection = new SqliteConnection(_conString);
         var query = @$"UPDATE WheelMovie
-                      SET Eliminated = @Eliminated
+                      SET IsEliminated = @IsEliminated
                       WHERE WheelId = @WheelId AND MovieId = @MovieId";
-        var param = new { WheelId = wheelId, MovieId = movieId, Eliminated = eliminated };
+        var param = new { WheelId = wheelId, MovieId = movieId, IsEliminated = isEliminated };
         await connection.ExecuteAsync(query, param);
     }
 
@@ -47,7 +47,7 @@ public class MovieRepository : GenericRepository<Models.Movie, int>, IMovieRepos
         var query = @$"SELECT m.*
                       FROM {TableName} m
                       INNER JOIN WheelMovie wm ON m.Id = wm.MovieId
-                      WHERE wm.WheelId = @WheelId AND wm.Eliminated = 0";
+                      WHERE wm.WheelId = @WheelId AND wm.IsEliminated = 0";
         var param = new { WheelId = wheelId };
         return await connection.QueryAsync<Models.Movie>(query, param);
     }

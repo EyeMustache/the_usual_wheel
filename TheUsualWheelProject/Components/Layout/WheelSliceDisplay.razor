@@ -1,0 +1,16 @@
+@using TheUsualWheelProject.Models
+@inject TheUsualWheelProject.ViewModels.WheelViewModel ViewModel
+
+@code {
+    [Parameter] public WheelSlice Slice { get; set; }
+}
+<g>
+    <path d="@Slice.PathData" fill="@Slice.FillColor" stroke="black" stroke-width="1" />
+    <g transform="rotate(@Slice.TextRotation, @Slice.LabelX, @Slice.LabelY)">
+        <text x="@Slice.LabelX" y="@Slice.LabelY" fill="@Slice.TextColor" font-size="16"
+              text-anchor="middle" dominant-baseline="middle"
+              stroke="black" stroke-width="0.1">
+            @Slice.Label
+        </text>
+    </g>
+</g>

@@ -89,7 +89,9 @@ public class MovieService : LoggingBase<MovieService>
     public async Task<IEnumerable<Movie>> GetMoviesByWheelAsync(int wheelId)
     {
         Logger.LogInformation("Fetching movies for wheel ID {wheelId}.", wheelId);
-        return await _movieRepository.GetByWheelAsync(wheelId);
+        var movies = await _movieRepository.GetByWheelAsync(wheelId);
+        Logger.LogInformation("Fetched {movieCount} movies for wheel ID {wheelId}.", movies.Count(), wheelId);
+        return movies;
     }
 
     public async Task SetMovieEliminatedAsync(int wheelId, int movieId, bool eliminated)

@@ -92,4 +92,20 @@ public class WheelService : LoggingBase<WheelService>
         Logger.LogInformation($"Fetching wheel movies for wheel ID {wheelId}.");
         return await _wheelRepository.GetMoviesByWheelIdAsync(wheelId);
     }
+
+    public async Task UpdateMovieEliminationStatusAsync(int wheelId, int movieId, bool isEliminated)
+    {
+        Logger.LogInformation($"Updating elimination status for movie {movieId} in wheel {wheelId} to {isEliminated}.");
+        if (isEliminated)
+        {
+            WheelMovie wheelMovie = new WheelMovie
+            {
+                WheelId = wheelId,
+                MovieId = movieId,
+                IsEliminated = true,
+                WatchedDate = DateOnly.FromDateTime(DateTime.Now)
+            };
+        }
+        await _wheelRepository.UpdateMovieEliminationStatusAsync(wheelId, movieId, isEliminated);
+    }
 }

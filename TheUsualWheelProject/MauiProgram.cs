@@ -44,11 +44,11 @@ public static class MauiProgram
         builder.Services.AddSingleton<AudioService>();
 		// ViewModels
 		builder.Services.AddSingleton<MainPageViewModel>();
-		builder.Services.AddTransient<WheelViewModel>();
+		builder.Services.AddSingleton<WheelViewModel>();
 		builder.Services.AddSingleton<MovieViewModel>();
 		builder.Services.AddSingleton<WheelListViewModel>();
 		builder.Services.AddSingleton<MovieSearchViewModel>();
-		builder.Services.AddTransient<MovieDetailsViewModel>();
+		builder.Services.AddSingleton<MovieDetailsViewModel>();
         
         //builder.UseSkiaSharp();
         // Trying out Blazor

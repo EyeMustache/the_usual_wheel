@@ -43,6 +43,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        ViewModel.DataUpdated += HandleDataUpdated;
+        ViewModel.PropertyChanged += HandlePropertyChanged;
         try
         {
             await ViewModel.LoadWheelAsync(Id); 
@@ -79,8 +81,14 @@ else
         InvokeAsync(StateHasChanged);
     }
 
+    private void HandlePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        HandleDataUpdated();
+    }
+
     public void Dispose()
     {
         ViewModel.DataUpdated -= HandleDataUpdated;
+        ViewModel.PropertyChanged -= HandlePropertyChanged;
     }
 }
