@@ -103,56 +103,6 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         DataUpdated?.Invoke();
     }
 
-    [RelayCommand]
-    public async Task SpinAsync()
-    {
-        if (IsSpinning || ActiveSessionMovies.Count <= 1 || CurrentWheel == null) return;
-
-        IsSpinning = true;
-
-        var random = new Random();
-        // Add 3-5 full rotations (1080 - 1800 degrees) plus a random offset
-        double extraRotation = random.Next(1080, 1800) + random.Next(0, 360);
-        CurrentRotation += extraRotation;
-
-        // Wait for the 5-second CSS transition to finish
-        await Task.Delay(5000);
-
-        // Calculate winning/landed movie
-        double normalizedRotation = CurrentRotation % 360;
-        int count = ActiveSessionMovies.Count;
-        
-        // The pointer is at the top (0 degrees or 360/0 in CSS rotate space depending on implementation).
-        // Since we'll draw segments starting from the top moving clockwise, rotating the wheel clockwise
-        // means the segment that ends up under the top pointer comes from the counter-clockwise direction.
-        // For simplicity, let's normalize angle to index:
-        // Angle of segment i is i * (360/count).
-        // Angle landed on the pointer is 360 - normalizedRotation (if starting at top and rotating clockwise).
-        double pointerAngle = (360 - normalizedRotation) % 360;
-        int landedIndex = (int)(pointerAngle / (360f / count)) % count;
-
-        var eliminatedMovie = ActiveSessionMovies[landedIndex];
-        LastRemovedMovie = eliminatedMovie;
-        ActiveSessionMovies.Remove(eliminatedMovie);
-
-        if (ActiveSessionMovies.Count == 1)
-        {
-            var winner = ActiveSessionMovies[0];
-            Logger.LogInformation($"Wheel finished! Winner is {winner.Title}. Marking the rest as eliminated.");
-            
-            // Mark all eliminated movies in the database
-            foreach (var movie in Movies)
-            {
-                if (movie.Id != winner.Id && WheelMovies.Any(wm => wm.MovieId == movie.Id && !wm.IsEliminated))
-                {
-                    await _wheelService.UpdateMovieEliminationStatusAsync(CurrentWheel.Id, movie.Id, true);
-                }
-            }
-        }
-
-        IsSpinning = false;
-        DataUpdated?.Invoke();
-    }
 
     private async Task AddMovieToWheelAsync(TmdbMovie tmdbMovie, int wheelId)
     {
@@ -206,39 +156,19 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         await _wheelService.AddMovieToWheelAsync(dbMovie.Id, wheelId);
     }
 
-    // public async Task EnrichMoviesBackgroundAsync()
-    // {
-    //     if (Movies == null || Movies.Count == 0) return;
-    //     IsEnriching = true;
-    //     await _movieService.EnrichMoviesAsync(Movies);
-    //     IsEnriching = false;
-    //     DataUpdated?.Invoke();
-    // }
+    [RelayCommand]
+    public async Task SpinAsync()
+    {
+        if (IsSpinning || ActiveSessionMovies.Count <= 1 || CurrentWheel == null) return;
+        IsSpinning = true;
 
-    // public async Task LoadWheelAsync(int id)
-    // {
-    //     // Fetch the wheel
-    //     CurrentWheel = await _wheelService.GetWheelByIdAsync(id);
-    //     Movies = (await _movieService.GetMoviesByWheelAsync(id)).ToList();
+        var result = GetSpinResult(CurrentRotation);
+        CurrentRotation += result.Item1;
+        LastRemovedMovie = ActiveSessionMovies[result.Item2];
 
-    //     // Populate Slices
-    //     Slices.Clear();
-    //     foreach (var wm in WheelMovies)
-    //     {
-    //         var movieObj = Movies.FirstOrDefault(m => m.Id == wm.MovieId);
-    //         if (movieObj != null)
-    //         {
-    //             Slices.Add(new WheelSlice
-    //             {
-    //                 MovieId = movieObj.Id,
-    //                 Title = movieObj.Title,
-    //                 IsEliminated = wm.IsEliminated
-    //             });
-    //         }
-    //     }
-
-    //     DataUpdated?.Invoke();
-    // }
+        IsSpinning = false;
+        DataUpdated?.Invoke();
+    }
 
     public async Task ResetSessionAsync()
     {
@@ -257,11 +187,57 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         // Reload the wheel session
         await LoadWheelAsync(CurrentWheel.Id);
     }
-}
 
-// public class WheelSlice
-// {
-//     public int MovieId { get; set; }
-//     public required string Title { get; set; }
-//     public bool IsEliminated { get; set; }
-// }
+    /// <summary>
+    /// Calculates the spin so the pointer lands randomly within the selected slice, relative to the current wheel rotation.
+    /// </summary>
+    /// <param name="currentRotation">The current cumulative rotation of the wheel (in degrees).</param>
+    /// <returns>(finalRotation, selectedIndex)</returns>
+    public (double finalRotation, int selectedIndex) GetSpinResult(double currentRotation)
+    {
+        int count = ActiveSessionMovies.Count;
+        var random = new Random();
+
+        // Normalize current rotation to [0, 360)
+        double normalizedCurrent = ((currentRotation % 360) + 360) % 360;
+
+        int selectedIndex = random.Next(0, count);
+        double sweepAngle = 360.0 / count;
+        double minAngle = selectedIndex * sweepAngle;
+        double maxAngle = (selectedIndex + 1) * sweepAngle;
+        // Pick a random point within the slice
+        double targetAngle = minAngle + random.NextDouble() * (maxAngle - minAngle);
+        // Find where the target angle currently sits on the screen
+        double targetCurrentPosition = (targetAngle + normalizedCurrent) % 360;
+        // Calculate the exact degrees needed to push that position to the top
+        double offsetToTop = (360 - targetCurrentPosition) % 360;
+        // Add the full spins to make it look like a real spin
+        double fullSpins = 5 + random.Next(0, 3); // 5-7 full spins
+        double finalRotation = fullSpins * 360 + offsetToTop;
+
+        Logger.LogInformation($"SpinResult: selectedIndex={selectedIndex}, movie='{GetMovieToRemove(selectedIndex)?.Title}', finalRotation={finalRotation}, normalizedCurrent={normalizedCurrent}, targetAngle={targetAngle}");
+        return (finalRotation, selectedIndex);
+    }
+
+    public void RemoveMovieAt(int selectedIndex, double finalRotation)
+    {
+        // Update rotation (do not normalize, keep cumulative for smooth animation)
+        CurrentRotation += finalRotation;
+
+        var eliminatedMovie = ActiveSessionMovies[selectedIndex];
+        LastRemovedMovie = eliminatedMovie;
+        ActiveSessionMovies.Remove(eliminatedMovie);
+        IsSpinning = false;
+        Logger.LogInformation($"RemoveMovieAt: selectedIndex={selectedIndex}, movie='{eliminatedMovie.Title}', finalRotation={finalRotation}, currentRotation={CurrentRotation}");
+        DataUpdated?.Invoke();
+    }
+
+    // Helper: Get the movie that would be removed for a given index (for debug display)
+    public Movie? GetMovieToRemove(int index)
+    {
+        if (index >= 0 && index < ActiveSessionMovies.Count)
+            return ActiveSessionMovies[index];
+        return null;
+    }
+
+}
