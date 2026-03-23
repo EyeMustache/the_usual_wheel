@@ -44,3 +44,7 @@
     transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1);
     transform-origin: center center;
 }
+
+.wheel-svg.spinning {
+    transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
+}
