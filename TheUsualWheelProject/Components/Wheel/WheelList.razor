@@ -12,14 +12,9 @@
     }
     else
     {
-        @foreach (var wheel in ViewModel.Wheels)
+        @foreach (var wheelInfo in ViewModel.Wheels)
         {
-            <div class="wheel-card">
-                <h2>
-                    <NavLink href="@($"/wheel/{wheel.Id}")">@wheel.Name</NavLink>
-                </h2>
-                <p>@wheel.Description</p>
-            </div>
+            <WheelCard WheelInfo="wheelInfo" />
         }
     }
 </div>

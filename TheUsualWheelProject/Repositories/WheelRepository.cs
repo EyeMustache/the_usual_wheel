@@ -37,4 +37,22 @@ public class WheelRepository : GenericRepository<Wheel, int>, IWheelRepository
         var param = new { WheelId = wheelId, MovieId = movieId, IsEliminated = isEliminated ? 1 : 0 };
         await connection.ExecuteAsync(query, param);
     }
+
+    public async Task RemoveMovieFromWheelAsync(int movieId, int wheelId)
+    {
+        using var connection = new SqliteConnection(_conString);
+        var query = @$"DELETE FROM WheelMovie
+                       WHERE WheelId = @WheelId AND MovieId = @MovieId";
+        var param = new { WheelId = wheelId, MovieId = movieId };
+        await connection.ExecuteAsync(query, param);
+    }
+
+    public async Task RemovieMoviesFromWheelAsync(IEnumerable<int> wheelMovieIds)
+    {
+        using var connection = new SqliteConnection(_conString);
+        var query = @$"DELETE FROM WheelMovie
+                       WHERE Id IN @WheelMovieIds";
+        var param = new { WheelMovieIds = wheelMovieIds };
+        await connection.ExecuteAsync(query, param);
+    }
 }

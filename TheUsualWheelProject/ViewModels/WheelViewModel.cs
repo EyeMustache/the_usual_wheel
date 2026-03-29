@@ -10,16 +10,19 @@ namespace TheUsualWheelProject.ViewModels;
 [INotifyPropertyChanged]
 public partial class WheelViewModel : LoggingBase<WheelViewModel>
 {
-    private const string PreferredWatchRegion = "NL";
     private readonly WheelService _wheelService;
     private readonly MovieService _movieService;
     private readonly WatchProviderService _watchProviderService;
+    private const string PreferredWatchRegion = "NL";
 
     public event Action? DataUpdated;
 
     public Wheel? CurrentWheel { get; private set; }
     public List<Movie>? Movies { get; private set; } = [];
     public List<WheelMovie>? WheelMovies { get; private set; }
+
+    public IEnumerable<WheelMovie> ActiveWheelMovies => WheelMovies?.Where(wm => !wm.IsEliminated) ?? Enumerable.Empty<WheelMovie>();
+    public IEnumerable<WheelMovie> WatchedWheelMovies => WheelMovies?.Where(wm => _isWatched(wm)) ?? Enumerable.Empty<WheelMovie>();
     private Movie? _lastRemovedMovie;
     public Movie? LastRemovedMovie
     {
@@ -34,7 +37,6 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         }
     }
 
-
     [ObservableProperty]
     private ObservableCollection<Movie> _activeSessionMovies = new();
 
@@ -43,10 +45,11 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
 
     [ObservableProperty]
     private bool _isSpinning;
-    public bool IsHidden { get; set; } = false;
-    public bool HasPeaked => IsHidden && WheelMovies?.Count(m => !m.IsEliminated) == 1;
+    // public bool IsHidden { get; set; } = false;
+    // public bool HasPeaked => IsHidden && WheelMovies?.Count(m => !m.IsEliminated) == 1;
 
     // For logging to track enrichment status, aswell as to tell the program we loading data
+    // Lowkey redundant but makes it easier to debug
     private bool _isEnriching;
     public bool IsEnriching
     {
@@ -74,35 +77,41 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
     
     public async Task LoadWheelAsync(int id)
     {
-        Wheel wheel = await _wheelService.GetWheelByIdAsync(id) ?? throw new InvalidOperationException($"Wheel with ID {id} not found.");
-        WheelMovies = (await _wheelService.GetWheelMoviesAsync(id)).ToList();
-        Movies = (await _movieService.GetMoviesByWheelAsync(id)).ToList();
-        CurrentWheel = wheel;
-
-        Logger.LogInformation($"WheelMovies loaded: {WheelMovies.Count}, Movies loaded: {Movies.Count}");
-
-        // Build the session movies list with logging for each mapping
-        var sessionMovies = new ObservableCollection<Movie>();
-        foreach (var wm in WheelMovies.Where(m => !m.IsEliminated))
+        try
         {
-            var movie = Movies.FirstOrDefault(m => m.Id == wm.MovieId);
-            if (movie != null)
+            var wheel = await _wheelService.GetWheelByIdAsync(id)
+                ?? throw new InvalidOperationException($"Wheel with ID {id} not found.");
+            WheelMovies = (await _wheelService.GetWheelMoviesAsync(id)).ToList();
+            Movies = (await _movieService.GetMoviesByWheelAsync(id)).ToList();
+            CurrentWheel = wheel;
+
+            Logger.LogInformation("WheelMovies loaded: {Count}, Movies loaded: {Count2}", WheelMovies.Count, Movies.Count);
+
+            var sessionMovies = new ObservableCollection<Movie>();
+            foreach (var wm in WheelMovies.Where(m => !m.IsEliminated))
             {
-                sessionMovies.Add(movie);
-                Logger.LogInformation($"Added movie to session: {movie.Title} (MovieId={movie.Id}) for WheelMovieId={wm.Id}");
+                var movie = Movies.FirstOrDefault(m => m.Id == wm.MovieId);
+                if (movie != null)
+                {
+                    sessionMovies.Add(movie);
+                    Logger.LogInformation("Added movie to session: {Title} (MovieId={MovieId})", movie.Title, movie.Id);
+                }
+                else
+                {
+                    Logger.LogWarning("No match for WheelMovie.MovieId={MovieId} in Movies list.", wm.MovieId);
+                }
             }
-            else
-            {
-                Logger.LogWarning($"No match for WheelMovie.MovieId={wm.MovieId} in Movies list.");
-            }
+
+            ActiveSessionMovies = sessionMovies;
+            CurrentRotation = 0;
+            DataUpdated?.Invoke();
         }
-
-        ActiveSessionMovies = sessionMovies;
-        Logger.LogInformation($"ActiveSessionMovies count after load: {ActiveSessionMovies.Count}");
-        CurrentRotation = 0;
-        DataUpdated?.Invoke();
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "LoadWheelAsync failed for wheel {WheelId}", id);
+            throw;
+        }
     }
-
 
     private async Task AddMovieToWheelAsync(TmdbMovie tmdbMovie, int wheelId)
     {
@@ -156,6 +165,63 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         await _wheelService.AddMovieToWheelAsync(dbMovie.Id, wheelId);
     }
 
+    public async Task RemoveWheelMovieAsync(int wheelMovieId)
+    {
+        if (CurrentWheel == null || WheelMovies == null) return;
+
+        var wheelMovie = WheelMovies.FirstOrDefault(wm => wm.Id == wheelMovieId);
+        if (wheelMovie == null) return;
+
+        await _wheelService.RemoveMovieFromWheelAsync(wheelMovie.MovieId, wheelMovie.WheelId);
+
+        // Keep in-memory and UI in sync
+        WheelMovies.Remove(wheelMovie);
+        ActiveSessionMovies = new ObservableCollection<Movie>(
+            Movies?.Where(m => WheelMovies.Any(wm => wm.MovieId == m.Id && !wm.IsEliminated && wm.WatchedDate == null)) ?? Enumerable.Empty<Movie>());
+
+        OnPropertyChanged(nameof(WheelMovies));
+        OnPropertyChanged(nameof(ActiveWheelMovies));
+        OnPropertyChanged(nameof(WatchedWheelMovies));
+        DataUpdated?.Invoke();
+    }   
+
+    public async Task RemoveWheelMoviesAsync(IEnumerable<int> wheelMovieIds)
+    {
+        if (CurrentWheel == null || WheelMovies == null) return;
+
+        await _wheelService.RemoveMoviesFromWheelAsync(wheelMovieIds);
+
+        WheelMovies = WheelMovies.Where(wm => !wheelMovieIds.Contains(wm.Id)).ToList();
+
+        ActiveSessionMovies = new ObservableCollection<Movie>(
+            Movies?.Where(m => WheelMovies.Any(wm => wm.MovieId == m.Id && !wm.IsEliminated && wm.WatchedDate == null)) ?? Enumerable.Empty<Movie>());
+
+        OnPropertyChanged(nameof(WheelMovies));
+        OnPropertyChanged(nameof(ActiveWheelMovies));
+        OnPropertyChanged(nameof(WatchedWheelMovies));
+        DataUpdated?.Invoke();
+    }
+
+    public async Task UpdateWheelMovieOrderAsync(List<int> orderedWheelMovieIds)
+    {
+        if (WheelMovies == null) return;
+
+        // keep the in-memory list in UI order
+        var ordered = orderedWheelMovieIds
+            .Select(id => WheelMovies.FirstOrDefault(wm => wm.Id == id))
+            .Where(wm => wm != null)
+            .ToList()!;
+
+        WheelMovies = ordered;
+
+        OnPropertyChanged(nameof(WheelMovies));
+        OnPropertyChanged(nameof(ActiveWheelMovies));
+
+        // optional DB persistence; implement repository function if used
+        // await _wheelService.UpdateMovieOrderAsync(CurrentWheel.Id, orderedWheelMovieIds);
+        DataUpdated?.Invoke();
+    }
+
     [RelayCommand]
     public async Task SpinAsync()
     {
@@ -172,9 +238,8 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
 
     public async Task ResetSessionAsync()
     {
-        if (CurrentWheel == null) return;
-        Logger.LogInformation($"Resetting session for wheel ID {CurrentWheel.Id}. Marking all movies as not eliminated.");
-        // Mark all movies as not eliminated in the database
+        if (CurrentWheel == null || WheelMovies == null) return;
+
         foreach (var wm in WheelMovies)
         {
             if (wm.IsEliminated)
@@ -184,15 +249,9 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
             }
         }
 
-        // Reload the wheel session
         await LoadWheelAsync(CurrentWheel.Id);
     }
 
-    /// <summary>
-    /// Calculates the spin so the pointer lands randomly within the selected slice, relative to the current wheel rotation.
-    /// </summary>
-    /// <param name="currentRotation">The current cumulative rotation of the wheel (in degrees).</param>
-    /// <returns>(finalRotation, selectedIndex)</returns>
     public (double finalRotation, int selectedIndex) GetSpinResult(double currentRotation)
     {
         int count = ActiveSessionMovies.Count;
@@ -240,4 +299,5 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         return null;
     }
 
+    private bool _isWatched(WheelMovie wm) => wm.WatchedDate != null;
 }

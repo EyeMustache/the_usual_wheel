@@ -87,6 +87,7 @@ public class WheelService : LoggingBase<WheelService>
     
         await _wheelRepository.AddMovieToWheelAsync(wheelId, movieId);
     }
+
     public async Task<IEnumerable<Models.WheelMovie>> GetWheelMoviesAsync(int wheelId)
     {
         Logger.LogInformation($"Fetching wheel movies for wheel ID {wheelId}.");
@@ -107,5 +108,17 @@ public class WheelService : LoggingBase<WheelService>
             };
         }
         await _wheelRepository.UpdateMovieEliminationStatusAsync(wheelId, movieId, isEliminated);
+    }
+
+    public async Task RemoveMovieFromWheelAsync(int movieId, int wheelId)
+    {
+        Logger.LogInformation($"Removing movie with ID {movieId} from wheel with ID {wheelId}.");
+        await _wheelRepository.RemoveMovieFromWheelAsync(wheelId, movieId);
+    }
+
+    public async Task RemoveMoviesFromWheelAsync(IEnumerable<int> wheelMovieIds)
+    {
+        Logger.LogInformation($"Removing movies with IDs {string.Join(", ", wheelMovieIds)} from their respective wheels.");
+        await _wheelRepository.RemovieMoviesFromWheelAsync(wheelMovieIds);
     }
 }

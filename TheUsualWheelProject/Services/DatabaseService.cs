@@ -21,7 +21,7 @@ public class DatabaseService : LoggingBase<DatabaseService>
     }
     public async Task InitAsync()
     {
-        Logger.LogInformation("Initializing database.");
+        Logger.LogInformation("InitAsync start at " + DateTime.UtcNow);
         using var connection = new SqliteConnection(_conString);
         await connection.OpenAsync();
         await connection.ExecuteAsync(@"
@@ -77,7 +77,7 @@ public class DatabaseService : LoggingBase<DatabaseService>
             CREATE INDEX IF NOT EXISTS IX_MovieProvider_ProviderId
             ON MovieProvider(ProviderId);
         ");
-        // SeedTestWheelsAsync()
+        Logger.LogInformation("InitAsync done at " + DateTime.UtcNow);
     }
 
     // For testing purposes, to clear all data from the database

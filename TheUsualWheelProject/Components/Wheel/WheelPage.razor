@@ -1,12 +1,6 @@
 @page "/wheel/{Id:int}"
 @implements IDisposable
-
 @inject WheelViewModel ViewModel
-
-@if (!string.IsNullOrEmpty(_errorMessage))
-{
-    <div class="error" style="color:red;">@_errorMessage</div>
-}
 
 @if (ViewModel.CurrentWheel == null)
 {
@@ -14,8 +8,9 @@
 }
 else
 {
-    <h1>@ViewModel.CurrentWheel.Name</h1>
+    <h1 style="color:#fff">@ViewModel.CurrentWheel.Name</h1>
     <Wheel />
+    
     @if (ViewModel.IsEnriching)
     {
         <p>Fetching missing details from TMDB...</p>

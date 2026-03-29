@@ -240,7 +240,8 @@
             double startAngle = i * sweepAngle;
             string fillColor = SlicePalette[i % SlicePalette.Count];
             string pathData = GetSlicePath(cx, cy, r, startAngle, sweepAngle);
-            string textColor = GetContrastTextColor(fillColor);
+            string textColor = "#000";
+            //string textColor = GetContrastTextColor(fillColor);
 
             // Calculate label position
             double midAngle = startAngle + (sweepAngle / 2);

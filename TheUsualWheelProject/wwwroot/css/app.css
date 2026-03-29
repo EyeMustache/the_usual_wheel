@@ -29,9 +29,11 @@ main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 1.5rem;
-    background: #23272a;
+    padding: 1rem;
+    background:#23272a;
+    color: #f1f3f7;
     overflow-y: auto;
+    min-height: calc(100vh - 120px);
 }
 
 .page-footer {
@@ -40,4 +42,17 @@ main {
     background: #23272a;
     text-align: center;
     padding-bottom: 1.2rem;
+}
+
+h1, p, span, .mud-paper, .mud-list-item {
+  color: #eaeaec !important;
+}
+
+.wheel-container, .controls {
+  color: #ffffff;
+}
+
+.mud-theme-default {
+  background: #181a1f !important;
+  color: #f0f0f0 !important;
 }

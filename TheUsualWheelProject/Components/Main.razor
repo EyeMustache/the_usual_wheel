@@ -1,14 +1,24 @@
 @namespace TheUsualWheelProject.Components
 @inject DatabaseService DatabaseService
 
-<Router AppAssembly="@typeof(Main).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-    </Found>
-    <NotFound>
-        <p>Sorry, there's nothing at this address.</p>
-    </NotFound>
-</Router>
+<ErrorBoundary>
+    <ChildContent>
+        <Router AppAssembly="@typeof(Main).Assembly">
+            <Found Context="routeData">
+                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            </Found>
+            <NotFound>
+                <p>Sorry, there's nothing at this address.</p>
+            </NotFound>
+        </Router>
+    </ChildContent>
+    <ErrorContent Context="ex">
+        <div style="color: red; padding: 20px; background: white;">
+            <h3>Razor UI Crashed!</h3>
+            <p>@ex.Message</p>
+        </div>
+    </ErrorContent>
+</ErrorBoundary>
 
 @code {
     protected override async Task OnInitializedAsync()

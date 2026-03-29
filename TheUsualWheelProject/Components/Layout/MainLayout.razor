@@ -1,11 +1,33 @@
 @inherits LayoutComponentBase
+@using MudBlazor
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
 
 <div class="main-layout">
-    <NavSidebar />
-
-    <main>
-        @Body
-    </main>
-
-    <NavFooter />
+    <ErrorBoundary>
+        <NavSidebar />
+        <main style="position:relative;overflow-y:auto;padding-bottom:4rem">
+            @Body
+        </main>
+        <NavFooter />
+    </ErrorBoundary>
 </div>
+
+@code {
+    private MudTheme MyTheme = new MudTheme
+    {
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#FFA400",
+            Background = "#23272a",
+            Surface = "#2d2f35",
+            AppbarBackground = "#181a1f",
+            TextPrimary = "#e3e3e3",
+            TextSecondary = "#abadb3",
+            DrawerBackground = "#20232a"
+        }
+    };
+}

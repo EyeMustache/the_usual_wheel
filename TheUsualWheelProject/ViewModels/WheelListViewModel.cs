@@ -6,8 +6,16 @@ namespace TheUsualWheelProject.ViewModels;
 
 public class WheelListViewModel
 {
+    public class WheelCardInfo
+    {
+        public Wheel Wheel { get; set; } = default!;
+        public int TotalMovies { get; set; }
+        public int EliminatedMovies { get; set; }
+        public int ActiveMovies => TotalMovies - EliminatedMovies;
+    }
+
     private readonly WheelService _wheelService;
-    public ObservableCollection<Wheel> Wheels { get; private set; } = [];
+    public ObservableCollection<WheelCardInfo> Wheels { get; private set; } = new();
 
     public WheelListViewModel(WheelService wheel)
     {
@@ -21,7 +29,16 @@ public class WheelListViewModel
         foreach (Wheel wheel in wheels)
         {
             System.Diagnostics.Debug.WriteLine($"Loaded wheel: {wheel.Name}");
-            Wheels.Add(wheel);
+
+            var wheelMovies = (await _wheelService.GetWheelMoviesAsync(wheel.Id)).ToList();
+            var eliminatedCount = wheelMovies.Count(wm => wm.IsEliminated);
+
+            Wheels.Add(new WheelCardInfo
+            {
+                Wheel = wheel,
+                TotalMovies = wheelMovies.Count,
+                EliminatedMovies = eliminatedCount
+            });
         }
     }
 
@@ -36,7 +53,12 @@ public class WheelListViewModel
         Wheel? createdWheel = await _wheelService.AddWheelAsync(newWheel);
         if (createdWheel != null)
         {
-            Wheels.Add(createdWheel);
+            Wheels.Add(new WheelCardInfo
+            {
+                Wheel = createdWheel,
+                TotalMovies = 0,
+                EliminatedMovies = 0
+            });
         }
     }
 }
