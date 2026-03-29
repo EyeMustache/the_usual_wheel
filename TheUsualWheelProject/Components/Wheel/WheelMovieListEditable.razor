@@ -1,33 +1,55 @@
-<MudDropContainer T="DropItem" Items="_items" ItemsSelector="@((item,dropzone) => item.Identifier == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-wrap flex-grow-1">
-    <ChildContent>
-        <MudDropZone T="DropItem" Identifier="Drop Zone 1" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
-            <MudText Typo="Typo.h6" Class="mb-4">Drop Zone 1</MudText>
-         </MudDropZone>
-        <MudDropZone T="DropItem" Identifier="Drop Zone 2" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
-            <MudText Typo="Typo.h6" Class="mb-4">Drop Zone 2</MudText>
-        </MudDropZone>
-    </ChildContent>
-    <ItemRenderer>
-        <MudPaper Elevation="25" Class="pa-4 my-4">@context.Name</MudPaper>
-    </ItemRenderer>
-</MudDropContainer>
+@* So much to do still, just made a quick template for next time *@
+<MudPaper Class="pa-4">
+    <h1>Movie List</h1>
+    <MudStack Spacing="2">
+        <MudButton OnClick="OnExpandCollapseClick">@(_expanded ? "Collapse" : "Expand")</MudButton>
+        <MudDivider />
+        <MudCollapse Expanded="_expanded">
+                <MudDropContainer T="DropItem" Items="_items" ItemsSelector="@((item,dropzone) => item.Selector == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-wrap flex-grow-1">
+                    <ChildContent>
+                        @for (int i = 1; i < 3; i++) 
+                        {
+                            var dropzone = i.ToString();
+                            <MudPaper Class="ma-4 flex-grow-1">
+                                <MudList T="string" Class="d-flex flex-column mud-height-full">
+                                    <MudListSubheader>Drop Zone @dropzone</MudListSubheader>
+                                    <MudDropZone T="DropItem" Identifier="@dropzone" Class="flex-grow-1" AllowReorder="true" />
+                                </MudList>
+                            </MudPaper>
+                        }
+                    </ChildContent>
+                    <ItemRenderer>
+                        <MudListItem T="string" Text="@context.Name" />
+                    </ItemRenderer>
+                </MudDropContainer>
+        </MudCollapse>
+    </MudStack>
+</MudPaper>
 
 @code {
+    bool _expanded = true;
+
+    private void OnExpandCollapseClick() {
+        _expanded = !_expanded;
+    }
+
     private void ItemUpdated(MudItemDropInfo<DropItem> dropItem)
     {
-        dropItem.Item.Identifier = dropItem.DropzoneIdentifier;
+        dropItem.Item.Selector = dropItem.DropzoneIdentifier;
     }
-    
+
     private List<DropItem> _items = new()
     {
-        new DropItem(){ Name = "Drag me!", Identifier = "Drop Zone 1" },
-        new DropItem(){ Name = "Or me!", Identifier = "Drop Zone 2" },
-        new DropItem(){ Name = "Just Mud", Identifier = "Drop Zone 1" },
+        new DropItem(){ Name = "Item 1", Selector = "1" },
+        new DropItem(){ Name = "Item 2", Selector = "1" },
+        new DropItem(){ Name = "Item 3", Selector = "1" },
+        new DropItem(){ Name = "Item 4", Selector = "2" },
+        new DropItem(){ Name = "Item 5", Selector = "2" },
     };
     
     public class DropItem
     {
         public string Name { get; init; }
-        public string Identifier { get; set; }
+        public string Selector { get; set; }
     }
 }

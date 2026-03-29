@@ -11,6 +11,8 @@ else
     <h1 style="color:#fff">@ViewModel.CurrentWheel.Name</h1>
     <Wheel />
     
+    <WheelMovieListEditable />
+
     @if (ViewModel.IsEnriching)
     {
         <p>Fetching missing details from TMDB...</p>

@@ -107,6 +107,12 @@
         "#fd79a8", // Pink
         "#636e72"  // Gray
     };
+    private double AnimatedRotation = 0;
+    private bool IsAnimating = false;
+    // Store the index of the movie to be removed for debug display
+    private bool IsSpinPendingConfirmation = false; // temp debug stuff
+    private int? pendingRemovalIndex = null; // temp debug stuff
+    private double pendingFinalRotation = 0; // temp debug stuff
 
     protected override void OnInitialized()
     {
@@ -143,15 +149,6 @@
     {
         RefreshWheel();
     }
-
-
-    private double AnimatedRotation = 0;
-    private bool IsAnimating = false;
-
-    // Store the index of the movie to be removed for debug display
-    private bool IsSpinPendingConfirmation = false; // temp debug stuff
-    private int? pendingRemovalIndex = null; // temp debug stuff
-    private double pendingFinalRotation = 0; // temp debug stuff
 
     private async Task Spin()
     {
@@ -193,6 +190,7 @@
         return title.Length > 18 ? title.Substring(0, 18) + "..." : title;
     }
 
+    // technically debug stuff but want something like this in the future anyway as a "reset session" button, so leaving it here for now
     private async Task ResetSession()
     {
         await ViewModel.ResetSessionAsync();
@@ -264,6 +262,7 @@
         return slices;
     }
 
+    // debug stuff
     private void ConfirmRemoval()
     {
         if (pendingRemovalIndex.HasValue)

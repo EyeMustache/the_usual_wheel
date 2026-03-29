@@ -52,7 +52,23 @@ h1, p, span, .mud-paper, .mud-list-item {
   color: #ffffff;
 }
 
-.mud-theme-default {
+/* .mud-theme-default {
   background: #181a1f !important;
   color: #f0f0f0 !important;
+} */
+
+/* global test override for the list area */
+/* .wheel-movie-list-outer,
+.mud-drop-container,
+.mud-paper,
+.mud-list,
+.mud-dropzone,
+.mud-list-item {
+  background: #222222 !important;
+  color: #e9f0ff !important;
+  border-color: #ffa400 !important;
 }
+
+.mud-list-subheader {
+  color: #8eb3ff !important;
+} */
