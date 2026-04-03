@@ -38,6 +38,18 @@ public class WheelRepository : GenericRepository<Wheel, int>, IWheelRepository
         await connection.ExecuteAsync(query, param);
     }
 
+    public async Task UpdateMovieWatchedDateAsync(int wheelMovieId, DateOnly? watchedDate)
+    {
+        using var connection = new SqliteConnection(_conString);
+        // DateOnly is mapped as 'yyyy-MM-dd' string in Sqlite typically by DateOnlyTypeHandler.
+        // Dapper handles it correctly if TypeHandler is configured globally. 
+        var query = @"UPDATE WheelMovie
+                      SET WatchedDate = @WatchedDate
+                      WHERE Id = @Id";
+        var param = new { Id = wheelMovieId, WatchedDate = watchedDate };
+        await connection.ExecuteAsync(query, param);
+    }
+
     public async Task RemoveMovieFromWheelAsync(int movieId, int wheelId)
     {
         using var connection = new SqliteConnection(_conString);

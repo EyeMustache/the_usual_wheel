@@ -110,6 +110,13 @@ public class WheelService : LoggingBase<WheelService>
         await _wheelRepository.UpdateMovieEliminationStatusAsync(wheelId, movieId, isEliminated);
     }
 
+    public async Task SetMovieWatchedStatusAsync(int wheelMovieId, bool isWatched)
+    {
+        Logger.LogInformation($"Setting watched status for wheelMovieId {wheelMovieId} to {isWatched}.");
+        DateOnly? watchedDate = isWatched ? DateOnly.FromDateTime(DateTime.Now) : null;
+        await _wheelRepository.UpdateMovieWatchedDateAsync(wheelMovieId, watchedDate);
+    }
+
     public async Task RemoveMovieFromWheelAsync(int movieId, int wheelId)
     {
         Logger.LogInformation($"Removing movie with ID {movieId} from wheel with ID {wheelId}.");

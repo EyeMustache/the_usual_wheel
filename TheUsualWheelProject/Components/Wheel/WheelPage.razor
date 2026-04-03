@@ -16,36 +16,54 @@ else
     <!-- Collapsible Management Panels -->
     <MudExpansionPanels MultiExpansion="true" Class="mt-6">
 
-        <!-- Panel 1: Your Collection (The Movie List UI) -->
-        <MudExpansionPanel Text="Your Movie Collection" Expanded="true" Icon="@Icons.Material.Filled.Movie">
+        <!-- Panel: Your Collection (The Movie List UI) -->
+        <MudExpansionPanel Text="Your Movie Collection" Expanded="true" Icon="@Icons.Material.TwoTone.LocalMovies">
             <WheelMovieCollection />
         </MudExpansionPanel>
 
-        <!-- Panel 2: Movie Details / Debug / Future Stats -->
+        <!-- Future Panel: Wheel Settings -->
+        <MudExpansionPanel Text="Wheel Settings" Icon="@Icons.Material.Filled.Settings">
+            @* Component that has more child panels with seperate settings? *@
+            <p>Style (change slice colors</p>
+            <p>Sound (upload audio files)</p>
+            <p>Sliders (Spin time, Text Size, Slice repeat amount)</p>
+            <p>Wheel name, description(modal maybe?)</p>
+            <p>Reset wheel (with confirmation)</p>
+            <p>Delete wheel (with confirmation)</p>
+        </MudExpansionPanel>
+
+        <!-- Panel: Movie Details / Debug / Future Stats -->
         <MudExpansionPanel Text="Movie Details" Icon="@Icons.Material.Filled.Info">
             @* Should be a component that has more expansion panels, one for each movie *@
             @if (ViewModel.IsEnriching)
             {
                 <p>Fetching missing details from TMDB...</p>
             }
-            @if (ViewModel.Movies == null || !ViewModel.Movies.Any())
+            @if (ViewModel.AllWheelMovies == null || !ViewModel.AllWheelMovies.Any())
             {
                 <p>No movies found for this wheel.</p>
             }
             else
             {
                 <div style="display:flex; flex-direction:column; gap:16px;">
-                    @foreach (Movie? movie in ViewModel.Movies)
+                    @foreach (WheelMovieItem item in ViewModel.AllWheelMovies)
                     {
-                        <WheelMovieCard Movie="movie" />
+                        <WheelMovieDetailsCard Movie="item.Movie" />
                     }
                 </div>
             }
         </MudExpansionPanel>
 
-        <!-- Future Panel 3: Stats -->
+        <!-- Future Panel: Stats -->
         <MudExpansionPanel Text="Stats & Insights" Icon="@Icons.Material.Filled.BarChart">
-            <p>Coming soon: visual stats on your watched movie history.</p>
+            <p>Visual stats on your watched movie history.</p>
+            <p>Charts on average ratings, genres, avg length, avg rating etc.</p>
+            <p>But for now, just list watched movies with dates:</p>
+            
+            @foreach (WheelMovieItem item in ViewModel.WatchedMovies)
+            {
+                <p>@item.Movie.Title - Watched on @item.WheelMovie.WatchedDate</p>
+            }
         </MudExpansionPanel>
         
 
@@ -55,7 +73,7 @@ else
 @code {
     [Parameter] 
     public int Id { get; set; }
-    private List<string> MovieTitles => ViewModel.Movies?.Select(m => m.Title).ToList() ?? new List<string>();
+    private List<string> MovieTitles => ViewModel.AllWheelMovies?.Select(m => m.Movie.Title).ToList() ?? new List<string>();
     private string? _errorMessage;
 
     protected override async Task OnInitializedAsync()
