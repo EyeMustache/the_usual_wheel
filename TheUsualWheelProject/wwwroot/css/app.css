@@ -1,18 +1,21 @@
-/* === COLOR PALETTE ===
-Discord Dark:      #23272a
-Sidebar:           #2c2f33
-Sidebar Hover:     #36393f
-Accent Orange:     #FFA400
-Accent Yellow:     #f7bd24
-Accent Blue:       #01b4e4
-Text:              #e3e3e3
-Shadow:            rgba(0,0,0,0.15) / rgba(0,0,0,0.25)
-====================== */
+/* === COLOR PALETTE === */
+:root {
+    --bg-neutral: #0d0d0d;     /* Deep dark background */
+    --bg-surface: #121212;     /* Tertiary (cards/panels) */
+    --bg-surface-elevated: #1e1e1e; /* Slightly brighter for depth */
+    /* Maybe adding more surface variants later for hover/active states */
+    
+    --primary: #ffa400;        /* Fav orange */
+    --secondary: #f8bf26;      /* Pathé gold */
+    --button-text: #1a1a1e;    /* Dark text for buttons */
+    --text-main: #e3e3e3;
+    --text-muted: #a0a0a0;
+}
 
 html, body {
     font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-    background: #23272a;
-    color: #e3e3e3;
+    background: var(--bg-neutral);
+    color: var(--text-main);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -22,7 +25,7 @@ html, body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background: #23272a;
+    background: var(--bg-neutral);
 }
 
 main {
@@ -30,45 +33,71 @@ main {
     display: flex;
     flex-direction: column;
     padding: 1rem;
-    background:#23272a;
-    color: #f1f3f7;
+    background: var(--bg-neutral);
+    color: var(--text-main);
     overflow-y: auto;
     min-height: calc(100vh - 120px);
 }
 
-.page-footer {
-    margin-top: auto;
-    width: 100%;
-    background: #23272a;
-    text-align: center;
-    padding-bottom: 1.2rem;
-}
-
+/* Base text overrides */
 h1, p, span, .mud-paper, .mud-list-item {
-  color: #eaeaec !important;
+  color: var(--text-main) !important;
 }
 
-.wheel-container, .controls {
-  color: #ffffff;
+/* --- MUDBLAZOR CINEMATIC POLISH --- */
+
+/* 1. Expansion Panel Structure & Typography */
+.mud-expand-panel {
+    border: 1px solid #2a2a30 !important;
+    margin-bottom: 8px;
+    border-radius: 8px !important;
+    background-color: var(--bg-surface) !important;
 }
 
-/* .mud-theme-default {
-  background: #181a1f !important;
-  color: #f0f0f0 !important;
-} */
-
-/* global test override for the list area */
-/* .wheel-movie-list-outer,
-.mud-drop-container,
-.mud-paper,
-.mud-list,
-.mud-dropzone,
-.mud-list-item {
-  background: #222222 !important;
-  color: #e9f0ff !important;
-  border-color: #ffa400 !important;
+.mud-expand-panel-header {
+    font-weight: 700 !important;
 }
 
-.mud-list-subheader {
-  color: #8eb3ff !important;
-} */
+.mud-expand-panel-text {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+}
+
+/* Force the expansion panel icon to be orange */
+.mud-expand-panel-header .mud-expand-panel-icon,
+.mud-expand-panel-header .mud-icon-root {
+    color: var(--primary) !important; 
+}
+
+/* 2. Menu Popover Borders & Hover Effects */
+.mud-popover .mud-paper {
+    border: 1px solid #2a2a30 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Add the subtle orange tint on hover */
+.mud-popover .mud-list-item:hover {
+    background-color: rgba(255, 164, 0, 0.1) !important;
+}
+
+/* Make hovered text and icons turn orange */
+.mud-popover .mud-list-item:hover .mud-list-item-text {
+    color: var(--primary) !important;
+}
+.mud-popover .mud-list-item:hover .mud-icon-root {
+    color: var(--primary) !important;
+}
+
+/* Optional: Make the 3-dots icon button match your theme better */
+.mud-icon-button {
+    color: var(--secondary) !important;
+}
+
+.movie-card.selected-for-removal {
+    border-color: #ff5252 !important;
+    background-color: rgba(255, 82, 82, 0.1);
+}
+.movie-card.selected-for-removal .movie-poster {
+    opacity: 0.5;
+}

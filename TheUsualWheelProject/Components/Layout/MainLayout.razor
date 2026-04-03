@@ -1,7 +1,7 @@
 @inherits LayoutComponentBase
 @using MudBlazor
 
-<MudThemeProvider />
+<MudThemeProvider Theme="@_cinematicTheme" IsDarkMode="true" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -17,17 +17,21 @@
 </div>
 
 @code {
-    private MudTheme MyTheme = new MudTheme
+    private MudTheme _cinematicTheme = new MudTheme()
     {
-        PaletteDark = new PaletteDark
+        PaletteDark = new PaletteDark()
         {
-            Primary = "#FFA400",
-            Background = "#23272a",
-            Surface = "#2d2f35",
-            AppbarBackground = "#181a1f",
-            TextPrimary = "#e3e3e3",
-            TextSecondary = "#abadb3",
-            DrawerBackground = "#20232a"
+            Primary = "#ffa400",          // Your var(--primary) matches Buttons/Hover states
+            Secondary = "#f8bf26",        // Your var(--secondary)
+            Background = "#0d0d0d",       // Your var(--bg-neutral)
+            Surface = "#1e1e1e",          // Your var(--bg-surface-elevated) for MudMenus/Papers!
+            DrawerBackground = "#121212", // Your var(--bg-surface) 
+            AppbarBackground = "#121212",
+            TextPrimary = "#e3e3e3",      // Your var(--text-main)
+            TextSecondary = "#a0a0a0",    // Your var(--text-muted)
+            ActionDefault = "#e3e3e3",    // Default color for icons like the 3 dots
+            Divider = "#2a2a30",          // Border color for separation
+            HoverOpacity = 0.1            // Nice subtle hover effect
         }
     };
 }

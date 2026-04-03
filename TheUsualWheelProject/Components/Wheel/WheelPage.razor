@@ -8,28 +8,48 @@
 }
 else
 {
-    <h1 style="color:#fff">@ViewModel.CurrentWheel.Name</h1>
+    <h1 style="color:var(--text-main); font-weight:800;">@ViewModel.CurrentWheel.Name</h1>
+    
+    <!-- Render the Wheel outside of the panels -->
     <Wheel />
     
-    <WheelMovieListEditable />
+    <!-- Collapsible Management Panels -->
+    <MudExpansionPanels MultiExpansion="true" Class="mt-6">
 
-    @if (ViewModel.IsEnriching)
-    {
-        <p>Fetching missing details from TMDB...</p>
-    }
-    @if (ViewModel.Movies == null || !ViewModel.Movies.Any())
-    {
-        <p>No movies found for this wheel.</p>
-    }
-    else
-    {
-        <ul>
-            @foreach (Movie? movie in ViewModel.Movies)
+        <!-- Panel 1: Your Collection (The Movie List UI) -->
+        <MudExpansionPanel Text="Your Movie Collection" Expanded="true" Icon="@Icons.Material.Filled.Movie">
+            <WheelMovieCollection />
+        </MudExpansionPanel>
+
+        <!-- Panel 2: Movie Details / Debug / Future Stats -->
+        <MudExpansionPanel Text="Movie Details" Icon="@Icons.Material.Filled.Info">
+            @* Should be a component that has more expansion panels, one for each movie *@
+            @if (ViewModel.IsEnriching)
             {
-                <WheelMovieCard Movie="movie" />
+                <p>Fetching missing details from TMDB...</p>
             }
-        </ul>
-    }
+            @if (ViewModel.Movies == null || !ViewModel.Movies.Any())
+            {
+                <p>No movies found for this wheel.</p>
+            }
+            else
+            {
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                    @foreach (Movie? movie in ViewModel.Movies)
+                    {
+                        <WheelMovieCard Movie="movie" />
+                    }
+                </div>
+            }
+        </MudExpansionPanel>
+
+        <!-- Future Panel 3: Stats -->
+        <MudExpansionPanel Text="Stats & Insights" Icon="@Icons.Material.Filled.BarChart">
+            <p>Coming soon: visual stats on your watched movie history.</p>
+        </MudExpansionPanel>
+        
+
+    </MudExpansionPanels>
 }
 
 @code {

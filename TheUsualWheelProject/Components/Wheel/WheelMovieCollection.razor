@@ -1,0 +1,155 @@
+<div class="collection-container">
+    
+    <!-- Top Header Area -->
+    <div class="collection-header mt-8 mb-4">
+        <div class="collection-actions">
+            <button class="action-btn"><MudIcon Icon="@Icons.Material.Filled.Shuffle" Size="Size.Small" /> SHUFFLE</button>
+            <button class="action-btn" @onclick="ToggleMassRemoveMode">
+                <MudIcon Icon="@(_isMassRemoveMode ? Icons.Material.Filled.ToggleOn : Icons.Material.Filled.ToggleOff)" Size="Size.Small" Color="@(_isMassRemoveMode ? Color.Primary : Color.Default)" /> 
+                @(_isMassRemoveMode ? "CANCEL MASS REMOVE" : "MASS REMOVE")
+            </button>
+            @if (_isMassRemoveMode && _selectedForRemoval.Any())
+            {
+                <button class="action-btn" style="color: #ff5252; border-color: #ff5252;" @onclick="ExecuteMassRemove">
+                    <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" /> 
+                    REMOVE (@_selectedForRemoval.Count)
+                </button>
+            }
+            <div class="movie-count-badge">
+                <span class="count-number">@_activeMovies.Count</span>
+                <span class="count-label">movies</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Movies Section -->
+    <div class="section-container mt-4">
+        <div class="section-title mb-3">
+            <MudIcon Icon="@Icons.Material.Filled.PlayCircleOutline" Size="Size.Small" Class="mr-2" />
+            <span>ACTIVE MOVIES</span>
+        </div>
+
+        <div class="movie-list">
+            @foreach (var movie in _activeMovies)
+            {
+                // Should be a compononent? but for now we can just do it here
+                <div class="movie-card @(_selectedForRemoval.Contains(movie) ? "selected-for-removal" : "")" 
+                     @onclick="@(() => { if (_isMassRemoveMode) ToggleMovieSelection(movie); })">
+                    <img src="@movie.PosterUrl" class="movie-poster" alt="@movie.Title poster" />
+                    <div class="movie-info">
+                        <h3 class="movie-title">@movie.Title</h3>
+                        <span class="movie-subtitle">@movie.Director • @movie.Year</span>
+                    </div>
+                    
+                    <div class="movie-actions">
+                        @if (_isMassRemoveMode)
+                        {
+                            <MudIcon Icon="@(_selectedForRemoval.Contains(movie) ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)" 
+                                     Color="@(_selectedForRemoval.Contains(movie) ? Color.Error : Color.Default)" />
+                        }
+                        else
+                        {
+                            <MudMenu Icon="@Icons.Material.Rounded.MoreVert" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                                <MudMenuItem Icon="@Icons.Material.Filled.Check" OnClick="@(() => { })">Mark as Watched</MudMenuItem>
+                                <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="@(() => { })">Remove Movie</MudMenuItem>
+                            </MudMenu>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Add Movie Button -->
+            <div class="add-movie-btn mt-3" @onclick="() => { }">
+                <MudIcon Icon="@Icons.Material.Filled.AddCircle" Class="mr-2" />
+                <span>ADD MOVIE</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Watched Movies Section -->
+    <div class="section-container mt-8">
+        <div class="section-title mb-3">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircleOutline" Size="Size.Small" Class="mr-2" />
+            <span>WATCHED MOVIES</span>
+        </div>
+
+        <div class="movie-list">
+            @foreach (var movie in _watchedMovies)
+            {
+                // Should also be a component? but for now we can just do it here
+                <div class="movie-card watched-card @(_selectedForRemoval.Contains(movie) ? "selected-for-removal" : "")" 
+                     @onclick="@(() => { if (_isMassRemoveMode) ToggleMovieSelection(movie); })">
+                    <img src="@movie.PosterUrl" class="movie-poster" alt="@movie.Title poster" />
+                    <div class="movie-info">
+                        <h3 class="movie-title">@movie.Title</h3>
+                        <span class="movie-subtitle">@movie.Director • @movie.Year</span>
+                    </div>
+                    
+                    <div class="movie-actions">
+                        @if (_isMassRemoveMode)
+                        {
+                            <MudIcon Icon="@(_selectedForRemoval.Contains(movie) ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)" 
+                                     Color="@(_selectedForRemoval.Contains(movie) ? Color.Error : Color.Default)" />
+                        }
+                        else
+                        {
+                            <MudMenu Icon="@Icons.Material.Rounded.MoreVert" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Dense="true">
+                                <MudMenuItem Icon="@Icons.Material.Filled.SettingsBackupRestore" OnClick="@(() => { })">Unmark as Watched</MudMenuItem>
+                                <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="@(() => { })">Remove Movie</MudMenuItem>
+                            </MudMenu>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private bool _isMassRemoveMode = false;
+    private HashSet<DummyMovie> _selectedForRemoval = new();
+
+    private void ToggleMassRemoveMode()
+    {
+        _isMassRemoveMode = !_isMassRemoveMode;
+        if (!_isMassRemoveMode) _selectedForRemoval.Clear();
+    }
+
+    private void ToggleMovieSelection(DummyMovie movie)
+    {
+        if (_selectedForRemoval.Contains(movie))
+            _selectedForRemoval.Remove(movie);
+        else
+            _selectedForRemoval.Add(movie);
+    }
+
+    private void ExecuteMassRemove()
+    {
+        _activeMovies.RemoveAll(m => _selectedForRemoval.Contains(m));
+        _watchedMovies.RemoveAll(m => _selectedForRemoval.Contains(m));
+        _selectedForRemoval.Clear();
+        _isMassRemoveMode = false;
+    }
+
+    // Dummy Data to test our UI
+    public class DummyMovie
+    {
+        public string Title { get; init; } = "";
+        public string Director { get; init; } = "";
+        public string Year { get; init; } = "";
+        public string PosterUrl { get; init; } = "";
+    }
+
+    private List<DummyMovie> _activeMovies = new List<DummyMovie>()
+    {
+        new DummyMovie { Title = "The Equalizer", Director = "Antoine Fuqua", Year = "2014", PosterUrl = "https://placehold.co/100x150/222222/FFF?text=EQ" },
+        new DummyMovie { Title = "Gladiator II", Director = "Ridley Scott", Year = "2024", PosterUrl = "https://placehold.co/100x150/222222/FFF?text=GLAD2" },
+        new DummyMovie { Title = "Inside Man", Director = "Spike Lee", Year = "2006", PosterUrl = "https://placehold.co/100x150/222222/FFF?text=INSIDE" }
+    };
+
+    private List<DummyMovie> _watchedMovies = new List<DummyMovie>()
+    {
+        new DummyMovie { Title = "Malcolm X", Director = "Spike Lee", Year = "1992", PosterUrl = "https://placehold.co/100x150/222222/FFF?text=MX" }
+    };
+}
