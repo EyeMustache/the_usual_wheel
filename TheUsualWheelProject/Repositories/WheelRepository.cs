@@ -67,4 +67,15 @@ public class WheelRepository : GenericRepository<Wheel, int>, IWheelRepository
         var param = new { WheelMovieIds = wheelMovieIds };
         await connection.ExecuteAsync(query, param);
     }
+
+    public async Task<WheelMovie?> GetLastWatchedWheelMovieAsync()
+    {
+        using var connection = new SqliteConnection(_conString);
+        var query = @$"SELECT *
+                       FROM WheelMovie
+                       WHERE WatchedDate IS NOT NULL
+                       ORDER BY WatchedDate DESC
+                       LIMIT 1";
+        return await connection.QueryFirstOrDefaultAsync<WheelMovie>(query);
+    }
 }

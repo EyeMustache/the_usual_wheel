@@ -128,4 +128,10 @@ public class WheelService : LoggingBase<WheelService>
         Logger.LogInformation($"Removing movies with IDs {string.Join(", ", wheelMovieIds)} from their respective wheels.");
         await _wheelRepository.RemovieMoviesFromWheelAsync(wheelMovieIds);
     }
+
+    public async Task<WheelMovie?> GetLastWatchedWheelMovieAsync()
+    {
+        Logger.LogInformation("Fetching the most recently watched movie from all wheels.");
+        return await _wheelRepository.GetLastWatchedWheelMovieAsync();
+    }
 }

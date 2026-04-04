@@ -10,4 +10,5 @@ public interface IWheelRepository : IGenericRepository<Wheel, int>
     Task UpdateMovieWatchedDateAsync(int wheelMovieId, DateOnly? watchedDate);
     Task RemoveMovieFromWheelAsync(int movieId, int wheelId);
     Task RemovieMoviesFromWheelAsync(IEnumerable<int> wheelMovieIds);
+    Task<WheelMovie?> GetLastWatchedWheelMovieAsync();
 }

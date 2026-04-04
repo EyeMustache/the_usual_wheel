@@ -1,6 +1,17 @@
 @page "/wheellist"
 
 @inject WheelListViewModel ViewModel
+@* Welcome back message with last watched info *@
+@* Should be pop up at the top of the page, everything shifts down, can be closed with an x *@
+<div class="welcome-back">
+    <h2>Welcome back!</h2>
+    <p>Last movie watched: <strong>@ViewModel.LastWatched.MovieTitle</strong></p>
+    <p>From wheel: <strong>@ViewModel.LastWatched.WheelName</strong></p>
+    @if (ViewModel.LastWatched.WatchedDate.HasValue)
+    {
+        <p>Watched on: <strong>@ViewModel.LastWatched.WatchedDate.Value.ToString("MMMM dd, yyyy")</strong></p>
+    }
+</div>
 
 <h1>All Wheels</h1>
 <button @onclick="ShowAddModal">Add Wheel</button>
@@ -12,7 +23,7 @@
     }
     else
     {
-        @foreach (var wheelInfo in ViewModel.Wheels)
+        @foreach (WheelListViewModel.WheelCardInfo wheelInfo in ViewModel.Wheels)
         {
             <WheelCard WheelInfo="wheelInfo" />
         }

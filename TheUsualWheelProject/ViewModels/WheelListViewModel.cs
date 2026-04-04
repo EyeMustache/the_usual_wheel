@@ -14,12 +14,24 @@ public class WheelListViewModel
         public int ActiveMovies => TotalMovies - EliminatedMovies;
     }
 
-    private readonly WheelService _wheelService;
-    public ObservableCollection<WheelCardInfo> Wheels { get; private set; } = new();
+    public class LastWatchedInfo
+    {
+        public string WheelName { get; set; } = "No movies watched yet";
+        public string MovieTitle { get; set; } = "No movies watched yet";
+        public DateOnly? WatchedDate { get; set; }
+    }
 
-    public WheelListViewModel(WheelService wheel)
+    public LastWatchedInfo LastWatched { get; private set; } = new();
+
+    private readonly WheelService _wheelService;
+    private readonly MovieService _movieService;
+    public ObservableCollection<WheelCardInfo> Wheels { get; private set; } = new();
+    public WheelMovie? LastWatchedWheelMovie {get; private set; }
+
+    public WheelListViewModel(WheelService wheel, MovieService movie)
     {
         _wheelService = wheel;
+        _movieService = movie;
     }
 
     public async Task LoadWheelAsync()
@@ -60,5 +72,25 @@ public class WheelListViewModel
                 EliminatedMovies = 0
             });
         }
+    }
+
+    public async Task LoadLastWatchedWheelMovieAsync()
+    {
+        var lastWatchedWheelMovie = await _wheelService.GetLastWatchedWheelMovieAsync();
+        if (lastWatchedWheelMovie == null)
+        {
+            LastWatched = new LastWatchedInfo();
+            return;
+        }
+
+        var wheel = await _wheelService.GetWheelByIdAsync(lastWatchedWheelMovie.WheelId);
+        var movie = await _movieService.GetMovieByIdAsync(lastWatchedWheelMovie.MovieId);
+
+        LastWatched = new LastWatchedInfo
+        {
+            WheelName = wheel?.Name ?? "Unknown wheel",
+            MovieTitle = movie?.Title ?? "Unknown movie",
+            WatchedDate = lastWatchedWheelMovie.WatchedDate
+        };
     }
 }
