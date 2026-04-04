@@ -222,7 +222,7 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         OnPropertyChanged(nameof(AllWheelMovies));
         OnPropertyChanged(nameof(WatchedMovies));
         DataUpdated?.Invoke();
-    }   
+    }
 
     public async Task RemoveWheelMoviesAsync(IEnumerable<int> wheelMovieIds)
     {

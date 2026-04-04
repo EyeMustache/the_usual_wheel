@@ -3,6 +3,7 @@
 @inject WheelListViewModel ViewModel
 @* Welcome back message with last watched info *@
 @* Should be pop up at the top of the page, everything shifts down, can be closed with an x *@
+@* But for now just shows the text *@
 <div class="welcome-back">
     <h2>Welcome back!</h2>
     <p>Last movie watched: <strong>@ViewModel.LastWatched.MovieTitle</strong></p>
@@ -43,5 +44,6 @@
     protected override async Task OnInitializedAsync()
     {
         await ViewModel.LoadWheelAsync();
+        await ViewModel.LoadLastWatchedWheelMovieAsync();
     }
 }
