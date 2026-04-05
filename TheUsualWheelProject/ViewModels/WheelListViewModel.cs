@@ -74,6 +74,35 @@ public class WheelListViewModel
         }
     }
 
+    public async Task UpdateWheelAsync(int wheelId, string name, string description)
+    {
+        var target = Wheels.FirstOrDefault(w => w.Wheel.Id == wheelId);
+        if (target == null) return;
+
+        var updatedWheel = new Wheel
+        {
+            Id = wheelId,
+            Name = name.Trim(),
+            Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim()
+        };
+
+        await _wheelService.UpdateWheelAsync(updatedWheel);
+
+        target.Wheel.Name = updatedWheel.Name;
+        target.Wheel.Description = updatedWheel.Description;
+    }
+
+    public async Task DeleteWheelAsync(int wheelId)
+    {
+        await _wheelService.DeleteWheelAsync(wheelId);
+
+        WheelCardInfo? target = Wheels.FirstOrDefault(w => w.Wheel.Id == wheelId);
+        if (target != null)
+        {
+            Wheels.Remove(target);
+        }
+    }
+
     public async Task LoadLastWatchedWheelMovieAsync()
     {
         var lastWatchedWheelMovie = await _wheelService.GetLastWatchedWheelMovieAsync();

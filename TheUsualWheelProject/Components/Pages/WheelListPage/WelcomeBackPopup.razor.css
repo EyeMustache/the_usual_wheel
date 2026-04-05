@@ -1,0 +1,80 @@
+.welcome-popup {
+    position: relative;
+    width: 100%;
+    /* Same background as mockup */
+    background: linear-gradient(135deg, var(--secondary), var(--primary)); 
+    /* Force all text in the div to be the dark contrast color */
+    color: var(--button-text-contrast) !important;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: none;
+    overflow: hidden;
+}
+
+/* Force MudBlazor icons inside the popup to also be dark */
+.welcome-popup ::deep .mud-icon-root {
+    color: var(--button-text-contrast) !important;
+    fill: var(--button-text-contrast) !important;
+}
+
+/* Any text elements inside get the contrast color */
+.welcome-popup p, 
+.welcome-popup h2, 
+.welcome-popup span {
+    color: var(--button-text-contrast) !important;
+}
+
+.welcome-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    border: none;
+    background: transparent;
+    color: var(--button-text-contrast);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.welcome-close:active {
+    transform: scale(0.95);
+}
+
+.welcome-eyebrow {
+    margin: 0 0 0.35rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    opacity: 0.85; /* slight transparency on the dark text looks great here */
+}
+
+.welcome-title {
+    margin: 0 0 0.7rem 0;
+    font-size: 2rem;
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.welcome-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.welcome-meta {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem; /* Gap between the Wheel name and Date */
+}

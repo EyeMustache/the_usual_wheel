@@ -7,7 +7,8 @@
     
     --primary: #ffa400;        /* Fav orange */
     --secondary: #f8bf26;      /* Pathé gold */
-    --button-text: #1a1a1e;    /* Dark text for buttons */
+    --button-text-contrast: #1a1a1e;    /* Dark text for buttons */
+    --button-text: #e3e3e3;             /* Light text for buttons */
     --text-main: #e3e3e3;
     --text-muted: #a0a0a0;
 }

@@ -50,7 +50,10 @@
                             <MudMenu Icon="@Icons.Material.Rounded.MoreVert" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
                                 <MudMenuItem Icon="@Icons.Material.Outlined.RemoveRedEye" OnClick="@(async () => { await Task.Delay(50); await ViewModel.ToggleMovieWatchedStatusAsync(item.WheelMovie.Id, true); })">Mark as Watched</MudMenuItem>
                                 <MudDivider />
-                                <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="@(async () => { await Task.Delay(50); await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id); })">Remove Movie</MudMenuItem>
+                                <MudMenuItem Icon="@Icons.Material.Filled.Delete"
+                                                    IconColor="Color.Error" 
+                                                    OnClick="@(async () => { await Task.Delay(50); await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id); })">Remove Movie
+                                </MudMenuItem>
                             </MudMenu>
                         }
                     </RightActions>
@@ -89,9 +92,14 @@
                         else
                         {
                             <MudMenu Icon="@Icons.Material.Rounded.MoreVert" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-                                <MudMenuItem Icon="@Icons.Material.Filled.RemoveRedEye" OnClick="@(async () => { await Task.Delay(50); await ViewModel.ToggleMovieWatchedStatusAsync(item.WheelMovie.Id, false); })">Unmark as Watched</MudMenuItem>
+                                <MudMenuItem Icon="@Icons.Material.Filled.RemoveRedEye" 
+                                                    OnClick="@(async () => { await Task.Delay(50); await ViewModel.ToggleMovieWatchedStatusAsync(item.WheelMovie.Id, false); })">Unmark as Watched
+                                </MudMenuItem>
                                 <MudDivider />
-                                <MudMenuItem Icon="@Icons.Material.Filled.Delete" OnClick="@(async () => { await Task.Delay(50); await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id); })">Remove Movie</MudMenuItem>
+                                <MudMenuItem Icon="@Icons.Material.Filled.Delete" 
+                                                    IconColor="Color.Error"
+                                                    OnClick="@(async () => { await Task.Delay(50); await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id); })">Remove Movie
+                                </MudMenuItem>
                             </MudMenu>
                         }
                     </RightActions>

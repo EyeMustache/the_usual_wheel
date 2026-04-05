@@ -1,0 +1,71 @@
+<div class="wheel-card" @onclick="HandleClick">
+    
+    <div class="wheel-card-left">
+        <div class="wheel-icon-box">
+            @* We're using a default icon here. You can swap this out or make it dynamic per wheel later! *@
+            <MudIcon Icon="@Icons.Material.Filled.Movie" Class="wheel-icon" />
+        </div>
+        <div class="movie-count-badge">
+            @WheelInfo.ActiveMovies.ToString("D2")
+        </div>
+    </div>
+
+    <div class="wheel-card-content">
+        <div class="wheel-card-name">
+            <h3>@WheelInfo.Wheel.Name</h3>
+        </div>
+        <div class="wheel-card-description">
+            <p>@(string.IsNullOrWhiteSpace(WheelInfo.Wheel.Description) ? "No titles added yet." : WheelInfo.Wheel.Description)</p>
+        </div>
+    </div>
+
+    <div class="wheel-card-actions" @onclick:stopPropagation="true">
+        <MudMenu Icon="@Icons.Material.Rounded.MoreVert" 
+                 AnchorOrigin="Origin.BottomRight" 
+                 TransformOrigin="Origin.TopRight" 
+                 Class="more-btn" 
+                 Size="Size.Medium" 
+                 DisableRipple="true">
+            <MudMenuItem Icon="@Icons.Material.Filled.Edit" 
+                         OnClick="HandleEditClick">
+                Edit Wheel
+            </MudMenuItem>
+            <MudDivider />
+            <MudMenuItem Icon="@Icons.Material.Filled.Delete" 
+                         IconColor="Color.Error" 
+                         OnClick="HandleDeleteClick">
+                <span style="color: #ff5252;">Delete Wheel</span>
+            </MudMenuItem>
+        </MudMenu>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ViewModels.WheelListViewModel.WheelCardInfo WheelInfo { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<ViewModels.WheelListViewModel.WheelCardInfo> OnEdit { get; set; }
+    [Parameter]
+    public EventCallback<ViewModels.WheelListViewModel.WheelCardInfo> OnDelete { get; set; }
+
+    [Inject]
+    public NavigationManager Navigation { get; set; } = default!;
+
+    private void HandleClick()
+    {
+        Navigation.NavigateTo($"/wheel/{WheelInfo.Wheel.Id}");
+    }
+
+    private async Task HandleEditClick()
+    {
+        if (OnEdit.HasDelegate)
+            await OnEdit.InvokeAsync(WheelInfo);
+    }
+
+    private async Task HandleDeleteClick()
+    {
+        if (OnDelete.HasDelegate)
+            await OnDelete.InvokeAsync(WheelInfo);
+    }
+}

@@ -1,0 +1,55 @@
+<BaseModal IsVisible="@IsVisible" OnClose="@OnClose">
+    <div class="add-wheel-modal">
+        <h2 class="modal-title">Create New Wheel</h2>
+        <div class="title-separator" aria-hidden="true"></div>
+
+        <div class="modal-form">
+            <label class="field-label field-label-secondary">
+                Wheel Title
+                <input class="field-input" @bind="WheelName" placeholder="e.g. Russell Crowe" />
+            </label>
+
+            <label class="field-label field-label-secondary">
+                Description
+                <textarea class="field-input field-textarea" @bind="WheelDescription" placeholder="Describe the vibe of this collection..."></textarea>
+            </label>
+
+            <div class="modal-actions">
+                <button class="btn-add" @onclick="AddWheel" disabled="@IsAddDisabled">
+                    <MudIcon Icon="@Icons.Material.Outlined.Add" Size="Size.Small" Class="btn-add-icon" />
+                    Add
+                </button>
+                <button class="btn-cancel" @onclick="Cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+</BaseModal>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<(string Name, string Description)> OnAddWheel { get; set; }
+
+    private string WheelName { get; set; } = string.Empty;
+    private string WheelDescription { get; set; } = string.Empty;
+
+    private bool IsAddDisabled => string.IsNullOrWhiteSpace(WheelName);
+
+    private async Task AddWheel()
+    {
+        if (OnAddWheel.HasDelegate && !IsAddDisabled)
+        {
+            await OnAddWheel.InvokeAsync((WheelName, WheelDescription));
+            WheelName = string.Empty;
+            WheelDescription = string.Empty;
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    private async Task Cancel()
+    {
+        WheelName = string.Empty;
+        WheelDescription = string.Empty;
+        await OnClose.InvokeAsync();
+    }
+}
