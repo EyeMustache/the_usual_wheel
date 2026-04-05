@@ -26,6 +26,7 @@ else
             @* Component that has more child panels with seperate settings? *@
             <p>Style (change slice colors</p>
             <p>Sound (upload audio files)</p>
+            @* https://mudblazor.com/components/slider could be useful here*@
             <p>Sliders (Spin time, Text Size, Slice repeat amount)</p>
             <p>Wheel name, description(modal maybe?)</p>
             <p>Reset wheel (with confirmation)</p>
@@ -33,7 +34,7 @@ else
             <p>Delete wheel (with confirmation)</p>
         </MudExpansionPanel>
 
-        <!-- Panel: Movie Details / Debug / Future Stats -->
+        <!-- Panel: Movie Details -->
         <MudExpansionPanel Text="Movie Details" Icon="@Icons.Material.Filled.Info">
             @* Should be a component that has more expansion panels, one for each movie *@
             @if (ViewModel.IsEnriching)
@@ -56,6 +57,8 @@ else
         </MudExpansionPanel>
 
         <!-- Future Panel: Stats -->
+        @* https://mudblazor.com/components/timeline, cool for displaying history *@
+        @*  *@
         <MudExpansionPanel Text="Stats & Insights" Icon="@Icons.Material.Filled.BarChart">
             <p>Visual stats on your watched movie history.</p>
             <p>Charts on average ratings, genres, avg length, avg rating etc.</p>

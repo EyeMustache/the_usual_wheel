@@ -1,9 +1,9 @@
-@page "/wheellist"
+@page "/"
 
 @inject WheelListViewModel ViewModel
 
 <div class="welcome-back-message">
-    @if (_showWelcomeBack)
+    @if (_showWelcomeBack && !ViewModel.IsWelcomeBackDismissed)
     {
         <WelcomeBackPopup
             MovieTitle="@ViewModel.LastWatched.MovieTitle"
@@ -62,7 +62,11 @@
 
     private void ShowAddModal() => _showAddModal = true;
     private void HideAddModal() => _showAddModal = false;
-    private void HideWelcomeBack() => _showWelcomeBack = false;
+    private void HideWelcomeBack()
+    {
+        _showWelcomeBack = false;
+        ViewModel.DismissWelcomeBack();
+    }
 
     private async Task HandleAddWheel((string Name, string Description) wheelData)
     {
@@ -101,5 +105,6 @@
     {
         await ViewModel.LoadWheelAsync();
         await ViewModel.LoadLastWatchedWheelMovieAsync();
+        _showWelcomeBack = !ViewModel.IsWelcomeBackDismissed;
     }
 }

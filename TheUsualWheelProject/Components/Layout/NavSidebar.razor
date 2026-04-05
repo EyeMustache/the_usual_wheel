@@ -5,6 +5,7 @@
     <span class="nav-title">(logo placeholder)</span>
     <button class="burger-btn" @onclick="ToggleMenu">☰</button>
 </nav>
+@* https://mudblazor.com/components/drawer, Could be useful replacement for nav sidebar *@
 
 @if (isMenuOpen)
 {
@@ -15,11 +16,13 @@
                 <button class="close-btn" @onclick="CloseMenu">×</button>
             </div>
             <hr class="sidebar-separator" />
-            <a href="/" @onclick="CloseMenu">Home</a>
+            <a href="/" @onclick="CloseMenu">Wheels</a>
             <hr class="sidebar-separator" />
-            <a href="/wheellist" @onclick="CloseMenu">Wheels</a>
+            <a href="/home" @onclick="CloseMenu">Home</a>
             <hr class="sidebar-separator" />
             <a href="/movies" @onclick="CloseMenu">Movies</a>
+            <hr class="sidebar-separator" />
+            <a href="/actors" @onclick="CloseMenu">Actors</a>
             <hr class="sidebar-separator" />
             <a href="/settings" @onclick="CloseMenu">Settings</a>
             <hr class="sidebar-separator" />

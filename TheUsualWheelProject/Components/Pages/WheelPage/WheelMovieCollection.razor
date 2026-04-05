@@ -7,6 +7,7 @@
         <div class="collection-actions">
             <button class="action-btn"><MudIcon Icon="@Icons.Material.Filled.Shuffle" Size="Size.Small" /> SHUFFLE</button>
             <button class="action-btn" @onclick="ToggleMassRemoveMode">
+                @* https://mudblazor.com/components/switch could be useful *@
                 <MudIcon Icon="@(_isMassRemoveMode ? Icons.Material.Filled.ToggleOn : Icons.Material.Filled.ToggleOff)" Size="Size.Small" Color="@(_isMassRemoveMode ? Color.Primary : Color.Default)" /> 
                 @(_isMassRemoveMode ? "CANCEL REMOVE" : "REMOVE")
             </button>
@@ -15,6 +16,7 @@
                 <button class="action-btn" style="color: #ff5252; border-color: #ff5252;" @onclick="ExecuteMassRemove">
                     <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" /> 
                     REMOVE (@_selectedForRemoval.Count)
+                    @* https://mudblazor.com/components/messagebox deletion confirmation component?? *@
                 </button>
             }
             <div class="movie-count-badge">
@@ -48,6 +50,7 @@
                         else
                         {
                             <MudMenu Icon="@Icons.Material.Rounded.MoreVert" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                                @* https://mudblazor.com/components/datepicker; could be useful after marking as watched? *@
                                 <MudMenuItem Icon="@Icons.Material.Outlined.RemoveRedEye" OnClick="@(async () => { await Task.Delay(50); await ViewModel.ToggleMovieWatchedStatusAsync(item.WheelMovie.Id, true); })">Mark as Watched</MudMenuItem>
                                 <MudDivider />
                                 <MudMenuItem Icon="@Icons.Material.Filled.Delete"
