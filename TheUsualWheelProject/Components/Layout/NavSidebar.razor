@@ -1,52 +1,26 @@
-﻿@inject NavigationManager Navigation
-@inject IJSRuntime JS
-<nav>
-    <button class ="back-btn" @onclick="GoBack">◀</button>
-    <span class="nav-title">(logo placeholder)</span>
-    <button class="burger-btn" @onclick="ToggleMenu">☰</button>
-</nav>
-@* https://mudblazor.com/components/drawer, Could be useful replacement for nav sidebar *@
-
-@if (isMenuOpen)
-{
-    <div class="sidebar-overlay" @onclick="CloseMenu">
-        <div class="sidebar" @onclick:stopPropagation>
-            <div class="sidebar-header">
-                <span>The Usual Wheel</span>
-                <button class="close-btn" @onclick="CloseMenu">×</button>
-            </div>
-            <hr class="sidebar-separator" />
-            <a href="/" @onclick="CloseMenu">Wheels</a>
-            <hr class="sidebar-separator" />
-            <a href="/home" @onclick="CloseMenu">Home</a>
-            <hr class="sidebar-separator" />
-            <a href="/movies" @onclick="CloseMenu">Movies</a>
-            <hr class="sidebar-separator" />
-            <a href="/actors" @onclick="CloseMenu">Actors</a>
-            <hr class="sidebar-separator" />
-            <a href="/settings" @onclick="CloseMenu">Settings</a>
-            <hr class="sidebar-separator" />
-            <a href="/about" @onclick="CloseMenu">About</a>
-            <hr class="sidebar-separator" />
+<div class="sidebar-overlay" @onclick="OnClose">
+    <div class="sidebar" @onclick:stopPropagation>
+        <div class="sidebar-header">
+            <span>The Usual Wheel</span>
+            <button class="close-btn" @onclick="OnClose">×</button>
         </div>
+        <hr class="sidebar-separator" />
+        <a href="/" @onclick="OnClose">Wheels</a>
+        <hr class="sidebar-separator" />
+        <a href="/home" @onclick="OnClose">Home</a>
+        <hr class="sidebar-separator" />
+        <a href="/movies" @onclick="OnClose">Movies</a>
+        <hr class="sidebar-separator" />
+        <a href="/actors" @onclick="OnClose">Actors</a>
+        <hr class="sidebar-separator" />
+        <a href="/settings" @onclick="OnClose">Settings</a>
+        <hr class="sidebar-separator" />
+        <a href="/about" @onclick="OnClose">About</a>
+        <hr class="sidebar-separator" />
     </div>
-}
+</div>
 
 @code {
-    private bool isMenuOpen = false;
-
-    private void ToggleMenu()
-    {
-        isMenuOpen = !isMenuOpen;
-    }
-
-    private void CloseMenu()
-    {
-        isMenuOpen = false;
-    }
-
-    private void GoBack()
-    {
-        JS.InvokeVoidAsync(identifier: "blazorGoBack");
-    }
+    [Parameter]
+    public EventCallback OnClose { get; set; }
 }

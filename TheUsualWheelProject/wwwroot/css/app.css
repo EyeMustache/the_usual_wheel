@@ -3,6 +3,8 @@
     --bg-neutral: #0d0d0d;     /* Deep dark background */
     --bg-surface: #121212;     /* Tertiary (cards/panels) */
     --bg-surface-elevated: #1e1e1e; /* Slightly brighter for depth */
+    --bg-surface-elevated-2: #2a2a2a; /* Slightly brighter for depth */
+    --bg-surface-elevated-3: #2b2b2b; /* Slightly brighter for depth */
     /* Maybe adding more surface variants later for hover/active states */
     
     --primary: #ffa400;        /* Fav orange */

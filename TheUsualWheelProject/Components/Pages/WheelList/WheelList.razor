@@ -1,6 +1,7 @@
 @page "/"
 
 @inject WheelListViewModel ViewModel
+@inject NavigationManager NavigationManager
 
 <div class="welcome-back-message">
     @if (_showWelcomeBack && !ViewModel.IsWelcomeBackDismissed)
@@ -19,22 +20,10 @@
         <p>Total wheels: @(ViewModel.Wheels?.Count() ?? 0)</p>
     </div>
 
-    <button class="add-wheel-button" @onclick="ShowAddModal">
+    <button class="add-wheel-button" @onclick="NavigateToAddWheel">
         <MudIcon Icon="@Icons.Material.Outlined.AddCircle" Size="Size.Medium" Class="add-wheel-icon" />
         <span class="add-wheel-text">Add New Wheel</span>
     </button>
-
-    <AddWheelModal
-        IsVisible="@_showAddModal"
-        OnClose="@HideAddModal"
-        OnAddWheel="@HandleAddWheel" />
-
-    <EditWheelModal
-        IsVisible="@_showEditModal"
-        CurrentName="@(_editingWheel?.Wheel.Name ?? string.Empty)"
-        CurrentDescription="@_editingWheel?.Wheel.Description"
-        OnClose="@HideEditModal"
-        OnSave="@HandleSaveEdit" />
 </div>
 
 <div class="wheel-grid">
@@ -48,57 +37,35 @@
         {
             <WheelCard
                 WheelInfo="wheelInfo"
-                OnEdit="HandleEditRequested"
+                OnEdit="NavigateToEditWheel"
                 OnDelete="HandleDeleteRequested" />
         }
     }
 </div>
 
 @code {
-    private bool _showAddModal = false;
-    private bool _showEditModal = false;
     private bool _showWelcomeBack = true;
-    private WheelListViewModel.WheelCardInfo? _editingWheel;
 
-    private void ShowAddModal() => _showAddModal = true;
-    private void HideAddModal() => _showAddModal = false;
+    private void NavigateToAddWheel()
+    {
+        NavigationManager.NavigateTo("/add-wheel");
+    }
+
     private void HideWelcomeBack()
     {
         _showWelcomeBack = false;
         ViewModel.DismissWelcomeBack();
     }
 
-    private async Task HandleAddWheel((string Name, string Description) wheelData)
+    private Task NavigateToEditWheel(WheelListViewModel.WheelCardInfo wheelInfo)
     {
-        await ViewModel.AddWheelAsync(wheelData.Name, wheelData.Description);
-        HideAddModal();
-    }
-
-    private Task HandleEditRequested(WheelListViewModel.WheelCardInfo wheelInfo)
-    {
-        _editingWheel = wheelInfo;
-        _showEditModal = true;
+        NavigationManager.NavigateTo($"/edit-wheel/{wheelInfo.Wheel.Id}");
         return Task.CompletedTask;
     }
 
     private async Task HandleDeleteRequested(WheelListViewModel.WheelCardInfo wheelInfo)
     {
         await ViewModel.DeleteWheelAsync(wheelInfo.Wheel.Id);
-    }
-
-    private void HideEditModal()
-    {
-        _showEditModal = false;
-        _editingWheel = null;
-    }
-
-    private async Task HandleSaveEdit((string Name, string Description) data)
-    {
-        if (_editingWheel is null)
-            return;
-
-        await ViewModel.UpdateWheelAsync(_editingWheel.Wheel.Id, data.Name, data.Description);
-        HideEditModal();
     }
 
     protected override async Task OnInitializedAsync()

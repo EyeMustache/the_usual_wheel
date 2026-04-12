@@ -1,0 +1,56 @@
+﻿@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<nav>
+    <button class="back-btn" @onclick="GoBack">◀</button>
+    <span class="nav-title">@PageTitle</span>
+    <button class="burger-btn" @onclick="ToggleMenu">☰</button>
+</nav>
+@* https://mudblazor.com/components/drawer, Could be useful replacement for nav sidebar *@
+
+@if (isMenuOpen)
+{
+    <NavSidebar OnClose="CloseMenu" />
+}
+
+@code {
+    private string PageTitle => GetPageTitle(Navigation.Uri);
+
+    private string GetPageTitle(string uri)
+    {
+        string? path = Navigation.ToBaseRelativePath(uri).TrimEnd(trimChar: '/');
+
+        return path switch
+        {
+            string p when p.StartsWith("add-wheel") => "Add New Wheel",
+            string p when p.StartsWith("edit-wheel") => "Edit Wheel",
+            string p when p.StartsWith("movies") => "Movies",
+            string p when p.StartsWith("actors") => "Actors",
+            string p when p.StartsWith("settings") => "Settings",
+            string p when p.StartsWith("about") => "About",
+            string p when p.StartsWith("wheel") => "Wheel Page",@* Should be the title of the wheel page but for now just generic wheel page *@
+            _ => "The Usual Wheel"
+        };
+    }
+
+    private bool isMenuOpen = false;
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += HandleLocationChanged;
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= HandleLocationChanged;
+    }
+
+    private void ToggleMenu() => isMenuOpen = !isMenuOpen;
+    private void CloseMenu() => isMenuOpen = false;
+    private void GoBack() => JS.InvokeVoidAsync("blazorGoBack");
+}
