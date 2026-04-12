@@ -1,0 +1,94 @@
+@page "/edit-wheel/{WheelId:int}"
+@inject TheUsualWheelProject.ViewModels.WheelListViewModel ViewModel
+@inject NavigationManager NavigationManager
+@using MudBlazor
+@using TheUsualWheelProject.Components.Layout.Modal
+
+<div class="wheel-page-container">
+    <div class="wheel-page-header">
+        <button class="btn-back" @onclick="GoBack">
+            <MudIcon Icon="@Icons.Material.Filled.ArrowBack" Size="Size.Small" />
+            <span>Back</span>
+        </button>
+    </div>
+
+    <div class="add-wheel-content">
+        <h2 class="page-title">Edit Wheel</h2>
+        <div class="title-separator" aria-hidden="true"></div>
+
+        @if (_isNotFound)
+        {
+            <p>Wheel not found.</p>
+        }
+        else
+        {
+            <div class="page-form">
+                <MudTextField
+                    @bind-Value="WheelName"
+                    Label="Wheel Title"
+                    Placeholder="e.g. Russell Crowe"
+                    FullWidth="true"
+                    Immediate="true"
+                    Variant="Variant.Outlined" />
+
+                <MudTextField
+                    @bind-Value="WheelDescription"
+                    Label="Description"
+                    Placeholder="Describe the vibe of this collection..."
+                    FullWidth="true"
+                    Immediate="true"
+                    Variant="Variant.Outlined"
+                    TextArea="true"
+                    Rows="5" />
+
+                <div class="page-actions">
+                    <button class="btn-add" @onclick="SaveChanges" disabled="@IsSaveDisabled">
+                        <MudIcon Icon="@Icons.Material.Filled.Save" Size="Size.Small" Class="btn-add-icon" />
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int WheelId { get; set; }
+
+    private string WheelName { get; set; } = string.Empty;
+    private string WheelDescription { get; set; } = string.Empty;
+    private bool _isNotFound = false;
+
+    private bool IsSaveDisabled => string.IsNullOrWhiteSpace(WheelName);
+
+    protected override void OnInitialized()
+    {
+        // Try to load the wheel info from the ViewModel (which is a singleton and should have it)
+        var wheelInfo = ViewModel.Wheels.FirstOrDefault(w => w.Wheel.Id == WheelId);
+        
+        if (wheelInfo != null)
+        {
+            WheelName = wheelInfo.Wheel.Name;
+            WheelDescription = wheelInfo.Wheel.Description ?? string.Empty;
+        }
+        else
+        {
+            _isNotFound = true;
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        if (!IsSaveDisabled)
+        {
+            await ViewModel.UpdateWheelAsync(WheelId, WheelName.Trim(), WheelDescription.Trim());
+            GoBack();
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

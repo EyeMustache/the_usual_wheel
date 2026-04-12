@@ -8,6 +8,7 @@ using TheUsualWheelProject.Components;
 using Plugin.Maui.Audio;
 using Dapper;
 using Microsoft.AspNetCore.Components.WebView.Maui;
+using MudBlazor.Services;
 
 namespace TheUsualWheelProject;
 
@@ -53,6 +54,8 @@ public static class MauiProgram
         //builder.UseSkiaSharp();
         // Trying out Blazor
         builder.Services.AddMauiBlazorWebView();
+
+		builder.Services.AddMudServices();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();

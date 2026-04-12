@@ -26,7 +26,7 @@
                     <g>
                         <circle cx="160" cy="160" r="150" fill="#ffa400" />
                         <text x="160" y="160" fill="white" font-size="20" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="0.5">
-                            @Truncate(ViewModel.ActiveSessionMovies[0].Title)
+                            @Truncate(ViewModel.ActiveSessionMovies[0].Movie.Title)
                         </text>
                     </g>;
                     break;
@@ -52,7 +52,7 @@
         <div class="modal show" style="display:block; background:rgba(0,0,0,0.5); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:1000;">
             <div class="modal-dialog" style="margin:10% auto; background:white; padding:2em; border-radius:8px; max-width:400px; box-shadow:0 2px 16px rgba(0,0,0,0.3);">
                 <h4>Movie Removed</h4>
-                <p><strong>@ViewModel.LastRemovedMovie.Title</strong> was removed from the wheel!</p>
+                <p><strong>@ViewModel.LastRemovedMovie.Movie.Title</strong> was removed from the wheel!</p>
                 <button class="btn btn-primary" @onclick="() => ViewModel.LastRemovedMovie = null" tabindex="0" autofocus>OK</button>
             </div>
         </div>
@@ -69,7 +69,7 @@
     }
     else if (ViewModel.ActiveSessionMovies.Count == 1)
     {
-        <h3 class="text-success mt-3">Winner: @ViewModel.ActiveSessionMovies[0].Title!</h3>
+        <h3 class="text-success mt-3">Winner: @ViewModel.ActiveSessionMovies[0].Movie.Title!</h3>
     }
     <button class="btn btn-secondary mt-2" @onclick="ResetSession">
         Reset Wheel Session
@@ -80,14 +80,14 @@
 @if (pendingRemovalIndex.HasValue && pendingRemovalIndex.Value >= 0 && pendingRemovalIndex.Value < ViewModel.ActiveSessionMovies.Count)
 {
     <div class="alert alert-info" style="margin-top: 16px; width: 100%; text-align: center;">
-        <strong>DEBUG:</strong> Next to be removed: <span style="color: #e74c3c;">@ViewModel.ActiveSessionMovies[pendingRemovalIndex.Value].Title</span> (index @pendingRemovalIndex.Value)
+        <strong>DEBUG:</strong> Next to be removed: <span style="color: #e74c3c;">@ViewModel.ActiveSessionMovies[pendingRemovalIndex.Value].Movie.Title</span> (index @pendingRemovalIndex.Value)
     </div>
 }
 
 @if (IsSpinPendingConfirmation && pendingRemovalIndex.HasValue)
 {
     <div class="alert alert-warning" style="margin-top: 16px; text-align: center;">
-        <strong>DEBUG:</strong> Wheel landed. Confirm removal of <span style="color: #e74c3c;">@ViewModel.ActiveSessionMovies[pendingRemovalIndex.Value].Title</span>?
+        <strong>DEBUG:</strong> Wheel landed. Confirm removal of <span style="color: #e74c3c;">@ViewModel.ActiveSessionMovies[pendingRemovalIndex.Value].Movie.Title</span>?
         <button class="btn btn-danger ml-2" @onclick="ConfirmRemoval">Confirm Removal</button>
     </div>
 }
@@ -107,6 +107,12 @@
         "#fd79a8", // Pink
         "#636e72"  // Gray
     };
+    private double AnimatedRotation = 0;
+    private bool IsAnimating = false;
+    // Store the index of the movie to be removed for debug display
+    private bool IsSpinPendingConfirmation = false; // temp debug stuff
+    private int? pendingRemovalIndex = null; // temp debug stuff
+    private double pendingFinalRotation = 0; // temp debug stuff
 
     protected override void OnInitialized()
     {
@@ -143,15 +149,6 @@
     {
         RefreshWheel();
     }
-
-
-    private double AnimatedRotation = 0;
-    private bool IsAnimating = false;
-
-    // Store the index of the movie to be removed for debug display
-    private bool IsSpinPendingConfirmation = false; // temp debug stuff
-    private int? pendingRemovalIndex = null; // temp debug stuff
-    private double pendingFinalRotation = 0; // temp debug stuff
 
     private async Task Spin()
     {
@@ -193,6 +190,7 @@
         return title.Length > 18 ? title.Substring(0, 18) + "..." : title;
     }
 
+    // technically debug stuff but want something like this in the future anyway as a "reset session" button, so leaving it here for now
     private async Task ResetSession()
     {
         await ViewModel.ResetSessionAsync();
@@ -240,7 +238,8 @@
             double startAngle = i * sweepAngle;
             string fillColor = SlicePalette[i % SlicePalette.Count];
             string pathData = GetSlicePath(cx, cy, r, startAngle, sweepAngle);
-            string textColor = GetContrastTextColor(fillColor);
+            string textColor = "#000";
+            //string textColor = GetContrastTextColor(fillColor);
 
             // Calculate label position
             double midAngle = startAngle + (sweepAngle / 2);
@@ -256,13 +255,29 @@
             if (adjustedAngle > 180)
                 textRotation += 180;
 
-            string label = movie.Title.Length > maxChars ? movie.Title.Substring(0, maxChars - 3) + "..." : movie.Title;
+            string label = movie.Movie.Title.Length > maxChars ? movie.Movie.Title.Substring(0, maxChars - 3) + "..." : movie.Movie.Title;
 
-            slices.Add(new WheelSlice(movie, pathData, fillColor, textColor, label, labelX, labelY, textRotation));
+            slices.Add(new WheelSlice(movie.Movie, pathData, fillColor, textColor, label, labelX, labelY, textRotation));
         }
         return slices;
     }
 
+    public void MarkMovieAsWatched(WheelMovieItem item)
+    {
+        // Get WheelMovie from WheelMovieItem
+        // Mark movie as watched
+        // Get datetime.now
+        // Update wheelmovie with watched datetime and set as watched
+        // Update viewmodel
+        // Update database
+    }
+
+    public void MarkMovieAsUnwatched(WheelMovieItem item)
+    {
+        // Same as above but mark as unwatched and remove watched datetime
+    }
+
+    // debug stuff
     private void ConfirmRemoval()
     {
         if (pendingRemovalIndex.HasValue)
@@ -275,3 +290,4 @@
         }
     }
 }
+

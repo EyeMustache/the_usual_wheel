@@ -1,0 +1,85 @@
+@page "/"
+
+@inject WheelListViewModel ViewModel
+@inject NavigationManager NavigationManager
+
+<div class="welcome-back-message">
+    @if (_showWelcomeBack && !ViewModel.IsWelcomeBackDismissed)
+    {
+        <WelcomeBackPopup
+            MovieTitle="@ViewModel.LastWatched.MovieTitle"
+            WheelName="@ViewModel.LastWatched.WheelName"
+            WatchedDate="@ViewModel.LastWatched.WatchedDate"
+            OnClose="HideWelcomeBack" />
+
+        <div class="welcome-back-divider"></div>
+    }
+</div>
+
+<div class="wheel-list-header">
+    <button class="add-wheel-button" @onclick="NavigateToAddWheel">
+        <MudIcon Icon="@Icons.Material.Outlined.AddCircle" Size="Size.Medium" Class="add-wheel-icon" />
+        <span class="add-wheel-text">Add New Wheel</span>
+    </button>
+
+    <div class="wheel-list-summary">
+        <div class="wheel-list-summary-left">
+            <h1>Your Wheels</h1>
+        </div>
+        <div class="wheel-list-count">
+            @(ViewModel.Wheels?.Count() ?? 0) Collections
+        </div>
+    </div>
+
+    <div class="your-wheels-divider"></div>
+</div>
+
+<div class="wheel-list">
+    @if (ViewModel.Wheels == null || !ViewModel.Wheels.Any())
+    {
+        <p>No wheels found.</p>
+    }
+    else
+    {
+        @foreach (WheelListViewModel.WheelCardInfo wheelInfo in ViewModel.Wheels)
+        {
+            <WheelCard
+                WheelInfo="wheelInfo"
+                OnEdit="NavigateToEditWheel"
+                OnDelete="HandleDeleteRequested" />
+        }
+    }
+</div>
+
+@code {
+    private bool _showWelcomeBack = true;
+
+    private void NavigateToAddWheel()
+    {
+        NavigationManager.NavigateTo("/add-wheel");
+    }
+
+    private void HideWelcomeBack()
+    {
+        _showWelcomeBack = false;
+        ViewModel.DismissWelcomeBack();
+    }
+
+    private Task NavigateToEditWheel(WheelListViewModel.WheelCardInfo wheelInfo)
+    {
+        NavigationManager.NavigateTo($"/edit-wheel/{wheelInfo.Wheel.Id}");
+        return Task.CompletedTask;
+    }
+
+    private async Task HandleDeleteRequested(WheelListViewModel.WheelCardInfo wheelInfo)
+    {
+        await ViewModel.DeleteWheelAsync(wheelInfo.Wheel.Id);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.LoadWheelAsync();
+        await ViewModel.LoadLastWatchedWheelMovieAsync();
+        _showWelcomeBack = !ViewModel.IsWelcomeBackDismissed;
+    }
+}

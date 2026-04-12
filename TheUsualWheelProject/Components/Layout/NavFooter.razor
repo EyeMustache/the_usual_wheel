@@ -1,10 +1,14 @@
 @inject NavigationManager Navigation
 
 <footer class="nav-footer">
-    <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/wheellist"))">Wheels</button>
-    <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/"))">Home</button>
+    <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/actors"))">Actors</button>
+    <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/"))">Wheels</button>
     <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/movies"))">Movies</button>
 </footer>
+
+@* Would be cool to be able to swipe left and right to navigate as well
+also would mean a smooth animation between pages, 
+it would have to update the state oft hese icons to show which page you are on rn *@
 
 @code {
     private void NavigateTo(string url)

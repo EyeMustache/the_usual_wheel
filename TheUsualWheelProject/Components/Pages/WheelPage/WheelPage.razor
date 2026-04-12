@@ -1,0 +1,133 @@
+@page "/wheel/{Id:int}"
+@implements IDisposable
+@inject WheelViewModel ViewModel
+
+@if (ViewModel.CurrentWheel == null)
+{
+    <p>Wheel not found.</p>
+}
+else
+{
+    <h1 style="color:var(--text-main); font-weight:800;">@ViewModel.CurrentWheel.Name</h1>
+    
+    <!-- Render the Wheel outside of the panels -->
+    <Wheel />
+    
+    <!-- Collapsible Management Panels -->
+    <MudExpansionPanels MultiExpansion="true" Class="mt-6">
+
+        <!-- Panel: Your Collection (The Movie List UI) -->
+        <MudExpansionPanel Text="Movie Collection" Expanded="true" Icon="@Icons.Material.TwoTone.LocalMovies">
+            <WheelMovieCollection />
+        </MudExpansionPanel>
+
+        <!-- Future Panel: Wheel Settings -->
+        <MudExpansionPanel Text="Wheel Settings" Icon="@Icons.Material.Filled.Settings">
+            @* Component that has more child panels with seperate settings? *@
+            <p>Style (change slice colors</p>
+            <p>Sound (upload audio files)</p>
+            @* https://mudblazor.com/components/slider could be useful here*@
+            <p>Sliders (Spin time, Text Size, Slice repeat amount)</p>
+            <p>Wheel name, description(modal maybe?)</p>
+            <p>Reset wheel (with confirmation)</p>
+            @* I want to add the delete functionality *@
+            <p>Delete wheel (with confirmation)</p>
+        </MudExpansionPanel>
+
+        <!-- Panel: Movie Details -->
+        <MudExpansionPanel Text="Movie Details" Icon="@Icons.Material.Filled.Info">
+            @* Should be a component that has more expansion panels, one for each movie *@
+            @if (ViewModel.IsEnriching)
+            {
+                <p>Fetching missing details from TMDB...</p>
+            }
+            @if (ViewModel.AllWheelMovies == null || !ViewModel.AllWheelMovies.Any())
+            {
+                <p>No movies found for this wheel.</p>
+            }
+            else
+            {
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                    @foreach (WheelMovieItem item in ViewModel.AllWheelMovies)
+                    {
+                        <WheelMovieDetailsCard Movie="item.Movie" />
+                    }
+                </div>
+            }
+        </MudExpansionPanel>
+
+        <!-- Future Panel: Stats -->
+        @* https://mudblazor.com/components/timeline, cool for displaying history *@
+        @*  *@
+        <MudExpansionPanel Text="Stats & Insights" Icon="@Icons.Material.Filled.BarChart">
+            <p>Visual stats on your watched movie history.</p>
+            <p>Charts on average ratings, genres, avg length, avg rating etc.</p>
+            <p>But for now, just list watched movies with dates:</p>
+            
+            @foreach (WheelMovieItem item in ViewModel.WatchedMovies)
+            {
+                <p>@item.Movie.Title - Watched on @item.WheelMovie.WatchedDate</p>
+            }
+        </MudExpansionPanel>
+        
+
+    </MudExpansionPanels>
+}
+
+@code {
+    [Parameter] 
+    public int Id { get; set; }
+    private List<string> MovieTitles => ViewModel.AllWheelMovies?.Select(m => m.Movie.Title).ToList() ?? new List<string>();
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ViewModel.DataUpdated += HandleDataUpdated;
+        ViewModel.PropertyChanged += HandlePropertyChanged;
+        try
+        {
+            await ViewModel.LoadWheelAsync(Id); 
+            _ = Task.Run(async () => 
+            {
+                try
+                {
+                    // await ViewModel.EnrichMoviesBackgroundAsync();
+                    await InvokeAsync(StateHasChanged);
+                }
+                catch (Exception ex)
+                {
+                    _errorMessage = $"Background error: {ex.Message}";
+                    Console.WriteLine(ex);
+                    await InvokeAsync(StateHasChanged);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Initialization error: {ex.Message}";
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async Task HandleWheelLanded(string selectedTitle)
+    {
+        // Find selected movie by title, mark as eliminated, update wheel state
+        // await ViewModel.HandleWheelSelectionAsync(selectedTitle);
+    }
+
+    private void HandleDataUpdated()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandlePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        HandleDataUpdated();
+    }
+
+    public void Dispose()
+    {
+        ViewModel.DataUpdated -= HandleDataUpdated;
+        ViewModel.PropertyChanged -= HandlePropertyChanged;
+    }
+}

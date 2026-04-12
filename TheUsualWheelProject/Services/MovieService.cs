@@ -168,6 +168,7 @@ public class MovieService : LoggingBase<MovieService>
             }
         }
     }
+
     private async Task EnrichMovieDetailsAsync(Movie movie)
     {
         Logger.LogInformation("Enriching movie details for movie ID {movieId} with TMDb ID {tmdbId}.", movie.Id, movie.TmdbId);
@@ -252,4 +253,6 @@ public class MovieService : LoggingBase<MovieService>
                || string.IsNullOrWhiteSpace(movie.PosterUrl)
                || movie.TmdbRating <= 0;
     }
+
+    
 }

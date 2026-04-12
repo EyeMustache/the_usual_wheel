@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="TheUsualWheelProject.styles.css" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
     <link rel="icon" href="data:,">
 </head>
 
@@ -23,6 +24,8 @@
         <a class="dismiss">🗙</a>
     </div>
     
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    
     <script src="_framework/blazor.webview.js" autostart="false"></script>
     
     <!--Back button-->
@@ -32,6 +35,24 @@
         }
     </script>
 
+    <!-- Blur input when keyboard closes so the modal centers itself -->
+    <script>
+        if (window.visualViewport) {
+            let lastHeight = window.visualViewport.height;
+            
+            window.visualViewport.addEventListener('resize', () => {
+                // If the visible screen suddenly gets taller by over 50px, the keyboard shrunk away
+                if (window.visualViewport.height > lastHeight + 50) {
+                    let active = document.activeElement;
+                    // Forcefully unfocus the active input box so the CSS lets the modal drop
+                    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+                        active.blur(); 
+                    }
+                }
+                lastHeight = window.visualViewport.height;
+            });
+        }
+    </script>
 </body>
 
 </html>

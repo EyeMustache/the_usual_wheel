@@ -1,0 +1,32 @@
+<div class="movie-card @(IsWatched ? "watched-card" : "") @(IsSelected ? "selected-for-removal" : "")" 
+     @onclick="HandleClick">
+    <img src="@(string.IsNullOrEmpty(PosterUrl) ? "https://placehold.co/70x105/222222/FFF?text=?" : PosterUrl)" class="movie-poster" alt="@Title poster" />
+    <div class="movie-info">
+        <h3 class="movie-title">@Title</h3>
+        <span class="movie-year">@Year</span>
+        <span class="movie-director">@Director</span>
+    </div>
+    
+    <div class="movie-actions">
+        @RightActions
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Year { get; set; } = "";
+    [Parameter] public string Director { get; set; } = "";
+    [Parameter] public string PosterUrl { get; set; } = "";
+    [Parameter] public bool IsWatched { get; set; }
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public RenderFragment? RightActions { get; set; }
+    [Parameter] public EventCallback OnCardClick { get; set; }
+
+    private async Task HandleClick(MouseEventArgs e)
+    {
+        if (OnCardClick.HasDelegate)
+        {
+            await OnCardClick.InvokeAsync();
+        }
+    }
+}

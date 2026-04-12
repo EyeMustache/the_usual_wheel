@@ -31,7 +31,7 @@
     private bool showSelector = false;
     private int selectedWheelId;
     private string? errorMessage;
-    private List<Models.Wheel> Wheels => WheelListViewModel.Wheels.ToList();
+    private List<Models.Wheel> Wheels => WheelListViewModel.Wheels.Select(w => w.Wheel).ToList();
 
     private void ShowWheelSelector() => showSelector = true;
     private void Cancel()

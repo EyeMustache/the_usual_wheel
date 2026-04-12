@@ -1,11 +1,37 @@
 @inherits LayoutComponentBase
+@using MudBlazor
+
+<MudThemeProvider Theme="@_cinematicTheme" IsDarkMode="true" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
 
 <div class="main-layout">
-    <NavSidebar />
-
-    <main>
-        @Body
-    </main>
-
-    <NavFooter />
+    <ErrorBoundary>
+        <NavHeader />
+        <main style="position:relative;overflow-y:auto;padding-bottom:4rem">
+            @Body
+        </main>
+        <NavFooter />
+    </ErrorBoundary>
 </div>
+
+@code {
+    private MudTheme _cinematicTheme = new MudTheme()
+    {
+        PaletteDark = new PaletteDark()
+        {
+            Primary = "#ffa400",          // Your var(--primary) matches Buttons/Hover states
+            Secondary = "#f8bf26",        // Your var(--secondary)
+            Background = "#0d0d0d",       // Your var(--bg-neutral)
+            Surface = "#1e1e1e",          // Your var(--bg-surface-elevated) for MudMenus/Papers!
+            DrawerBackground = "#121212", // Your var(--bg-surface) 
+            AppbarBackground = "#121212",
+            TextPrimary = "#e3e3e3",      // Your var(--text-main)
+            TextSecondary = "#a0a0a0",    // Your var(--text-muted)
+            ActionDefault = "#e3e3e3",    // Default color for icons like the 3 dots
+            Divider = "#2a2a30",          // Border color for separation
+            HoverOpacity = 0.1            // Nice subtle hover effect
+        }
+    };
+}

@@ -1,0 +1,43 @@
+<div class="welcome-popup" role="status" aria-live="polite">
+    <button type="button" class="welcome-close" @onclick="OnCloseClicked" aria-label="Dismiss welcome message">
+        <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Medium" />
+    </button>
+
+    <h2 class="welcome-title">Welcome Back!</h2>
+    <p class="welcome-eyebrow">Your Last Movie:</p>
+
+    <div class="welcome-row">
+        <MudIcon Icon="@Icons.Material.Filled.Movie" Size="Size.Small" />
+        <span>@MovieTitle</span>
+    </div>
+
+    <div class="welcome-meta">
+        <div class="welcome-row">
+            <MudIcon Icon="@Icons.Material.Filled.Timelapse" Size="Size.Small" />
+            <span>@WheelName</span>
+        </div>
+
+        @if (WatchedDate.HasValue)
+        {
+            <div class="welcome-row">
+                <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Size="Size.Small" />
+                <span>@WatchedDate.Value.ToString("MMM dd, yyyy")</span>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string MovieTitle { get; set; } = "No movies watched yet";
+    [Parameter] public string WheelName { get; set; } = "No movies watched yet";
+    [Parameter] public DateOnly? WatchedDate { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private async Task OnCloseClicked()
+    {
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+}

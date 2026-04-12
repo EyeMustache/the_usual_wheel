@@ -3,7 +3,7 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    background: #222;
+    background: var(--bg-navbar);
     display: flex;
     justify-content: space-around;
     padding: 8px 0;

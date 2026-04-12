@@ -1,0 +1,67 @@
+@page "/add-wheel"
+@inject TheUsualWheelProject.ViewModels.WheelListViewModel ViewModel
+@inject NavigationManager NavigationManager
+@using MudBlazor
+@using TheUsualWheelProject.Components.Layout.Modal
+
+<div class="wheel-page-container">
+    <div class="wheel-page-header">
+        <button class="btn-back" @onclick="GoBack">
+            <MudIcon Icon="@Icons.Material.Filled.ArrowBack" Size="Size.Small" />
+            <span>Back</span>
+        </button>
+    </div>
+
+    <div class="add-wheel-content">
+        <h2 class="page-title">Create New Wheel</h2>
+        <div class="title-separator" aria-hidden="true"></div>
+
+        <div class="page-form">
+            <MudTextField
+                @bind-Value="WheelName"
+                Label="Wheel Title"
+                Placeholder="e.g. Russell Crowe"
+                FullWidth="true"
+                Immediate="true"
+                Variant="Variant.Outlined" />
+
+            <MudTextField
+                @bind-Value="WheelDescription"
+                Label="Description"
+                Placeholder="Describe the vibe of this collection..."
+                FullWidth="true"
+                Immediate="true"
+                Variant="Variant.Outlined"
+                TextArea="true"
+                Rows="5" />
+
+            <div class="page-actions">
+                <button class="btn-add" @onclick="AddWheel" disabled="@IsAddDisabled">
+                    <MudIcon Icon="@Icons.Material.Outlined.Add" Size="Size.Small" Class="btn-add-icon" />
+                    Create Wheel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string WheelName { get; set; } = string.Empty;
+    private string WheelDescription { get; set; } = string.Empty;
+
+    private bool IsAddDisabled => string.IsNullOrWhiteSpace(WheelName);
+
+    private async Task AddWheel()
+    {
+        if (!IsAddDisabled)
+        {
+            await ViewModel.AddWheelAsync(WheelName, WheelDescription);
+            GoBack();
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

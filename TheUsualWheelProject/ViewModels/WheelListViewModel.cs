@@ -6,12 +6,33 @@ namespace TheUsualWheelProject.ViewModels;
 
 public class WheelListViewModel
 {
-    private readonly WheelService _wheelService;
-    public ObservableCollection<Wheel> Wheels { get; private set; } = [];
+    public class WheelCardInfo
+    {
+        public Wheel Wheel { get; set; } = default!;
+        public int TotalMovies { get; set; }
+        public int EliminatedMovies { get; set; }
+        public int ActiveMovies => TotalMovies - EliminatedMovies;
+    }
 
-    public WheelListViewModel(WheelService wheel)
+    public class LastWatchedInfo
+    {
+        public string WheelName { get; set; } = "No movies watched yet";
+        public string MovieTitle { get; set; } = "No movies watched yet";
+        public DateOnly? WatchedDate { get; set; }
+    }
+
+    public LastWatchedInfo LastWatched { get; private set; } = new();
+
+    private readonly WheelService _wheelService;
+    private readonly MovieService _movieService;
+    public ObservableCollection<WheelCardInfo> Wheels { get; private set; } = new();
+    public WheelMovie? LastWatchedWheelMovie {get; private set; }
+    public bool IsWelcomeBackDismissed { get; private set; }
+
+    public WheelListViewModel(WheelService wheel, MovieService movie)
     {
         _wheelService = wheel;
+        _movieService = movie;
     }
 
     public async Task LoadWheelAsync()
@@ -21,7 +42,16 @@ public class WheelListViewModel
         foreach (Wheel wheel in wheels)
         {
             System.Diagnostics.Debug.WriteLine($"Loaded wheel: {wheel.Name}");
-            Wheels.Add(wheel);
+
+            var wheelMovies = (await _wheelService.GetWheelMoviesAsync(wheel.Id)).ToList();
+            var eliminatedCount = wheelMovies.Count(wm => wm.IsEliminated);
+
+            Wheels.Add(new WheelCardInfo
+            {
+                Wheel = wheel,
+                TotalMovies = wheelMovies.Count,
+                EliminatedMovies = eliminatedCount
+            });
         }
     }
 
@@ -36,7 +66,64 @@ public class WheelListViewModel
         Wheel? createdWheel = await _wheelService.AddWheelAsync(newWheel);
         if (createdWheel != null)
         {
-            Wheels.Add(createdWheel);
+            Wheels.Add(new WheelCardInfo
+            {
+                Wheel = createdWheel,
+                TotalMovies = 0,
+                EliminatedMovies = 0
+            });
         }
     }
+
+    public async Task UpdateWheelAsync(int wheelId, string name, string description)
+    {
+        var target = Wheels.FirstOrDefault(w => w.Wheel.Id == wheelId);
+        if (target == null) return;
+
+        var updatedWheel = new Wheel
+        {
+            Id = wheelId,
+            Name = name.Trim(),
+            Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim()
+        };
+
+        await _wheelService.UpdateWheelAsync(updatedWheel);
+
+        target.Wheel.Name = updatedWheel.Name;
+        target.Wheel.Description = updatedWheel.Description;
+    }
+
+    public async Task DeleteWheelAsync(int wheelId)
+    {
+        await _wheelService.DeleteWheelAsync(wheelId);
+
+        WheelCardInfo? target = Wheels.FirstOrDefault(w => w.Wheel.Id == wheelId);
+        if (target != null)
+        {
+            Wheels.Remove(target);
+        }
+    }
+
+    public async Task LoadLastWatchedWheelMovieAsync()
+    {
+        var lastWatchedWheelMovie = await _wheelService.GetLastWatchedWheelMovieAsync();
+        if (lastWatchedWheelMovie == null)
+        {
+            LastWatched = new LastWatchedInfo();
+            return;
+        }
+
+        var wheel = await _wheelService.GetWheelByIdAsync(lastWatchedWheelMovie.WheelId);
+        var movie = await _movieService.GetMovieByIdAsync(lastWatchedWheelMovie.MovieId);
+
+        LastWatched = new LastWatchedInfo
+        {
+            WheelName = wheel?.Name ?? "Unknown wheel",
+            MovieTitle = movie?.Title ?? "Unknown movie",
+            WatchedDate = lastWatchedWheelMovie.WatchedDate
+        };
+    }
+
+    public void DismissWelcomeBack() => IsWelcomeBackDismissed = true;
+
 }

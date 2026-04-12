@@ -1,19 +1,12 @@
-<div class="movie-search-card" @onclick="HandleClick">
-    <div class="movie-search-card-content">
-        <div class="movie-search-card-image">
-            @if (!string.IsNullOrWhiteSpace(TmdbMovie.PosterUrl))
-            {
-                <img src="@TmdbMovie.PosterUrl" alt="Poster for @TmdbMovie.Title" />
-            }
-        </div>
-        <div class="movie-search-card-info">
-            <strong>@TmdbMovie.Title</strong> (@TmdbMovie.Year)<br />
-            <span>Director: @TmdbMovie.Director</span>
-        </div>
+<MovieCard Title="@TmdbMovie.Title" 
+           Year="@TmdbMovie.Year.ToString()"
+           Director="@TmdbMovie.Director"
+           PosterUrl="@TmdbMovie.PosterUrl"
+           OnCardClick="HandleClick">
+    <RightActions>
         <AddMovieToWheel TmdbMovie="TmdbMovie" />
-    </div>
-    <hr class="movie-search-card-separator" />
-</div>
+    </RightActions>
+</MovieCard>
 
 @code {
     [Parameter]
