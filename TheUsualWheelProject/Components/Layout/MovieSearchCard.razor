@@ -4,13 +4,16 @@
            PosterUrl="@TmdbMovie.PosterUrl"
            OnCardClick="HandleClick">
     <RightActions>
-        <AddMovieToWheel TmdbMovie="TmdbMovie" />
+        <AddMovieToWheel TmdbMovie="TmdbMovie" TargetWheelId="TargetWheelId" />
     </RightActions>
 </MovieCard>
 
 @code {
     [Parameter]
     public TmdbMovie TmdbMovie { get; set; } = default!;
+
+    [Parameter]
+    public int? TargetWheelId { get; set; }
 
     [Inject]
     public NavigationManager Navigation { get; set; } = default!;

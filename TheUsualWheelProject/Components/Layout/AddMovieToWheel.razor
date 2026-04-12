@@ -1,9 +1,24 @@
 @inject WheelViewModel WheelViewModel
 @inject WheelListViewModel WheelListViewModel
+@inject ISnackbar Snackbar
 
-<button class="add-movie-to-wheel-btn" @onclick="ShowWheelSelector" disabled="@IsDisabled">
-    Add to Wheel (+)
-</button>
+@if (TargetWheelId.HasValue)
+{
+    @if (_isAdded)
+    {
+        <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" disabled="true" />
+    }
+    else
+    {
+        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="AddMovieRapidFire" disabled="@IsDisabled" />
+    }
+}
+else
+{
+    <button class="add-movie-to-wheel-btn" @onclick="ShowWheelSelector" disabled="@IsDisabled">
+        Add to Wheel (+)
+    </button>
+}
 
 @if (showSelector)
 {
@@ -27,10 +42,12 @@
     [Parameter] public Models.Movie? DbMovie { get; set; }
     [Parameter] public Models.TmdbMovie? TmdbMovie { get; set; }
     [Parameter] public bool IsDisabled { get; set; } = false;
+    [Parameter] public int? TargetWheelId { get; set; }
 
     private bool showSelector = false;
     private int selectedWheelId;
     private string? errorMessage;
+    private bool _isAdded = false;
     private List<Models.Wheel> Wheels => WheelListViewModel.Wheels.Select(w => w.Wheel).ToList();
 
     private void ShowWheelSelector() => showSelector = true;
@@ -40,29 +57,42 @@
         errorMessage = null;
     }
 
-    private async Task AddMovieToSelectedWheel()
+    private async Task AddMovieRapidFire()
     {
-        errorMessage = null;
+        if (!TargetWheelId.HasValue) return;
+        selectedWheelId = TargetWheelId.Value;
+
         try
         {
-            if (DbMovie != null)
-            {
-                await WheelViewModel.AddMovieToWheelByMovieIdAsync(DbMovie.Id, selectedWheelId);
-            }
-            else if (TmdbMovie != null)
-            {
-                await WheelViewModel.AddMovieToWheelByTmdbIdAsync(TmdbMovie.TmdbId, selectedWheelId);
-            }
-            else
-            {
-                errorMessage = "No movie provided.";
-                return;
-            }
+            var result = await WheelViewModel.AddMovieToTargetWheelAsync(DbMovie, TmdbMovie, selectedWheelId);
+            _isAdded = true;
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            Snackbar.Add($"Successfully added {result.MovieTitle} to {result.WheelName}!", Severity.Success);
         }
         catch (Exception ex)
         {
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task AddMovieToSelectedWheel()
+    {
+        errorMessage = null;
+
+        try
+        {
+            var result = await WheelViewModel.AddMovieToTargetWheelAsync(DbMovie, TmdbMovie, selectedWheelId);
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            Snackbar.Add($"Successfully added {result.MovieTitle} to {result.WheelName}!", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            string movieTitle = DbMovie?.Title ?? TmdbMovie?.Title ?? "movie";
             errorMessage = $"Error adding movie to wheel: {ex.Message}";
             Console.WriteLine(ex);
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            Snackbar.Add($"Error adding {movieTitle}: {ex.Message}", Severity.Error);
         }
         finally
         {

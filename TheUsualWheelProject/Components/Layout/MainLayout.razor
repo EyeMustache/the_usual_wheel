@@ -6,15 +6,19 @@
 <MudSnackbarProvider />
 <MudPopoverProvider />
 
-<div class="main-layout">
-    <ErrorBoundary>
-        <NavHeader />
-        <main style="position:relative;overflow-y:auto;padding-bottom:4rem">
-            @Body
-        </main>
-        <NavFooter />
-    </ErrorBoundary>
-</div>
+<MudLayout>
+    <NavHeader />
+    <MudMainContent>
+        <div class="main-layout">
+            <ErrorBoundary>
+                <main style="position:relative;overflow-y:auto;">
+                    @Body
+                </main>
+            </ErrorBoundary>
+        </div>
+    </MudMainContent>
+    <NavFooter />
+</MudLayout>
 
 @code {
     private MudTheme _cinematicTheme = new MudTheme()
