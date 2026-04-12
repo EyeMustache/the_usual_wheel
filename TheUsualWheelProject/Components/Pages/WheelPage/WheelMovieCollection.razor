@@ -51,22 +51,31 @@
                         {
                             <MudMenu Icon="@Icons.Material.Rounded.MoreVert" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
                                 @* https://mudblazor.com/components/datepicker; could be useful after marking as watched? *@
+                                <MudMenuItem Icon="@Icons.Material.Filled.Info" 
+                                                    IconColor="Color.Primary"
+                                                    OnClick="() => { /* TODO: Show movie details */ }"
+                                                    >View Details
+                                </MudMenuItem>
+                                <MudDivider />
                                 <MudMenuItem Icon="@Icons.Material.Outlined.RemoveRedEye" OnClick="@(async () => { await Task.Delay(50); await ViewModel.ToggleMovieWatchedStatusAsync(item.WheelMovie.Id, true); })">Mark as Watched</MudMenuItem>
                                 <MudDivider />
                                 <MudMenuItem Icon="@Icons.Material.Filled.Delete"
                                                     IconColor="Color.Error" 
-                                                    OnClick="@(async () => { await Task.Delay(50); await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id); })">Remove Movie
+                                                    OnClick="@(async () => { await Task.Delay(50); await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id); })"
+                                                    >Remove Movie
                                 </MudMenuItem>
                             </MudMenu>
                         }
                     </RightActions>
                 </MovieCard>
             }
-
+            @* TODO: Make this a proper functioning component *@
             <div class="add-movie-btn mt-3" @onclick="() => { }">
                 <MudIcon Icon="@Icons.Material.Filled.AddCircleOutline" Class="mr-2" />
                 <span>ADD MOVIE</span>
+                @* Useful MudIcons: @Icons.Material.Filled.Bookmark, BookmarkAdd, BookmarkAdded, BookmarkRemove  *@
             </div>
+
         </div>
     </div>
 
