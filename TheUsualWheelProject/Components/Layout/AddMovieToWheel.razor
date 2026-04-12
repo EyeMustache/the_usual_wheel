@@ -6,11 +6,17 @@
 {
     @if (_isAdded)
     {
+        <!-- Kept success green for feedback -->
         <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" disabled="true" />
     }
     else
     {
-        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="AddMovieRapidFire" disabled="@IsDisabled" />
+        <!-- Using the primary variable directly to force the exact orange -->
+        <MudIconButton 
+            Icon="@Icons.Material.Filled.Add" 
+            Style="color: var(--primary);" 
+            OnClick="AddMovieRapidFire" 
+            disabled="@IsDisabled" />
     }
 }
 else

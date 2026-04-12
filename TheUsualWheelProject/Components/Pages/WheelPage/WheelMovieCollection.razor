@@ -130,12 +130,23 @@
 
     @if (_isSearchDrawerOpen)
     {
-        <MudDrawer @bind-Open="_isSearchDrawerOpen" Anchor="Anchor.Bottom" Elevation="1" Variant="@DrawerVariant.Temporary" Height="80%" OverlayAutoClose="true" Style="bottom: var(--mud-appbar-height, 57px);">
-            <MudDrawerHeader>
-                <MudText Typo="Typo.h6">Add Movie to Wheel</MudText>
+        <MudDrawer
+            @bind-Open="_isSearchDrawerOpen"
+            Anchor="Anchor.Bottom"
+            Variant="DrawerVariant.Temporary"
+            Elevation="24"
+            Height="80%"
+            Class="search-drawer"
+            Style="bottom: 64px; border-top-left-radius: 24px; border-top-right-radius: 24px; overflow: hidden;">
+            <div class="drawer-handle"></div>
+            <MudDrawerHeader Class="search-drawer-header">
+                <MudText Typo="Typo.h5" Class="search-drawer-title" Style="color: var(--primary);">
+                    Search Movies
+                </MudText>
                 <MudSpacer />
                 <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="() => _isSearchDrawerOpen = false" />
             </MudDrawerHeader>
+
 
             <div class="pa-4" style="overflow-y: auto; height: 100%;">
                 <SharedMovieSearch TargetWheelId="ViewModel.CurrentWheel?.Id" />

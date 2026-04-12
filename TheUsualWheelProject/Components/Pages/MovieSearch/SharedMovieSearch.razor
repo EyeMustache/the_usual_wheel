@@ -4,9 +4,17 @@
 @* Should have a clear results button *@
 @* Should include TMDB reference before you search, will be hidden once you look for movies *@
 <div class="movie-search">
-    <input @bind="ViewModel.SearchQuery" placeholder="Enter movie title..." />
-    <button @onclick="ViewModel.SearchMoviesAsync">Search</button>
-    @* TODO: Add search icon *@
+    <MudTextField
+        @bind-Value="ViewModel.SearchQuery"
+        Placeholder="Search cinematic masterpieces..."
+        Adornment="Adornment.Start"
+        AdornmentIcon="@Icons.Material.Filled.Search"
+        Class="search-input"
+        Immediate="true" />
+
+    <button type="button" class="search-action-button" @onclick="ViewModel.SearchMoviesAsync">
+        SEARCH
+    </button>
 </div>
 
 @if (ViewModel.IsSearching)

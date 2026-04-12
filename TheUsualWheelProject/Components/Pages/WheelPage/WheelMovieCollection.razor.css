@@ -100,3 +100,33 @@
 .add-movie-btn:active {
     background: var(--bg-surface);
 }
+
+.search-drawer .mud-drawer-paper {
+    background: var(--bg-surface-elevated-2);
+    backdrop-filter: blur(18px);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+}
+
+.search-drawer .mud-drawer-content {
+    padding: 1rem 1rem 0;
+}
+
+.search-drawer-header {
+    padding: 1rem;
+    align-items: center;
+}
+
+.search-drawer-title {
+    color: var(--primary) !important;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.drawer-handle {
+    width: 96px;
+    height: 4px;
+    margin: 0.5rem auto;
+    border-radius: 999px;
+    background: var(--text-muted);
+}
