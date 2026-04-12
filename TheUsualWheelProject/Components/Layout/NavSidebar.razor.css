@@ -11,7 +11,7 @@
     right: 0;
     width: 280px;
     height: 100vh;
-    background: #23272a;
+    background: var(--bg-surface-elevated);
     color: #e3e3e3;
     padding: 1rem;
     z-index: 100;
@@ -30,7 +30,7 @@
 }
 
 .sidebar a:hover {
-    background: #36393f;
+    background: var(--bg-surface-elevated-2);
 }
 
 .close-btn {

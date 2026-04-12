@@ -11,22 +11,30 @@
             WheelName="@ViewModel.LastWatched.WheelName"
             WatchedDate="@ViewModel.LastWatched.WatchedDate"
             OnClose="HideWelcomeBack" />
+
+        <div class="welcome-back-divider"></div>
     }
 </div>
 
 <div class="wheel-list-header">
-    <div class="wheel-list-header-top">
-        <h1>Your Wheels</h1>
-        <p>Total wheels: @(ViewModel.Wheels?.Count() ?? 0)</p>
-    </div>
-
     <button class="add-wheel-button" @onclick="NavigateToAddWheel">
         <MudIcon Icon="@Icons.Material.Outlined.AddCircle" Size="Size.Medium" Class="add-wheel-icon" />
         <span class="add-wheel-text">Add New Wheel</span>
     </button>
+
+    <div class="wheel-list-summary">
+        <div class="wheel-list-summary-left">
+            <h1>Your Wheels</h1>
+        </div>
+        <div class="wheel-list-count">
+            @(ViewModel.Wheels?.Count() ?? 0) Collections
+        </div>
+    </div>
+
+    <div class="your-wheels-divider"></div>
 </div>
 
-<div class="wheel-grid">
+<div class="wheel-list">
     @if (ViewModel.Wheels == null || !ViewModel.Wheels.Any())
     {
         <p>No wheels found.</p>

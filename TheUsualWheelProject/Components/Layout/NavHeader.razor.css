@@ -1,5 +1,5 @@
 nav {
-    background: #2c2f33;
+    background:var(--bg--navbar);
     color: #e3e3e3;
     padding: 0.5rem 1rem;
     display: flex;
@@ -7,6 +7,8 @@ nav {
     align-items: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     position: relative;
+    border-bottom: 1px solid rgba(255, 164, 0, 0.18);
+
 }
 
 .nav-title {
