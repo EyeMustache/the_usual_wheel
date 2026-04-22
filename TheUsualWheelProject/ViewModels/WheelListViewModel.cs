@@ -27,6 +27,7 @@ public class WheelListViewModel
     private readonly MovieService _movieService;
     public ObservableCollection<WheelCardInfo> Wheels { get; private set; } = new();
     public WheelMovie? LastWatchedWheelMovie {get; private set; }
+    public IEnumerable<Wheel> AvailableWheels => Wheels.Select(x => x.Wheel);
     public bool IsWelcomeBackDismissed { get; private set; }
 
     public WheelListViewModel(WheelService wheel, MovieService movie)
@@ -125,5 +126,7 @@ public class WheelListViewModel
     }
 
     public void DismissWelcomeBack() => IsWelcomeBackDismissed = true;
+
+
 
 }
