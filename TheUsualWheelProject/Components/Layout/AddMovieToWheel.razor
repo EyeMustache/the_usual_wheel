@@ -1,5 +1,6 @@
 @inject WheelViewModel WheelViewModel
 @inject WheelListViewModel WheelListViewModel
+@inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
 <button class="add-movie-button"
@@ -11,24 +12,6 @@
     <MudIcon Icon="@ButtonIcon" />
 </button>
 
-@if (showSelector)
-{
-    <div class="wheel-selector-modal">
-        <select @bind="selectedWheelId">
-            @foreach (Models.Wheel wheel in Wheels)
-            {
-                <option value="@wheel.Id">@wheel.Name</option>
-            }
-        </select>
-        <button @onclick="AddMovieToSelectedWheel">Confirm</button>
-        <button @onclick="Cancel">Cancel</button>
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="error-message">@errorMessage</div>
-        }
-    </div>
-}
-
 @code {
     [Parameter] public Models.Movie? DbMovie { get; set; }
     [Parameter] public Models.TmdbMovie? TmdbMovie { get; set; }
@@ -36,9 +19,6 @@
     [Parameter] public int? TargetWheelId { get; set; }
 
     private IEnumerable<Models.Wheel> Wheels => WheelListViewModel.AvailableWheels;
-    private bool showSelector = false;
-    private int selectedWheelId;
-    private string? errorMessage;
     private bool _isAdding = false;
 
     private IEnumerable<Models.WheelMovieItem> WheelMovies => WheelViewModel.AllWheelMovies;
@@ -65,14 +45,23 @@
 
     private void ShowWheelSelector()
     {
-        showSelector = true;
-        selectedWheelId = TargetWheelId ?? Wheels.FirstOrDefault()?.Id ?? 0;
-    }
+        DialogParameters<WheelSelectionDialog>? parameters = new DialogParameters<WheelSelectionDialog>
+        {
+            { x => x.DbMovie, DbMovie },
+            { x => x.TmdbMovie, TmdbMovie }
+        };
 
-    private void Cancel()
-    {
-        showSelector = false;
-        errorMessage = null;
+        DialogOptions? options = new DialogOptions
+        {
+            Position = DialogPosition.Center,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = false,
+            NoHeader = false,
+            CloseOnEscapeKey = true,
+            CloseButton = true
+        };
+
+        DialogService.ShowAsync<WheelSelectionDialog>(title: "Add to wheel", parameters, options);
     }
 
     private async Task AddMovieRapidFire()
@@ -82,46 +71,18 @@
         _isAdding = true;
         try
         {
-            var result = await WheelViewModel.AddMovieToTargetWheelAsync(DbMovie, TmdbMovie, TargetWheelId.Value);
+            (string MovieTitle, string WheelName) result = await WheelViewModel.AddMovieToTargetWheelAsync(DbMovie, TmdbMovie, TargetWheelId.Value);
             Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-            Snackbar.Add($"Successfully added {result.MovieTitle} to {result.WheelName}!", Severity.Success);
+            Snackbar.Add(message: $"Successfully added {result.MovieTitle} to {result.WheelName}!", Severity.Success);
         }
         catch (Exception ex)
         {
             Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+            Snackbar.Add(message: $"Error: {ex.Message}", Severity.Error);
         }
         finally
         {
             _isAdding = false;
-        }
-    }
-
-    private async Task AddMovieToSelectedWheel()
-    {
-        errorMessage = null;
-        _isAdding = true;
-
-        try
-        {
-            (string MovieTitle, string WheelName) result =
-                await WheelViewModel.AddMovieToTargetWheelAsync(DbMovie, TmdbMovie, selectedWheelId);
-
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-            Snackbar.Add($"Successfully added {result.MovieTitle} to {result.WheelName}!", Severity.Success);
-        }
-        catch (Exception ex)
-        {
-            string movieTitle = DbMovie?.Title ?? TmdbMovie?.Title ?? "movie";
-            errorMessage = $"Error adding movie to wheel: {ex.Message}";
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-            Snackbar.Add($"Error adding {movieTitle}: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            _isAdding = false;
-            showSelector = false;
-            StateHasChanged();
         }
     }
 

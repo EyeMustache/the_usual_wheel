@@ -105,3 +105,8 @@ h1, p, span, .mud-paper, .mud-list-item {
 .movie-card.selected-for-removal .movie-poster {
     opacity: 0.5;
 }
+
+.dialog-background-title {
+    background: rgba(var(--mud-palette-primary-rgb), 0.85);
+    color: var(--mud-palette-white) !important;
+}

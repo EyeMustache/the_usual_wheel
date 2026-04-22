@@ -99,6 +99,12 @@ public class WheelService : LoggingBase<WheelService>
         await _wheelRepository.AddMovieToWheelAsync(wheelId, movieId);
     }
 
+    public async Task<IEnumerable<int>> GetWheelIdsForMovieAsync(int movieId)
+    {
+        Logger.LogInformation($"Fetching wheel IDs for movie ID {movieId}.");
+        return await _wheelRepository.GetWheelIdsForMovieAsync(movieId);
+    }
+
     public async Task<IEnumerable<WheelMovie>> GetWheelMoviesAsync(int wheelId)
     {
         Logger.LogInformation($"Fetching wheel movies for wheel ID {wheelId}.");

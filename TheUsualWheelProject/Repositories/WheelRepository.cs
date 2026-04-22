@@ -9,6 +9,16 @@ public class WheelRepository : GenericRepository<Wheel, int>, IWheelRepository
 {
     public WheelRepository(string conString) : base("Wheel", conString) { }
 
+    public async Task<IEnumerable<int>> GetWheelIdsForMovieAsync(int movieId)
+    {
+        using var connection = new SqliteConnection(_conString);
+        var query = @$"SELECT WheelId
+                      FROM WheelMovie
+                      WHERE MovieId = @MovieId";
+        var param = new { MovieId = movieId };
+        return await connection.QueryAsync<int>(query, param);
+    }
+
     public async Task<IEnumerable<WheelMovie>> GetMoviesByWheelIdAsync(int wheelId)
     {
         using var connection = new SqliteConnection(_conString);
