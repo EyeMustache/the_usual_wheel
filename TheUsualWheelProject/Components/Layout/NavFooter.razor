@@ -1,10 +1,14 @@
 @inject NavigationManager Navigation
 
-<footer class="nav-footer">
-    <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/actors"))">Actors</button>
-    <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/"))">Wheels</button>
-    <button class="nav_footer_btn" @onclick="@(() => NavigateTo("/movies"))">Movies</button>
-</footer>
+<MudAppBar Bottom="true" Fixed="true" Elevation="2" Style="background: var(--bg-navbar); border-top: 1px solid #444; z-index: var(--mud-zindex-appbar);">
+    <MudSpacer />
+    <MudButton Color="Color.Inherit" OnClick="@(() => NavigateTo("/actors"))">Actors</MudButton>
+    <MudSpacer />
+    <MudButton Color="Color.Inherit" OnClick="@(() => NavigateTo("/"))">Wheels</MudButton>
+    <MudSpacer />
+    <MudButton Color="Color.Inherit" OnClick="@(() => NavigateTo("/movies"))">Movies</MudButton>
+    <MudSpacer />
+</MudAppBar>
 
 @* Would be cool to be able to swipe left and right to navigate as well
 also would mean a smooth animation between pages, 

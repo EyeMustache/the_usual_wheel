@@ -1,11 +1,13 @@
 ﻿@inject NavigationManager Navigation
 @inject IJSRuntime JS
 
-<nav>
-    <button class="back-btn" @onclick="GoBack">◀</button>
-    <span class="nav-title">@PageTitle</span>
-    <button class="burger-btn" @onclick="ToggleMenu">☰</button>
-</nav>
+<MudAppBar Fixed="true" Elevation="1" Style="background: var(--bg-navbar); border-bottom: 1px solid rgba(255, 164, 0, 0.18);">
+    <MudIconButton Icon="@Icons.Material.Filled.ArrowBackIos" Color="Color.Primary" OnClick="GoBack" />
+    <MudSpacer />
+    <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-weight: 600;">@PageTitle</MudText>
+    <MudSpacer />
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Primary" OnClick="ToggleMenu" />
+</MudAppBar>
 @* https://mudblazor.com/components/drawer, Could be useful replacement for nav sidebar *@
 
 @if (isMenuOpen)

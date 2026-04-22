@@ -1,0 +1,18 @@
+.dialog-background-surface {
+    background: var(--bg-surface) !important;
+    border: 1px solid #2a2a30 !important;
+    color: var(--text-main) !important;
+}
+
+.dialog-background-surface .mud-list-item {
+    background: transparent !important;
+    color: var(--text-main) !important;
+}
+
+.dialog-background-surface .mud-list-item:hover {
+    background: rgba(255, 164, 0, 0.08) !important;
+}
+
+.dialog-background-surface .mud-list-item-text {
+    color: var(--text-main) !important;
+}

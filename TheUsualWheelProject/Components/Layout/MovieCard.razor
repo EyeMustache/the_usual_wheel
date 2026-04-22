@@ -7,7 +7,7 @@
         <span class="movie-director">@Director</span>
     </div>
     
-    <div class="movie-actions">
+    <div class="movie-actions" @onclick:stopPropagation="true">
         @RightActions
     </div>
 </div>

@@ -143,6 +143,34 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         }
     }
 
+    public async Task<(string MovieTitle, string WheelName)> AddMovieToTargetWheelAsync(Movie? dbMovie, TmdbMovie? tmdbMovie, int wheelId)
+    {
+        string movieTitle = dbMovie?.Title ?? tmdbMovie?.Title ?? "Unknown Movie";
+        
+        if (dbMovie != null)
+        {
+            await AddMovieToWheelByMovieIdAsync(dbMovie.Id, wheelId);
+        }
+        else if (tmdbMovie != null)
+        {
+            await AddMovieToWheelByTmdbIdAsync(tmdbMovie.TmdbId, wheelId);
+        }
+        else
+        {
+            throw new InvalidOperationException("No movie provided.");
+        }
+
+        Wheel? wheel = await _wheelService.GetWheelByIdAsync(wheelId);
+        string wheelName = wheel?.Name ?? "Unknown Wheel";
+
+        if (CurrentWheel?.Id == wheelId)
+        {
+            await LoadWheelAsync(wheelId);
+        }
+
+        return (movieTitle, wheelName);
+    }
+
     public async Task AddMovieToWheelByTmdbIdAsync(int tmdbId, int wheelId)
     {
         Logger.LogInformation($"Adding movie with TMDb ID {tmdbId} to wheel ID {wheelId} by TMDb ID.");

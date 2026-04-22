@@ -9,6 +9,7 @@ using Plugin.Maui.Audio;
 using Dapper;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using MudBlazor.Services;
+using MudBlazor;
 
 namespace TheUsualWheelProject;
 
@@ -52,10 +53,13 @@ public static class MauiProgram
 		builder.Services.AddSingleton<MovieDetailsViewModel>();
         
         //builder.UseSkiaSharp();
-        // Trying out Blazor
         builder.Services.AddMauiBlazorWebView();
 
-		builder.Services.AddMudServices();
+		builder.Services.AddMudServices(config =>
+		{
+			config.SnackbarConfiguration.SnackbarVariant = Variant.Outlined;
+			config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopCenter;
+		});
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
@@ -86,8 +90,7 @@ public static class MauiProgram
 		logger?.LogInformation("App startup sequence complete.");
 
 		var db = app.Services.GetRequiredService<DatabaseService>();
-		// db.ResetAndSeedTestDataAsync().GetAwaiter().GetResult();
-
+		
 		return app;
 	}
 }

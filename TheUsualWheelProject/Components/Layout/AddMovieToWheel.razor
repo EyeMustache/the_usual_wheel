@@ -1,72 +1,105 @@
 @inject WheelViewModel WheelViewModel
 @inject WheelListViewModel WheelListViewModel
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
-<button class="add-movie-to-wheel-btn" @onclick="ShowWheelSelector" disabled="@IsDisabled">
-    Add to Wheel (+)
+<button class="add-movie-button"
+        type="button"
+        @onclick="HandleAddButtonClick"
+        @onclick:stopPropagation="true"
+        disabled="@IsButtonDisabled"
+        aria-label="Add movie to wheel">
+    <MudIcon Icon="@ButtonIcon" />
 </button>
-
-@if (showSelector)
-{
-    <div class="wheel-selector-modal">
-        <select @bind="selectedWheelId">
-            @foreach (var wheel in Wheels)
-            {
-                <option value="@wheel.Id">@wheel.Name</option>
-            }
-        </select>
-        <button @onclick="AddMovieToSelectedWheel">Confirm</button>
-        <button @onclick="Cancel">Cancel</button>
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="error-message">@errorMessage</div>
-        }
-    </div>
-}
 
 @code {
     [Parameter] public Models.Movie? DbMovie { get; set; }
     [Parameter] public Models.TmdbMovie? TmdbMovie { get; set; }
     [Parameter] public bool IsDisabled { get; set; } = false;
+    [Parameter] public int? TargetWheelId { get; set; }
 
-    private bool showSelector = false;
-    private int selectedWheelId;
-    private string? errorMessage;
-    private List<Models.Wheel> Wheels => WheelListViewModel.Wheels.Select(w => w.Wheel).ToList();
+    private IEnumerable<Models.Wheel> Wheels => WheelListViewModel.AvailableWheels;
+    private bool _isAdding = false;
 
-    private void ShowWheelSelector() => showSelector = true;
-    private void Cancel()
+    private IEnumerable<Models.WheelMovieItem> WheelMovies => WheelViewModel.AllWheelMovies;
+    private int? CurrentWheelId => WheelViewModel.CurrentWheel?.Id;
+
+    private bool IsAlreadyAdded =>
+        TargetWheelId.HasValue
+        && TargetWheelId == CurrentWheelId
+        && GetMovieTmdbId() is int tmdbId
+        && WheelMovies.Any(wm => wm.Movie.TmdbId == tmdbId);
+
+    private bool IsButtonDisabled => IsDisabled || _isAdding || IsAlreadyAdded;
+
+    private string ButtonIcon => IsAlreadyAdded
+        ? Icons.Material.Filled.Check
+        : Icons.Material.Filled.Add;
+
+    private int? GetMovieTmdbId()
     {
-        showSelector = false;
-        errorMessage = null;
+        if (DbMovie != null && DbMovie.TmdbId != 0) return DbMovie.TmdbId;
+        if (TmdbMovie != null) return TmdbMovie.TmdbId;
+        return null;
     }
 
-    private async Task AddMovieToSelectedWheel()
+    private void ShowWheelSelector()
     {
-        errorMessage = null;
+        DialogParameters<WheelSelectionDialog>? parameters = new DialogParameters<WheelSelectionDialog>
+        {
+            { x => x.DbMovie, DbMovie },
+            { x => x.TmdbMovie, TmdbMovie }
+        };
+
+        DialogOptions? options = new DialogOptions
+        {
+            Position = DialogPosition.Center,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = false,
+            NoHeader = false,
+            CloseOnEscapeKey = true,
+            CloseButton = true
+        };
+
+        DialogService.ShowAsync<WheelSelectionDialog>(title: "Add to wheel", parameters, options);
+    }
+
+    private async Task AddMovieRapidFire()
+    {
+        if (!TargetWheelId.HasValue) return;
+
+        _isAdding = true;
         try
         {
-            if (DbMovie != null)
-            {
-                await WheelViewModel.AddMovieToWheelByMovieIdAsync(DbMovie.Id, selectedWheelId);
-            }
-            else if (TmdbMovie != null)
-            {
-                await WheelViewModel.AddMovieToWheelByTmdbIdAsync(TmdbMovie.TmdbId, selectedWheelId);
-            }
-            else
-            {
-                errorMessage = "No movie provided.";
-                return;
-            }
+            (string MovieTitle, string WheelName) result = await WheelViewModel.AddMovieToTargetWheelAsync(DbMovie, TmdbMovie, TargetWheelId.Value);
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            Snackbar.Add(message: $"Successfully added {result.MovieTitle} to {result.WheelName}!", Severity.Success);
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error adding movie to wheel: {ex.Message}";
-            Console.WriteLine(ex);
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            Snackbar.Add(message: $"Error: {ex.Message}", Severity.Error);
         }
         finally
         {
-            showSelector = false;
+            _isAdding = false;
+        }
+    }
+
+    private async Task HandleAddButtonClick()
+    {
+        if (IsAlreadyAdded)
+        {
+            return;
+        }
+
+        if (TargetWheelId.HasValue)
+        {
+            await AddMovieRapidFire();
+        }
+        else
+        {
+            ShowWheelSelector();
         }
     }
 }

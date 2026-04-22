@@ -9,6 +9,16 @@ public class WheelRepository : GenericRepository<Wheel, int>, IWheelRepository
 {
     public WheelRepository(string conString) : base("Wheel", conString) { }
 
+    public async Task<IEnumerable<int>> GetWheelIdsForMovieAsync(int movieId)
+    {
+        using var connection = new SqliteConnection(_conString);
+        var query = @$"SELECT WheelId
+                      FROM WheelMovie
+                      WHERE MovieId = @MovieId";
+        var param = new { MovieId = movieId };
+        return await connection.QueryAsync<int>(query, param);
+    }
+
     public async Task<IEnumerable<WheelMovie>> GetMoviesByWheelIdAsync(int wheelId)
     {
         using var connection = new SqliteConnection(_conString);
@@ -22,7 +32,7 @@ public class WheelRepository : GenericRepository<Wheel, int>, IWheelRepository
     public async Task AddMovieToWheelAsync(int wheelId, int movieId)
     {
         using var connection = new SqliteConnection(_conString);
-        var query = @$"INSERT INTO WheelMovie (WheelId, MovieId, IsEliminated)
+        var query = @$"INSERT OR IGNORE INTO WheelMovie (WheelId, MovieId, IsEliminated)
                       VALUES (@WheelId, @MovieId, 0)";
         var param = new { WheelId = wheelId, MovieId = movieId };
         await connection.ExecuteAsync(query, param);

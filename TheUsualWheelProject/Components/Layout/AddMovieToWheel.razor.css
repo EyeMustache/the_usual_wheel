@@ -1,17 +1,49 @@
-/* .add-movie-to-wheel-btn {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background-color: #0078d4;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
+.add-movie-button {
+  position: relative;
+  z-index: 9999;
+  pointer-events: auto;
+  touch-action: manipulation;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--primary);
+  border: 1px solid rgba(255, 164, 0, 0.9);
+  color: var(--button-text-contrast);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
-.add-movie-to-wheel-btn:hover,
-.add-movie-to-wheel-btn:focus {
-    background-color: #005fa3;
-    outline: none;
-} */
+.add-movie-button .mud-icon-root {
+  color: var(--button-text-contrast) !important;
+}
+
+.add-movie-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+}
+
+.add-movie-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.add-movie-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.add-movie-button.added {
+  background: rgba(255, 164, 0, 0.95);
+}
+
+.add-movie-button.secondary {
+  width: auto;
+  min-width: 120px;
+  padding: 0 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}

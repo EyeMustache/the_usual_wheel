@@ -1,0 +1,53 @@
+@using TheUsualWheelProject.ViewModels
+@inject MovieSearchViewModel ViewModel
+
+@* Should have a clear results button *@
+@* Should include TMDB reference before you search, will be hidden once you look for movies *@
+<div class="movie-search">
+    <MudTextField
+        @bind-Value="ViewModel.SearchQuery"
+        Placeholder="Search cinematic masterpieces..."
+        Adornment="Adornment.Start"
+        AdornmentIcon="@Icons.Material.Filled.Search"
+        Class="search-input"
+        Immediate="true" />
+
+    <button type="button" class="search-action-button" @onclick="ViewModel.SearchMoviesAsync">
+        SEARCH
+    </button>
+</div>
+
+@if (ViewModel.IsSearching)
+{
+    @* TODO: Show a loading indicator here *@
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="loading-bar" />
+    @* TODO: Show movie search result skeletons *@
+    @* Tell the user we are searching? ig progress bar does that *@
+}
+else if (ViewModel.SearchResults != null && ViewModel.SearchResults.Any())
+{
+    <h2>Results</h2>
+    <div class="movie-results">
+        @foreach (var movie in ViewModel.SearchResults)
+        {
+            <MovieSearchCard TmdbMovie="movie" TargetWheelId="TargetWheelId" />
+        }
+    </div>
+
+    @if (ViewModel.HasMoreResults)
+    {
+        @* TODO: Fix so when you load more you don't get send to the top of the page *@
+        <button @onclick="ViewModel.LoadMoreAsync" disabled="@ViewModel.IsSearching">
+            @(ViewModel.IsSearching ? "Loading..." : "Load More")
+        </button>
+    }
+}
+else if (ViewModel.HasSearched)
+{
+    <p>No results found.</p>
+}
+
+@code {
+    [Parameter]
+    public int? TargetWheelId { get; set; }
+}
