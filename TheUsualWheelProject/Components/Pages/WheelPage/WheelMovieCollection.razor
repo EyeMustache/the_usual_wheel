@@ -1,5 +1,5 @@
 @implements IDisposable
-@using TheUsualWheelProject.Models
+@inject IDialogService DialogService
 
 <div class="collection-container">
     <div class="collection-header mt-8 mb-4">
@@ -73,7 +73,13 @@
                                 <MudDivider />
                                 <MudMenuItem Icon="@Icons.Material.Filled.Delete"
                                              IconColor="Color.Error"
-                                             OnClick="@(async () => { await Task.Delay(50); await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id); })">
+                                             OnClick="@(async () =>
+                                             {
+                                                 if (await ConfirmAsync("Remove movie?", $"Remove {item.Movie.Title} from this wheel?"))
+                                                 {
+                                                     await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id);
+                                                 }
+                                             })">
                                     Remove Movie
                                 </MudMenuItem>
                             </MudMenu>
@@ -126,8 +132,14 @@
                                 </MudMenuItem>
                                 <MudDivider />
                                 <MudMenuItem Icon="@Icons.Material.Filled.Delete"
-                                             IconColor="Color.Error"
-                                             OnClick="@(async () => { await Task.Delay(50); await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id); })">
+                                            IconColor="Color.Error"
+                                            OnClick="@(async () =>
+                                            {
+                                                if (await ConfirmAsync("Remove movie?", $"Remove {item.Movie.Title} from this wheel?"))
+                                                {
+                                                    await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id);
+                                                }
+                                            })">
                                     Remove Movie
                                 </MudMenuItem>
                             </MudMenu>
@@ -216,14 +228,47 @@
 
     private async Task ExecuteMassRemove()
     {
-        if (_selectedForRemoval.Any())
+        if (!_selectedForRemoval.Any())
+            return;
+
+        if (!await ConfirmAsync(
+            title: "Remove multiple movies?",
+            message: $"Remove {_selectedForRemoval.Count} selected movies from this wheel?",
+            detail: "This action cannot be undone."))
         {
-            var idsToRemove = _selectedForRemoval.Select(i => i.WheelMovie.Id).ToList();
-            await ViewModel.RemoveWheelMoviesAsync(idsToRemove);
+            return;
         }
+
+        List<int>? idsToRemove = _selectedForRemoval.Select(i => i.WheelMovie.Id).ToList();
+        await ViewModel.RemoveWheelMoviesAsync(idsToRemove);
 
         _selectedForRemoval.Clear();
         _isMassRemoveMode = false;
+    }
+
+    private async Task<bool> ConfirmAsync(string title, string message, string? detail = null)
+    {
+        DialogParameters? parameters = new DialogParameters
+        {
+            { "Title", title },
+            { "Message", message },
+            { "Detail", detail ?? "This action cannot be undone." },
+            { "ConfirmText", "Continue" },
+            { "CancelText", "Cancel" },
+            { "ConfirmColor", Color.Error }
+        };
+
+        DialogOptions? options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            CloseButton = true,
+            MaxWidth = MaxWidth.ExtraSmall,
+            FullWidth = true
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<ConfirmDialog>(title: "Confirm Removal", parameters, options);
+        DialogResult? result = await dialog.Result;
+        return !result.Canceled && result.Data is bool ok && ok;
     }
 
     private double? _touchStartY;

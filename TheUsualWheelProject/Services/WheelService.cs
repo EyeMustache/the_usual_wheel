@@ -137,7 +137,7 @@ public class WheelService : LoggingBase<WheelService>
     public async Task RemoveMovieFromWheelAsync(int movieId, int wheelId)
     {
         Logger.LogInformation($"Removing movie with ID {movieId} from wheel with ID {wheelId}.");
-        await _wheelRepository.RemoveMovieFromWheelAsync(wheelId, movieId);
+        await _wheelRepository.RemoveMovieFromWheelAsync(movieId, wheelId);
     }
 
     public async Task RemoveMoviesFromWheelAsync(IEnumerable<int> wheelMovieIds)
