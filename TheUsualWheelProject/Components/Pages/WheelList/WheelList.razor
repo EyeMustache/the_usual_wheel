@@ -2,6 +2,7 @@
 
 @inject WheelListViewModel ViewModel
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
 
 <div class="welcome-back-message">
     @if (_showWelcomeBack && !ViewModel.IsWelcomeBackDismissed)
@@ -73,7 +74,40 @@
 
     private async Task HandleDeleteRequested(WheelListViewModel.WheelCardInfo wheelInfo)
     {
+        if (!await ConfirmAsync(
+            title: "Delete wheel?",
+            message: $"Delete \"{wheelInfo.Wheel.Name}\" and remove it from your collection?",
+            detail: "This action cannot be undone."))
+        {
+            return;
+        }
+
         await ViewModel.DeleteWheelAsync(wheelInfo.Wheel.Id);
+    }
+
+    private async Task<bool> ConfirmAsync(string title, string message, string? detail = null)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Title", title },
+            { "Message", message },
+            { "Detail", detail ?? "This action cannot be undone." },
+            { "ConfirmText", "Continue" },
+            { "CancelText", "Cancel" },
+            { "ConfirmColor", Color.Error }
+        };
+    
+        DialogOptions? options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            CloseButton = true,
+            MaxWidth = MaxWidth.ExtraSmall,
+            FullWidth = true
+        };
+    
+        IDialogReference? dialog = await DialogService.ShowAsync<ConfirmDialog>(title: "Confirm deletion", parameters, options);
+        DialogResult? result = await dialog.Result;
+        return result is { Canceled: false, Data: bool ok } && ok;
     }
 
     protected override async Task OnInitializedAsync()

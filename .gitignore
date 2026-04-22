@@ -46,3 +46,4 @@ docs/
 #Hide API key
 TheUsualWheelProject/TmdbApiKey.cs
 
+.github/agents/ask-wheel.agent.md

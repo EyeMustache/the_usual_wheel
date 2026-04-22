@@ -135,7 +135,7 @@
                                             IconColor="Color.Error"
                                             OnClick="@(async () =>
                                             {
-                                                if (await ConfirmAsync("Remove movie?", $"Remove {item.Movie.Title} from this wheel?"))
+                                                if (await ConfirmAsync("Remove movie?", $"Remove \"{item.Movie.Title}\" from this wheel?"))
                                                 {
                                                     await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id);
                                                 }
@@ -266,9 +266,9 @@
             FullWidth = true
         };
 
-        IDialogReference? dialog = await DialogService.ShowAsync<ConfirmDialog>(title: "Confirm Removal", parameters, options);
+        IDialogReference? dialog = await DialogService.ShowAsync<ConfirmDialog>(title, parameters, options);
         DialogResult? result = await dialog.Result;
-        return !result.Canceled && result.Data is bool ok && ok;
+        return result is { Canceled: false, Data: bool ok } && ok;
     }
 
     private double? _touchStartY;
