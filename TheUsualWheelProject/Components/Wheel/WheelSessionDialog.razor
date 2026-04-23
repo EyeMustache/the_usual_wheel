@@ -13,41 +13,47 @@
                 IsAnimating="IsAnimating"
                 IsPreviewMode="false" />
 
-            @* Volume controller *@
-            <div class="session-controls">
-                <MudText Typo="Typo.subtitle2" Class="mb-1">Volume</MudText>
-                <MudSlider @bind-Value="_volume" Min="0" Max="1" Step="0.05" Color="Color.Primary" />
-                <MudText Typo="Typo.caption" Class="mt-1">@($"{_volume:P0}")</MudText>
-
-                <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Elimination Timeline</MudText>
+            @* Session Controls & Timeline *@
+            <MudExpansionPanels MultiExpansion="true" Class="mt-4 session-controls">
                 
-                @* Timeline of eliminations *@
-                <div class="timeline-scroll-container">
-                    <MudTimeline>
-                        @for (int i = 0; i < _eliminationHistory.Count; i++)
-                        {
-                            WheelMovieItem? item = _eliminationHistory[i];
-                            
-                            // The most recent item is the last one in the list
-                            bool isLatest = i == _eliminationHistory.Count - 1;
-                            
-                            // Make the latest item "Primary" or "Error" (lit up), others "Dark" or "Default"
-                            Color itemColor = isLatest ? Color.Warning : Color.Dark;
-                            
-                            // Even items go right (default text align), odd items go left (push text to the end)
-                            Align textAlign = i % 2 == 0 ? Align.Start : Align.End;
+                @* Volume panel *@
+                <MudExpansionPanel Text="Audio Settings" Icon="@Icons.Material.Filled.VolumeUp">
+                    <div class="px-2">
+                        <MudSlider @bind-Value="_volume" Min="0" Max="1" Step="0.05" Color="Color.Primary" />
+                        <MudText Typo="Typo.caption" Class="mt-1">@($"{_volume:P0}")</MudText>
+                    </div>
+                </MudExpansionPanel>
 
-                            <MudTimelineItem Color="@itemColor" Size="Size.Small" Variant="Variant.Filled">
-                                <ItemContent>
-                                    <MudText Typo="Typo.body2" Align="@textAlign">
-                                        @item.Movie.Title
-                                    </MudText>
-                                </ItemContent>
-                            </MudTimelineItem>
-                        }
-                    </MudTimeline>
-                </div>
-            </div>
+                @* Timeline panel *@
+                <MudExpansionPanel Text="Elimination Timeline" Icon="@Icons.Material.Filled.History">
+                    <div class="timeline-scroll-container">
+                        <MudTimeline>
+                            @for (int i = 0; i < _eliminationHistory.Count; i++)
+                            {
+                                WheelMovieItem? item = _eliminationHistory[i];
+                                
+                                // The most recent item is the last one in the list
+                                bool isLatest = i == _eliminationHistory.Count - 1;
+                                
+                                // Make the latest item "Warning" (lit up), others "Dark"
+                                Color itemColor = isLatest ? Color.Warning : Color.Dark;
+                                
+                                // Even items go right (default text align), odd items go left (push text to the end)
+                                Align textAlign = i % 2 == 0 ? Align.Start : Align.End;
+
+                                <MudTimelineItem Color="@itemColor" Size="Size.Small" Variant="Variant.Filled">
+                                    <ItemContent>
+                                        <MudText Typo="Typo.body2" Align="@textAlign">
+                                            @item.Movie.Title
+                                        </MudText>
+                                    </ItemContent>
+                                </MudTimelineItem>
+                            }
+                        </MudTimeline>
+                    </div>
+                </MudExpansionPanel>
+
+            </MudExpansionPanels>
 
             @* Elimination Confirmation Dialog *@
             <MudDialog @bind-Visible="_showEliminationDialog">
