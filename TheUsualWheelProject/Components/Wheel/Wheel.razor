@@ -34,13 +34,13 @@
                 default:
                     foreach (WheelSlice slice in GetWheelSlices())
                     {
-                        <WheelSliceDispz`lay Slice="slice" />
+                        <WheelSliceDisplay Slice="slice" />
                     }
                     break;
             }
         <circle cx="160" cy="160" r="150" fill="none" stroke="#0b0b0b" stroke-width="6" opacity="0.95" />
-        <circle cx="160" cy="160" r="18" fill="#ffa400" />
-        <circle cx="160" cy="160" r="10" fill="#000" />
+        <circle cx="160" cy="160" r="18" fill="#000" />
+        <circle cx="160" cy="160" r="10" fill="#ffa400" />
         }
     </svg>
 
@@ -67,17 +67,17 @@
     @if (ViewModel.ActiveSessionMovies.Count > 1)
     {
         // Maybe make this a component in the future if we add more controls
-        <button class="btn btn-primary" @onclick="Spin" disabled="@ViewModel.IsSpinning">
+        @* <button class="btn btn-primary" @onclick="Spin" disabled="@ViewModel.IsSpinning">
             @(ViewModel.IsSpinning ? "SPINNING..." : "SPIN THE WHEEL")
-        </button>
+        </button> *@
     }
     else if (ViewModel.ActiveSessionMovies.Count == 1)
     {
         <h3 class="text-success mt-3">Winner: @ViewModel.ActiveSessionMovies[0].Movie.Title!</h3>
     }
-    <button class="btn btn-secondary mt-2" @onclick="ResetSession">
+    @* <button class="btn btn-secondary mt-2" @onclick="ResetSession">
         Reset Wheel Session
-    </button>
+    </button> *@
 </div>
 
 @* Debug line: show which movie will be removed on next spin (only when a spin is pending), now below the controls *@
@@ -220,8 +220,10 @@
 
         // Calculate sweep angle and label positions.
         double sweepAngle = 360.0 / count;
-        double labelRadius = 80;
+        double labelRadius = 82;
         double charWidth = 5;
+        @* double baseFontSize = 16;
+        double fontSize = Math.Clamp(baseFontSize - (count * 0.8), min: 10, baseFontSize); *@
 
         // Clamp maxChars between 3 and 16
         double arcLength = 2 * Math.PI * labelRadius * (sweepAngle / 360.0);
@@ -233,12 +235,11 @@
 
         for (int i = 0; i < count; i++)
         {
-            var movie = ViewModel.ActiveSessionMovies[i];
+            WheelMovieItem? movie = ViewModel.ActiveSessionMovies[i];
             double startAngle = i * sweepAngle;
             string fillColor = SlicePalette[i % SlicePalette.Count];
             string pathData = GetSlicePath(cx, cy, r, startAngle, sweepAngle);
-            string textColor = "#000";
-            //string textColor = GetContrastTextColor(fillColor);
+            string textColor = GetContrastTextColor(fillColor); // Dynamically pick black or white
 
             // Calculate label position
             double midAngle = startAngle + (sweepAngle / 2);
@@ -254,7 +255,10 @@
             if (adjustedAngle > 180)
                 textRotation += 180;
 
-            string label = movie.Movie.Title.Length > maxChars ? movie.Movie.Title.Substring(0, maxChars - 3) + "..." : movie.Movie.Title;
+            int safeChars = Math.Max(3, maxChars - 2);
+            string label = movie.Movie.Title.Length > safeChars
+                ? movie.Movie.Title.Substring(0, safeChars - 3) + "..."
+                : movie.Movie.Title;
 
             slices.Add(new WheelSlice(movie.Movie, pathData, fillColor, textColor, label, labelX, labelY, textRotation));
         }
@@ -263,6 +267,7 @@
 
     public void MarkMovieAsWatched(WheelMovieItem item)
     {
+        @* Should be handled in the viewmodel tbh *@
         // Get WheelMovie from WheelMovieItem
         // Mark movie as watched
         // Get datetime.now
