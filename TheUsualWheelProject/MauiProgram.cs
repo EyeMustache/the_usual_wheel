@@ -27,6 +27,7 @@ public static class MauiProgram
 			});
 		
 		SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+		SqlMapper.AddTypeHandler(new WheelConfigTypeHandler());
 
 		// Repositories
         builder.Services.AddSingleton<IGenericRepository<Movie, int>>(_ => new GenericRepository<Movie, int>("Movies", DatabaseConfig.ConnectionString));

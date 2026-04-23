@@ -8,7 +8,7 @@
 }
 else
 {
-    <h1 style="color:var(--text-main); font-weight:800;">@ViewModel.CurrentWheel.Name</h1>
+    @* <h1 style="color:var(--text-main); font-weight:800;">@ViewModel.CurrentWheel.Name</h1> *@
     
     <!-- Render the Wheel outside of the panels -->
     <Wheel />
@@ -23,15 +23,40 @@ else
 
         <!-- Future Panel: Wheel Settings -->
         <MudExpansionPanel Text="Wheel Settings" Icon="@Icons.Material.Filled.Settings">
-            @* Component that has more child panels with seperate settings? *@
-            <p>Style (change slice colors</p>
-            <p>Sound (upload audio files)</p>
-            @* https://mudblazor.com/components/slider could be useful here*@
-            <p>Sliders (Spin time, Text Size, Slice repeat amount)</p>
-            <p>Wheel name, description(modal maybe?)</p>
-            <p>Reset wheel (with confirmation)</p>
-            @* I want to add the delete functionality *@
-            <p>Delete wheel (with confirmation)</p>
+            
+            <div class="wheel-settings-overview">
+                <h5>Current DB Configuration:</h5>
+                <p><strong>Name:</strong> @ViewModel.CurrentWheel.Name</p>
+                <p><strong>Description:</strong> @ViewModel.CurrentWheel.Description</p>
+                <hr />
+                <p><strong>Mode (Last Man Standing):</strong> @ViewModel.CurrentWheel.Configuration.IsLastMovieStanding</p>
+                <p><strong>Spin Speed (Seconds):</strong> @ViewModel.CurrentWheel.Configuration.SpinDurationSeconds</p>
+                <p><strong>Allow Duplicates:</strong> @ViewModel.CurrentWheel.Configuration.AllowDuplicates</p>
+                <p><strong>Selected Audio:</strong> @ViewModel.CurrentWheel.Configuration.AudioTrack</p>
+                <p><strong>Slice Colors:</strong></p>
+                <ul>
+                    @foreach(string c in ViewModel.CurrentWheel.Configuration.SliceColors)
+                    {
+                        <li><span style="display:inline-block; width:12px; height:12px; background-color:@c; margin-right:8px;"></span>@c</li>
+                    }
+                </ul>
+            </div>
+
+            @*
+                // FUTURE MUDBLAZOR COMPONENT REMINDERS:
+                // When we build the real UI, two-way bind them directly to the Configuration object like this:
+                
+                <MudSwitch @bind-Value="ViewModel.CurrentWheel.Configuration.IsLastMovieStanding" Label="Last Movie Standing Mode" Color="Color.Success" />
+                <MudSwitch @bind-Value="ViewModel.CurrentWheel.Configuration.AllowDuplicates" Label="Allow Duplicate Entries" Color="Color.Primary" />
+                
+                <MudText>Spin Duration (@ViewModel.CurrentWheel.Configuration.SpinDurationSeconds sec)</MudText>
+                <MudSlider @bind-Value="ViewModel.CurrentWheel.Configuration.SpinDurationSeconds" Min="2" Max="10" Step="1" Color="Color.Info" />
+                
+                <MudTextField @bind-Value="ViewModel.CurrentWheel.Configuration.AudioTrack" Label="Audio Track" Variant="Variant.Outlined" />
+                
+                // Colors will need a slightly more complex repeater component to add/remove from the List<string>.
+            *@
+
         </MudExpansionPanel>
 
         <!-- Panel: Movie Details -->

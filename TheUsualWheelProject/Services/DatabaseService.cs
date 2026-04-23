@@ -29,6 +29,7 @@ public class DatabaseService : LoggingBase<DatabaseService>
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 Name TEXT NOT NULL,
                 Description TEXT
+                Configuration TEXT
             );
             CREATE TABLE IF NOT EXISTS Movie (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,6 +78,7 @@ public class DatabaseService : LoggingBase<DatabaseService>
             CREATE INDEX IF NOT EXISTS IX_MovieProvider_ProviderId
             ON MovieProvider(ProviderId);
         ");
+        // await connection.ExecuteAsync(@"ALTER TABLE Wheel ADD COLUMN Configuration TEXT;");
         Logger.LogInformation("InitAsync done at " + DateTime.UtcNow);
     }
 

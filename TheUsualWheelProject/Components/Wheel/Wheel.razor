@@ -11,7 +11,8 @@
     <svg viewBox="0 0 320 320"
          class="wheel-svg @(IsAnimating ? "spinning" : "")"
          style="transform: rotate(@(AnimatedRotation)deg);">
-        <circle cx="160" cy="160" r="4" fill="black" />;
+        <circle cx="160" cy="160" r="154" fill="#111" />
+
         @{
             // Could be a proper count in future
             int count = ViewModel.ActiveSessionMovies.Count;
@@ -19,7 +20,7 @@
             {
                 case 0:
                     // TODO?: Could be a "no movies added" component in the future
-                    <circle cx="160" cy="160" r="150" fill="#grey" />;
+                    <circle cx="160" cy="160" r="150" fill="#gray" />;
                     break;
                 case 1:
                     // TODO?: Could be slice winner component in future
@@ -33,10 +34,13 @@
                 default:
                     foreach (WheelSlice slice in GetWheelSlices())
                     {
-                        <WheelSliceDisplay Slice="slice" />
+                        <WheelSliceDispz`lay Slice="slice" />
                     }
                     break;
             }
+        <circle cx="160" cy="160" r="150" fill="none" stroke="#0b0b0b" stroke-width="6" opacity="0.95" />
+        <circle cx="160" cy="160" r="18" fill="#ffa400" />
+        <circle cx="160" cy="160" r="10" fill="#000" />
         }
     </svg>
 
@@ -96,17 +100,12 @@
     // TODO: Make this palette user-configurable in the future
     private List<string> SlicePalette = new()
     {
-        "#e74c3c", // Red
-        "#3498db", // Blue
-        "#2ecc71", // Green
-        "#f1c40f", // Yellow
-        "#9b59b6", // Purple
-        "#e67e22", // Orange
-        "#1abc9c", // Teal
-        "#34495e", // Navy
-        "#fd79a8", // Pink
-        "#636e72"  // Gray
+        "#ffa400", // orange
+        "#171717", // dark
+        "#f8bf26", // yellow
+        "#121212", // very dark
     };
+
     private double AnimatedRotation = 0;
     private bool IsAnimating = false;
     // Store the index of the movie to be removed for debug display
