@@ -38,6 +38,7 @@
         </div>
 
         <div class="movie-list">
+            @* Maybe make these movie lists collapsable too? *@
             @foreach (WheelMovieItem item in ActiveMovies)
             {
                 <MovieCard Title="@item.Movie.Title"

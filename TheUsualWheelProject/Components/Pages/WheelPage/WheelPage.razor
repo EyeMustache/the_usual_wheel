@@ -1,6 +1,7 @@
 @page "/wheel/{Id:int}"
 @implements IDisposable
 @inject WheelViewModel ViewModel
+@inject IDialogService DialogService
 
 @if (ViewModel.CurrentWheel == null)
 {
@@ -8,11 +9,15 @@
 }
 else
 {
-    @* <h1 style="color:var(--text-main); font-weight:800;">@ViewModel.CurrentWheel.Name</h1> *@
+    <!-- Preview Wheel -->
+    <WheelVisualizer Items="ViewModel.ActiveSessionMovies.ToList()" IsPreviewMode="true" />
     
-    <!-- Render the Wheel outside of the panels -->
-    <Wheel />
-    
+    <div class="d-flex justify-center mt-4">
+        <button class="start-session-button" @onclick="OpenSessionDialog">
+            <span class="start-session-text">Start Wheel Session</span>
+         </button>
+    </div>
+
     <!-- Collapsible Management Panels -->
     <MudExpansionPanels MultiExpansion="true" Class="mt-6">
 
@@ -154,5 +159,12 @@ else
     {
         ViewModel.DataUpdated -= HandleDataUpdated;
         ViewModel.PropertyChanged -= HandlePropertyChanged;
+    }
+
+    private Task OpenSessionDialog()
+    {
+        DialogOptions options = new DialogOptions {CloseOnEscapeKey = true, FullScreen =true, CloseButton = true };
+        return DialogService.ShowAsync<WheelSessionDialog>("Wheel Session", options);
+    }
     }
 }

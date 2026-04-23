@@ -318,6 +318,20 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         await LoadWheelAsync(CurrentWheel.Id);
     }
 
+    public void RestoreSessionMovies()
+    {
+        if (AllWheelMovies == null) return;
+        
+        ActiveSessionMovies.Clear();
+        foreach (var item in AllWheelMovies.Where(x => x.IsActive))
+        {
+            ActiveSessionMovies.Add(item);
+        }
+        
+        CurrentRotation = 0;
+        DataUpdated?.Invoke();
+    }
+
     public (double finalRotation, int selectedIndex) GetSpinResult(double currentRotation)
     {
         int count = ActiveSessionMovies.Count;

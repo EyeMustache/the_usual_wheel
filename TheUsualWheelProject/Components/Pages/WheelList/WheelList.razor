@@ -87,7 +87,7 @@
 
     private async Task<bool> ConfirmAsync(string title, string message, string? detail = null)
     {
-        var parameters = new DialogParameters
+        DialogParameters? parameters = new DialogParameters
         {
             { "Title", title },
             { "Message", message },

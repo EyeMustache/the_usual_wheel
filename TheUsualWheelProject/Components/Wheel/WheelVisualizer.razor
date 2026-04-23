@@ -1,0 +1,153 @@
+@* Should have wheel preview (maybe slightly spinning) *@
+<div class="wheel-container">
+    @* Center Pin *@
+    <div class="wheel-pointer"></div>
+
+
+    <svg viewBox="0 0 320 320"
+         class="wheel-svg @(IsAnimating ? "spinning" : "") @(IsPreviewMode ? "preview-spin" : "")"
+         style="transform: rotate(@(AnimatedRotation)deg);">
+        <circle cx="160" cy="160" r="154" fill="#111" />
+
+        @{
+            int count = Items.Count;
+            switch (count)
+            {
+                case 0:
+                    // TODO?: Could be a "no movies added" component in the future
+                    <circle cx="160" cy="160" r="150" fill="#gray" />;
+                    break;
+                case 1:
+                    // TODO?: Could be slice winner component in future
+                    <g>
+                        <circle cx="160" cy="160" r="150" fill="#ffa400" />
+                        <text x="160" y="160" fill="white" font-size="20" text-anchor="middle" dominant-baseline="middle" stroke="black" stroke-width="0.5">
+                            @Truncate(Items[0].Movie.Title)
+                        </text>
+                    </g>;
+                    break;
+                default:
+                    foreach (WheelSlice slice in GetWheelSlices())
+                    {
+                        <WheelSliceDisplay Slice="slice" />
+                    }
+                    break;
+            }
+
+        <circle cx="160" cy="160" r="150" fill="none" stroke="#0b0b0b" stroke-width="6" opacity="0.95" />
+        <circle cx="160" cy="160" r="18" fill="#000" />
+        <circle cx="160" cy="160" r="10" fill="#ffa400" />
+        }
+    </svg>
+
+    @* Could make it a proper counter *@
+    @* <div class="mt-2 text-danger font-weight-bold" style="position: absolute; top: -10px; left: 0;">
+        Count: @Items.Count
+    </div> *@
+</div>
+
+@code {
+    [Parameter] public List<WheelMovieItem> Items { get; set; } = new List<WheelMovieItem>();
+    [Parameter] public double AnimatedRotation { get; set; }
+    [Parameter] public double BaseRotation { get; set; } // Replaces ViewModel.CurrentRotation for text flipping (might be redundant tbh)
+    [Parameter] public bool IsAnimating { get; set; }
+    [Parameter] public bool IsPreviewMode { get; set; } // Will use this later for continuous span CSS class
+
+    // This should be user confirurable.
+    private List<string> SlicePalette = new List<string>
+    {
+        "#ffa400", // orange
+        "#171717", // dark
+        "#f8bf26", // yellow
+        "#121212", // very dark
+    };
+
+    private List<WheelSlice> GetWheelSlices()
+    {
+        // TODO: This method does a lot, could be broken down into parts in the future?
+        List<WheelSlice> slices = new();
+        int count = Items.Count;
+        if (count <= 1) return slices;
+
+        // Calculate sweep angle and label positions.
+        double sweepAngle = 360.0 / count;
+        double labelRadius = 82;
+        double charWidth = 5;
+        @* double baseFontSize = 16;
+        double fontSize = Math.Clamp(baseFontSize - (count * 0.8), min: 10, baseFontSize); *@
+
+        // Clamp maxChars between 3 and 16
+        double arcLength = 2 * Math.PI * labelRadius * (sweepAngle / 360.0);
+        int maxChars = Math.Clamp((int)(arcLength / charWidth), min: 3, max: 17);
+        double cx = 160, cy = 160, r = 150;
+
+        // Use BaseRotation for label flipping (not AnimatedRotation)
+        double labelRotation = BaseRotation;
+
+        for (int i = 0; i < count; i++)
+        {
+            WheelMovieItem? movie = Items[i];
+            double startAngle = i * sweepAngle;
+            string fillColor = SlicePalette[i % SlicePalette.Count];
+            string pathData = GetSlicePath(cx, cy, r, startAngle, sweepAngle);
+            string textColor = GetContrastTextColor(fillColor); // Dynamically pick black or white
+
+            // Calculate label position
+            double midAngle = startAngle + (sweepAngle / 2);
+            double angleRad = (midAngle - 90) * Math.PI / 180.0;
+            double labelX = cx + labelRadius * Math.Cos(angleRad);
+            double labelY = cy + labelRadius * Math.Sin(angleRad);
+
+            // Adjust for final resting rotation only
+            double adjustedAngle = (midAngle + labelRotation) % 360;
+            if (adjustedAngle < 0) adjustedAngle += 360; // Ensure positive
+
+            double textRotation = midAngle - 90;
+            if (adjustedAngle > 180)
+                textRotation += 180;
+
+            int safeChars = Math.Max(3, maxChars - 2);
+            string label = movie.Movie.Title.Length > safeChars
+                ? movie.Movie.Title.Substring(startIndex: 0, length: safeChars - 3) + "..."
+                : movie.Movie.Title;
+
+            slices.Add(new WheelSlice(movie.Movie, pathData, fillColor, textColor, label, labelX, labelY, textRotation));
+        }
+        return slices;
+    }
+
+    private string GetSlicePath(double cx, double cy, double r, double startAngle, double sweepAngle)
+    {
+        double startAngleRad = (startAngle - 90) * Math.PI / 180.0;
+        double endAngleRad = (startAngle + sweepAngle - 90) * Math.PI / 180.0;
+
+        double x1 = cx + r * Math.Cos(startAngleRad);
+        double y1 = cy + r * Math.Sin(startAngleRad);
+
+        double x2 = cx + r * Math.Cos(endAngleRad);
+        double y2 = cy + r * Math.Sin(endAngleRad);
+
+        int largeArcFlag = sweepAngle > 180 ? 1 : 0;
+
+        return $"M {cx},{cy} L {x1},{y1} A {r},{r} 0 {largeArcFlag} 1 {x2},{y2} Z";
+    }
+
+    // Returns "#000" for black or "#fff" for white, based on background color luminance
+    private string GetContrastTextColor(string hexColor)
+    {
+        // Remove # if present
+        hexColor = hexColor.Replace(oldValue: "#", newValue: "");
+        int r = Convert.ToInt32(hexColor.Substring(startIndex: 0, length: 2), fromBase: 16);
+        int g = Convert.ToInt32(hexColor.Substring(startIndex: 2, length: 2), fromBase: 16);
+        int b = Convert.ToInt32(hexColor.Substring(startIndex: 4, length: 2), fromBase: 16);
+
+        // Calculate luminance
+        double luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+        return luminance > 0.6 ? "#000" : "#fff";
+    }
+
+    private string Truncate(string title) => 
+        title.Length > 18 ? title.Substring(startIndex: 0, length: 18) + "..." : title;
+
+
+}

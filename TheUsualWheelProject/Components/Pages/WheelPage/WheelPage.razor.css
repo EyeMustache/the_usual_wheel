@@ -12,3 +12,22 @@
     padding: 1rem;
     margin-top: 1rem;
 }
+
+.start-session-button {
+    border-radius: 12px;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--secondary);
+    background: radial-gradient(circle, var(--secondary) 50%, var(--primary) 100%);
+    color: var(--button-text-contrast) !important;
+    font-weight: 650;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 300px;
+}
