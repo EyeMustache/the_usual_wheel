@@ -371,4 +371,35 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
             return ActiveSessionMovies[index];
         return null;
     }
+
+    [RelayCommand]
+    public async Task SaveWheelConfigAsync()
+    {
+        if (CurrentWheel == null) return;
+
+        Logger.LogInformation($"Saving configuration for Wheel {CurrentWheel.Id}");
+        await _wheelService.UpdateWheelAsync(CurrentWheel);
+
+        DataUpdated?.Invoke();
+    }
+
+
+    [RelayCommand]
+    public void AddSliceColor()
+    {
+        if (CurrentWheel == null) return;
+        
+        // Add a default color, then trigger save
+        CurrentWheel.Configuration.SliceColors.Add("#ffffff");
+        _ = SaveWheelConfigAsync();
+    }
+
+     [RelayCommand]
+    public void RemoveSliceColor(string colorValue)
+    {
+        if (CurrentWheel == null || CurrentWheel.Configuration.SliceColors.Count <= 2) return; // Prevent removing all colors
+        
+        CurrentWheel.Configuration.SliceColors.Remove(colorValue);
+        _ = SaveWheelConfigAsync();
+    }
 }

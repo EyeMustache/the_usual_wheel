@@ -2,6 +2,16 @@
 @inject NavigationManager Navigation
 @implements IDisposable
 
+@* 
+KNOWN ISSUES:
+The elimination dialog cancel completely breaks the session
+Ignoring the pop up and pressing outside to close also breaks the session,  you can't spin anywhere anymore.
+You can press X to back out of the session but the wheelpage isnt refreshed
+The mudexpansionpanels are flexible, would like for them to be static
+
+
+*@
+
 <MudDialog Title="Wheel Session" MaxWidth="MaxWidth.Medium" FullWidth="true" Class="wheel-session-dialog">
     <DialogContent>
         <div class="session-layout">
@@ -16,18 +26,11 @@
             @* Session Controls & Timeline *@
             <MudExpansionPanels MultiExpansion="true" Class="mt-4 session-controls">
                 
-                @* Volume panel *@
-                <MudExpansionPanel Text="Audio Settings" Icon="@Icons.Material.Filled.VolumeUp">
-                    <div class="px-2">
-                        <MudSlider @bind-Value="_volume" Min="0" Max="1" Step="0.05" Color="Color.Primary" />
-                        <MudText Typo="Typo.caption" Class="mt-1">@($"{_volume:P0}")</MudText>
-                    </div>
-                </MudExpansionPanel>
 
                 @* Timeline panel *@
-                <MudExpansionPanel Text="Elimination Timeline" Icon="@Icons.Material.Filled.History">
+                <MudExpansionPanel Text="Elimination Timeline" Expanded="true" Icon="@Icons.Material.Filled.History">
                     <div class="timeline-scroll-container">
-                        <MudTimeline>
+                        <MudTimeline TimelinePosition=TimelinePosition.Alternate TimelineOrientation=TimelineOrientation.Vertical Reverse="false">
                             @for (int i = 0; i < _eliminationHistory.Count; i++)
                             {
                                 WheelMovieItem? item = _eliminationHistory[i];
@@ -50,6 +53,14 @@
                                 </MudTimelineItem>
                             }
                         </MudTimeline>
+                    </div>
+                </MudExpansionPanel>
+
+                @* Volume panel *@
+                <MudExpansionPanel Text="Audio Settings" Icon="@Icons.Material.Filled.VolumeUp">
+                    <div class="px-2">
+                        <MudSlider @bind-Value="_volume" Min="0" Max="1" Step="0.05" Color="Color.Primary" />
+                        <MudText Typo="Typo.caption" Class="mt-1">@($"{_volume:P0}")</MudText>
                     </div>
                 </MudExpansionPanel>
 
@@ -158,7 +169,8 @@
         StateHasChanged();
 
         // Let the animation finish before showing the removal dialog
-        await Task.Delay(5000);
+        await Task.Delay(8000);
+        // Should be variable setting by user
 
         IsAnimating = false;
         _showEliminationDialog = true;

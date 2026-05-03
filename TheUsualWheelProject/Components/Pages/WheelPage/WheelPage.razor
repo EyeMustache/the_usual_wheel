@@ -10,7 +10,10 @@
 else
 {
     <!-- Preview Wheel -->
-    <WheelVisualizer Items="ViewModel.ActiveSessionMovies.ToList()" IsPreviewMode="true" />
+    <WheelVisualizer 
+        Items="ViewModel.ActiveSessionMovies.ToList()" 
+        IsPreviewMode="true" 
+        SlicePalette="ViewModel.CurrentWheel.Configuration.SliceColors" />
     
     <div class="d-flex justify-center mt-4">
         <button class="start-session-button" @onclick="OpenSessionDialog">
@@ -38,14 +41,71 @@ else
                 <p><strong>Spin Speed (Seconds):</strong> @ViewModel.CurrentWheel.Configuration.SpinDurationSeconds</p>
                 <p><strong>Allow Duplicates:</strong> @ViewModel.CurrentWheel.Configuration.AllowDuplicates</p>
                 <p><strong>Selected Audio:</strong> @ViewModel.CurrentWheel.Configuration.AudioTrack</p>
-                <p><strong>Slice Colors:</strong></p>
-                <ul>
-                    @foreach(string c in ViewModel.CurrentWheel.Configuration.SliceColors)
-                    {
-                        <li><span style="display:inline-block; width:12px; height:12px; background-color:@c; margin-right:8px;"></span>@c</li>
-                    }
-                </ul>
             </div>
+
+            <MudDivider Class="my-4" />
+
+            <MudText Typo="Typo.subtitle2" Class="mb-2">Slice colors</MudText>
+            
+            <!-- The row of custom palette boxes matching your image -->
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                @for (int i = 0; i < ViewModel.CurrentWheel.Configuration.SliceColors.Count; i++)
+                {
+                    int index = i;
+                    string currentColor = ViewModel.CurrentWheel.Configuration.SliceColors[index];
+                    
+                    <div style="width: 40px; height: 40px; background-color: @currentColor; cursor: pointer; border: 2px solid #222;"
+                         @onclick="() => _editingColorIndex = index">
+                    </div>
+                }
+                
+                <!-- The generic Add (+) Button Box -->
+                <div style="width: 40px; height: 40px; cursor: pointer; border: 2px dashed #888; display: flex; align-items: center; justify-content: center;"
+                     @onclick="() => 
+                     {
+                         ViewModel.AddSliceColor();
+                         _editingColorIndex = ViewModel.CurrentWheel.Configuration.SliceColors.Count - 1;
+                     }">
+                    <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small" />
+                </div>
+            </div>
+
+            <!-- Color Picker Panel -->
+            @if (_editingColorIndex.HasValue && _editingColorIndex.Value < ViewModel.CurrentWheel.Configuration.SliceColors.Count)
+            {
+                <MudPaper Class="pa-4 mt-2" Elevation="3" Style="width: fit-content;">
+                    <div class="d-flex justify-space-between align-center mb-2">
+                        <MudText Typo="Typo.subtitle2">Editing Color @(_editingColorIndex.Value + 1)</MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" OnClick="() => _editingColorIndex = null" />
+                    </div>
+                    
+                    <MudColorPicker 
+                        PickerVariant="PickerVariant.Static" 
+                        ColorPickerView="ColorPickerView.Spectrum" 
+                        Value="@ViewModel.CurrentWheel.Configuration.SliceColors[_editingColorIndex.Value]"
+                        ValueChanged="(MudBlazor.Utilities.MudColor newColor) => 
+                        {
+                            ViewModel.CurrentWheel.Configuration.SliceColors[_editingColorIndex.Value] = newColor.Value;
+                            _ = ViewModel.SaveWheelConfigAsync();
+                        }" 
+                        Elevation="0"
+                        DisableAlpha="true" />
+                        
+                    <div class="d-flex justify-end mt-2">
+                        <MudButton 
+                            Color="Color.Error" 
+                            Variant="Variant.Text"
+                            StartIcon="@Icons.Material.Filled.Delete"
+                            Disabled="ViewModel.CurrentWheel.Configuration.SliceColors.Count <= 2"
+                            OnClick="() => {
+                                ViewModel.RemoveSliceColor(ViewModel.CurrentWheel.Configuration.SliceColors[_editingColorIndex.Value]);
+                                _editingColorIndex = null;
+                            }">
+                            Delete Color
+                        </MudButton>
+                    </div>
+                </MudPaper>
+            }
 
             @*
                 // FUTURE MUDBLAZOR COMPONENT REMINDERS:
@@ -58,8 +118,6 @@ else
                 <MudSlider @bind-Value="ViewModel.CurrentWheel.Configuration.SpinDurationSeconds" Min="2" Max="10" Step="1" Color="Color.Info" />
                 
                 <MudTextField @bind-Value="ViewModel.CurrentWheel.Configuration.AudioTrack" Label="Audio Track" Variant="Variant.Outlined" />
-                
-                // Colors will need a slightly more complex repeater component to add/remove from the List<string>.
             *@
 
         </MudExpansionPanel>
@@ -109,6 +167,7 @@ else
     public int Id { get; set; }
     private List<string> MovieTitles => ViewModel.AllWheelMovies?.Select(m => m.Movie.Title).ToList() ?? new List<string>();
     private string? _errorMessage;
+    private int? _editingColorIndex = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -165,6 +224,5 @@ else
     {
         DialogOptions options = new DialogOptions {CloseOnEscapeKey = true, FullScreen =true, CloseButton = true };
         return DialogService.ShowAsync<WheelSessionDialog>("Wheel Session", options);
-    }
     }
 }

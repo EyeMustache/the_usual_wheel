@@ -54,13 +54,15 @@
     [Parameter] public bool IsPreviewMode { get; set; } // Will use this later for continuous span CSS class
 
     // This should be user confirurable.
-    private List<string> SlicePalette = new List<string>
+    @* private List<string> SlicePalette = new List<string>
     {
         "#ffa400", // orange
         "#171717", // dark
         "#f8bf26", // yellow
         "#121212", // very dark
-    };
+    }; *@
+    [Parameter] public List<string> SlicePalette { get; set; } = new List<string>();
+
 
     private List<WheelSlice> GetWheelSlices()
     {
