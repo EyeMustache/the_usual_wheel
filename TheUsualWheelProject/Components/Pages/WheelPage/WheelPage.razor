@@ -53,14 +53,15 @@ else
                 {
                     int index = i;
                     string currentColor = ViewModel.CurrentWheel.Configuration.SliceColors[index];
-                    
-                    <div style="width: 40px; height: 40px; background-color: @currentColor; cursor: pointer; border: 2px solid #222;"
+
+                    <div class="color-palette-box" 
+                         style="background-color: @currentColor;"
                          @onclick="() => _editingColorIndex = index">
                     </div>
                 }
-                
+
                 <!-- The generic Add (+) Button Box -->
-                <div style="width: 40px; height: 40px; cursor: pointer; border: 2px dashed #888; display: flex; align-items: center; justify-content: center;"
+                <div class="add-color-box"
                      @onclick="() => 
                      {
                          ViewModel.AddSliceColor();
