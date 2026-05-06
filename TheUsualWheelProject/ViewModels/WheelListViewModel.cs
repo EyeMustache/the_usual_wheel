@@ -11,7 +11,8 @@ public class WheelListViewModel
         public Wheel Wheel { get; set; } = default!;
         public int TotalMovies { get; set; }
         public int EliminatedMovies { get; set; }
-        public int ActiveMovies => TotalMovies - EliminatedMovies;
+        public int WatchedMovies { get; set; }
+        public int ActiveMovies => TotalMovies - WatchedMovies;
     }
 
     public class LastWatchedInfo
@@ -42,16 +43,16 @@ public class WheelListViewModel
         var wheels = await _wheelService.GetAllWheelsAsync();
         foreach (Wheel wheel in wheels)
         {
-            System.Diagnostics.Debug.WriteLine($"Loaded wheel: {wheel.Name}");
-
             var wheelMovies = (await _wheelService.GetWheelMoviesAsync(wheel.Id)).ToList();
             var eliminatedCount = wheelMovies.Count(wm => wm.IsEliminated);
+            var watchedCount = wheelMovies.Count(wm => wm.WatchedDate != null);
 
             Wheels.Add(new WheelCardInfo
             {
                 Wheel = wheel,
                 TotalMovies = wheelMovies.Count,
-                EliminatedMovies = eliminatedCount
+                EliminatedMovies = eliminatedCount,
+                WatchedMovies = watchedCount
             });
         }
     }

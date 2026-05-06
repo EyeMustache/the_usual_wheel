@@ -31,110 +31,158 @@ else
 
         <!-- Future Panel: Wheel Settings -->
         <MudExpansionPanel Text="Wheel Settings" Icon="@Icons.Material.Filled.Settings">
-            
-            <div class="wheel-settings-overview">
-                <h5>Current DB Configuration:</h5>
-                <p><strong>Name:</strong> @ViewModel.CurrentWheel.Name</p>
-                <p><strong>Description:</strong> @ViewModel.CurrentWheel.Description</p>
-                <hr />
-                <p><strong>Mode (Last Man Standing):</strong> @ViewModel.CurrentWheel.Configuration.IsLastMovieStanding</p>
-                <p><strong>Spin Speed (Seconds):</strong> @ViewModel.CurrentWheel.Configuration.SpinDurationSeconds</p>
-                <p><strong>Allow Duplicates:</strong> @ViewModel.CurrentWheel.Configuration.AllowDuplicates</p>
-                <p><strong>Selected Audio:</strong> @ViewModel.CurrentWheel.Configuration.AudioTrack</p>
-            </div>
-
-            <MudDivider Class="my-4" />
-
-            <MudText Typo="Typo.subtitle2" Class="mb-2">Slice colors</MudText>
-            
-            <!-- The row of custom palette boxes matching your image -->
-            <div class="d-flex flex-wrap gap-2 mb-4">
-                @for (int i = 0; i < ViewModel.CurrentWheel.Configuration.SliceColors.Count; i++)
-                {
-                    int index = i;
-                    string currentColor = ViewModel.CurrentWheel.Configuration.SliceColors[index];
-
-                    <div class="color-palette-box" 
-                         style="background-color: @currentColor;"
-                         @onclick="() => _editingColorIndex = index">
+            <div class="settings-container">
+                
+                <!-- WHEEL DETAILS -->
+                <div class="settings-section">
+                    <h6 class="settings-header">WHEEL DETAILS</h6>
+                    
+                    <div class="settings-field">
+                        <label>Wheel Title</label>
+                        <MudTextField @bind-Value="ViewModel.CurrentWheel.Name" 
+                                      @bind-Value:after="() => ViewModel.SaveWheelConfigAsync()"
+                                      Variant="Variant.Outlined" 
+                                      Margin="Margin.Dense"
+                                      Class="sleek-input" />
                     </div>
-                }
 
-                <!-- The generic Add (+) Button Box -->
-                <div class="add-color-box"
-                     @onclick="() => 
-                     {
-                         ViewModel.AddSliceColor();
-                         _editingColorIndex = ViewModel.CurrentWheel.Configuration.SliceColors.Count - 1;
-                     }">
-                    <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small" />
+                    <div class="settings-field">
+                        <label>Description</label>
+                        <MudTextField @bind-Value="ViewModel.CurrentWheel.Description" 
+                                      @bind-Value:after="() => ViewModel.SaveWheelConfigAsync()"
+                                      Variant="Variant.Outlined" 
+                                      Margin="Margin.Dense"
+                                      Class="sleek-input" />
+                    </div>
                 </div>
-            </div>
 
-            <!-- Color Picker Sub Panel -->
-            @* Should probably be a separate component again *@
-            @if (_editingColorIndex.HasValue && _editingColorIndex.Value < ViewModel.CurrentWheel.Configuration.SliceColors.Count)
-            {
-                <MudPaper Class="pa-4 mt-2" Elevation="3" Style="width: fit-content;">
-                    <div class="d-flex justify-space-between align-center mb-2">
-                        <MudText Typo="Typo.subtitle2">Editing Color @(_editingColorIndex.Value + 1)</MudText>
-                        <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" OnClick="() => _editingColorIndex = null" />
+                <MudDivider Class="my-4 subtle-divider" />
+
+                <!-- GAMEPLAY OPTIONS -->
+                <div class="settings-section">
+                    <h6 class="settings-header">SPIN SETTINGS</h6>
+                    
+                    <div class="settings-row">
+                        <label>Last Movie Standing Mode (non functional)</label>
+                        <MudSwitch @bind-Value="ViewModel.CurrentWheel.Configuration.IsLastMovieStanding" 
+                                   @bind-Value:after="() => ViewModel.SaveWheelConfigAsync()"
+                                   Color="Color.Warning" />
+                    </div>
+
+                    <div class="settings-field mt-2">
+                        <div class="d-flex justify-space-between w-100 mb-1">
+                            <label class="mb-0">Spin Duration(non functional)</label>
+                            <span class="accent-text">@ViewModel.CurrentWheel.Configuration.SpinDurationSeconds sec</span>
+                        </div>
+                        
+                        <MudSlider @bind-Value="ViewModel.CurrentWheel.Configuration.SpinDurationSeconds" 
+                                   @bind-Value:after="() => ViewModel.SaveWheelConfigAsync()" 
+                                   Min="2" Max="10" Step="1" 
+                                   Color="Color.Warning" 
+                                   Class="sleek-slider my-0" />
+                                   
+                        <div class="d-flex justify-space-between w-100 mt-1 px-1">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">2 sec</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">10 sec</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <MudDivider Class="my-4 subtle-divider" />
+
+                <!-- AESTHETICS -->
+                <div class="settings-section">
+                    <h6 class="settings-header">AESTHETICS</h6>
+
+                    <div class="settings-row">
+                        <label>Allow Slice Duplication (non functional)</label>
+                        <MudSwitch @bind-Value="ViewModel.CurrentWheel.Configuration.AllowDuplicates" 
+                                   @bind-Value:after="() => ViewModel.SaveWheelConfigAsync()"
+                                   Color="Color.Warning" />
                     </div>
                     
-                    <MudColorPicker 
-                        PickerVariant="PickerVariant.Static" 
-                        ColorPickerView="ColorPickerView.Spectrum" 
-                        Value="@ViewModel.CurrentWheel.Configuration.SliceColors[_editingColorIndex.Value]"
-                        ValueChanged="(MudBlazor.Utilities.MudColor newColor) => 
+
+                    <div class="settings-field mt-4">
+                        <label>Slice Colors</label>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            @for (int i = 0; i < ViewModel.CurrentWheel.Configuration.SliceColors.Count; i++)
+                            {
+                                int index = i;
+                                string currentColor = ViewModel.CurrentWheel.Configuration.SliceColors[index];
+
+                                <div class="color-palette-box" 
+                                     style="background-color: @currentColor;"
+                                     @onclick="() => _editingColorIndex = index">
+                                </div>
+                            }
+                            <div class="add-color-box"
+                                 @onclick="() => 
+                                 {
+                                     ViewModel.AddSliceColor();
+                                     _editingColorIndex = ViewModel.CurrentWheel.Configuration.SliceColors.Count - 1;
+                                 }">
+                                <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small" />
+                            </div>
+                        </div>
+
+                        <!-- Color Picker Sub Panel -->
+                        @if (_editingColorIndex.HasValue && _editingColorIndex.Value < ViewModel.CurrentWheel.Configuration.SliceColors.Count)
                         {
-                            ViewModel.CurrentWheel.Configuration.SliceColors[_editingColorIndex.Value] = newColor.Value;
-                            _ = ViewModel.SaveWheelConfigAsync();
-                        }" 
-                        Elevation="0"
-                        DisableAlpha="true" />
-                        
-                    <div class="d-flex justify-end mt-2">
-                        <MudButton 
-                            Color="Color.Error" 
-                            Variant="Variant.Text"
-                            StartIcon="@Icons.Material.Filled.Delete"
-                            Disabled="ViewModel.CurrentWheel.Configuration.SliceColors.Count <= 2"
-                            OnClick="() => {
-                                ViewModel.RemoveSliceColor(ViewModel.CurrentWheel.Configuration.SliceColors[_editingColorIndex.Value]);
-                                _editingColorIndex = null;
-                            }">
-                            Delete Color
-                        </MudButton>
+                            <MudPaper Class="pa-4 mt-2 color-picker-panel" Elevation="0">
+                                <div class="d-flex justify-space-between align-center mb-2">
+                                    <MudText Typo="Typo.subtitle2">Editing Color @(_editingColorIndex.Value + 1)</MudText>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" OnClick="() => _editingColorIndex = null" />
+                                </div>
+                                <MudColorPicker 
+                                    PickerVariant="PickerVariant.Static" 
+                                    ColorPickerView="ColorPickerView.Spectrum" 
+                                    Value="@ViewModel.CurrentWheel.Configuration.SliceColors[_editingColorIndex.Value]"
+                                    ValueChanged="(MudBlazor.Utilities.MudColor newColor) => 
+                                    {
+                                        ViewModel.CurrentWheel.Configuration.SliceColors[_editingColorIndex.Value] = newColor.Value;
+                                        _ = ViewModel.SaveWheelConfigAsync();
+                                    }" 
+                                    Elevation="0"
+                                    DisableAlpha="true" />
+                                <div class="d-flex justify-end mt-2">
+                                    <MudButton 
+                                        Color="Color.Error" 
+                                        Variant="Variant.Text"
+                                        StartIcon="@Icons.Material.Filled.Delete"
+                                        Disabled="ViewModel.CurrentWheel.Configuration.SliceColors.Count <= 2"
+                                        OnClick="() => {
+                                            ViewModel.RemoveSliceColor(ViewModel.CurrentWheel.Configuration.SliceColors[_editingColorIndex.Value]);
+                                            _editingColorIndex = null;
+                                        }">
+                                        Delete Color
+                                    </MudButton>
+                                </div>
+                            </MudPaper>
+                        }
                     </div>
-                </MudPaper>
-            }
+                </div>
 
-            @*
-                // FUTURE MUDBLAZOR COMPONENT REMINDERS:
-                // When we build the real UI, two-way bind them directly to the Configuration object like this:
-                
-                <MudSwitch @bind-Value="ViewModel.CurrentWheel.Configuration.IsLastMovieStanding" Label="Last Movie Standing Mode" Color="Color.Success" />
-                <MudSwitch @bind-Value="ViewModel.CurrentWheel.Configuration.AllowDuplicates" Label="Allow Duplicate Entries" Color="Color.Primary" />
-                
-                <MudText>Spin Duration (@ViewModel.CurrentWheel.Configuration.SpinDurationSeconds sec)</MudText>
-                <MudSlider @bind-Value="ViewModel.CurrentWheel.Configuration.SpinDurationSeconds" Min="2" Max="10" Step="1" Color="Color.Info" />
-                
-                <MudTextField @bind-Value="ViewModel.CurrentWheel.Configuration.AudioTrack" Label="Audio Track" Variant="Variant.Outlined" />
-            *@              <!-- The Switch -->
-            <MudSwitch 
-                @bind-Value="ViewModel.CurrentWheel.Configuration.IsLastMovieStanding" 
-                @bind-Value:after="() => ViewModel.SaveWheelConfigAsync()" 
-                Label="Last Movie Standing Mode" 
-                Color="Color.Success" />
-            
-            <!-- The Slider -->
-            <MudText>Spin Duration (@ViewModel.CurrentWheel.Configuration.SpinDurationSeconds sec)</MudText>
-            <MudSlider 
-                @bind-Value="ViewModel.CurrentWheel.Configuration.SpinDurationSeconds" 
-                @bind-Value:after="() => ViewModel.SaveWheelConfigAsync()" 
-                Min="2" Max="10" Step="1" 
-                Color="Color.Info" />
+                <MudDivider Class="my-4 subtle-divider" />
 
+                <!-- AUDIO -->
+                <div class="settings-section">
+                    <h6 class="settings-header">AUDIO</h6>
+                    
+                    <div class="settings-field">
+                        <label>Spin Soundtrack(non functional)</label>
+                        <div class="audio-selection-box mt-2">
+                            <div class="d-flex align-center gap-3">
+                                <MudIcon Icon="@Icons.Material.Filled.MusicNote" Color="Color.Warning" />
+                                <span>@(string.IsNullOrWhiteSpace(ViewModel.CurrentWheel.Configuration.AudioTrack) ? "Default" : ViewModel.CurrentWheel.Configuration.AudioTrack)</span>
+                            </div>
+                            <!-- Currently functionless standard track selector intent -->
+                            <MudButton Variant="Variant.Text" Color="Color.Warning" Size="Size.Small">CHANGE</MudButton>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </MudExpansionPanel>
 
         <!-- Panel: Movie Details -->

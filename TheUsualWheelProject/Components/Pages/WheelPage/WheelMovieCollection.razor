@@ -2,154 +2,166 @@
 @inject IDialogService DialogService
 
 <div class="collection-container">
-    <div class="collection-header mt-8 mb-4">
-        <div class="collection-actions">
-            <button class="action-btn">
-                <MudIcon Icon="@Icons.Material.Filled.Shuffle" Size="Size.Small" /> SHUFFLE
-            </button>
-            <button class="action-btn" @onclick="ToggleMassRemoveMode">
-                @* https://mudblazor.com/components/switch could be useful *@
-                <MudIcon Icon="@(_isMassRemoveMode ? Icons.Material.Filled.ToggleOn : Icons.Material.Filled.ToggleOff)"
-                         Size="Size.Small"
-                         Color="@(_isMassRemoveMode ? Color.Primary : Color.Default)" />
-                @(_isMassRemoveMode ? "CANCEL REMOVE" : "REMOVE")
-            </button>
-
-            @if (_isMassRemoveMode && _selectedForRemoval.Any())
-            {
-                <button class="action-btn" style="color: #ff5252; border-color: #ff5252;" @onclick="ExecuteMassRemove">
-                    <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" />
-                    REMOVE (@_selectedForRemoval.Count)
-                    @* https://mudblazor.com/components/messagebox deletion confirmation component?? *@
-                </button>
-            }
-
+    <div class="collection-header mt-4 mb-4">
+        <div class="collection-actions d-flex flex-wrap gap-2 align-center w-100">
+            
             <div class="movie-count-badge">
                 <span class="count-number">@ActiveMovies.Count()</span>
                 <span class="count-label">movies</span>
             </div>
-        </div>
-    </div>
 
-    <div class="section-container mt-4">
-        <div class="section-title mb-3">
-            <MudIcon Icon="@Icons.Material.Filled.PlayCircleOutline" Size="Size.Small" Class="mr-2" />
-            <span>ACTIVE MOVIES</span>
-        </div>
+            <MudSpacer />
+            
+            <MudSwitch Value="_isMassRemoveMode" 
+                       ValueChanged="(bool val) => OnMassRemoveModeChanged(val)" 
+                       Color="Color.Error" 
+                       Label="Remove Multiple" 
+                       LabelPlacement="Placement.Start"
+                       Class="my-0" />
 
-        <div class="movie-list">
-            @* Maybe make these movie lists collapsable too? *@
-            @foreach (WheelMovieItem item in ActiveMovies)
+            @if (_isMassRemoveMode && _selectedForRemoval.Any())
             {
-                <MovieCard Title="@item.Movie.Title"
-                           Year="@item.Movie.Year.ToString()"
-                           Director="@item.Movie.Director"
-                           PosterUrl="@item.Movie.PosterUrl"
-                           IsSelected="@_selectedForRemoval.Contains(item)"
-                           OnCardClick="@(() => { if (_isMassRemoveMode) ToggleMovieSelection(item); })">
-                    <RightActions>
-                        @if (_isMassRemoveMode)
-                        {
-                            <MudIcon Icon="@(_selectedForRemoval.Contains(item)
-                                                ? Icons.Material.Filled.CheckCircle
-                                                : Icons.Material.Filled.RadioButtonUnchecked)"
-                                     Color="@(_selectedForRemoval.Contains(item) ? Color.Error : Color.Default)" />
-                        }
-                        else
-                        {
-                            <MudMenu Icon="@Icons.Material.Rounded.MoreVert"
-                                     AnchorOrigin="Origin.BottomRight"
-                                     TransformOrigin="Origin.TopRight">
-                                @* https://mudblazor.com/components/datepicker; could be useful after marking as watched? *@
-                                <MudMenuItem Icon="@Icons.Material.Filled.Info"
-                                             IconColor="Color.Primary"
-                                             OnClick="() => { /* TODO: Show movie details */ }">
-                                    View Details
-                                </MudMenuItem>
-                                <MudDivider />
-                                <MudMenuItem Icon="@Icons.Material.Outlined.RemoveRedEye"
-                                             OnClick="@(async () => { await Task.Delay(50); await ViewModel.ToggleMovieWatchedStatusAsync(item.WheelMovie.Id, true); })">
-                                    Mark as Watched
-                                </MudMenuItem>
-                                <MudDivider />
-                                <MudMenuItem Icon="@Icons.Material.Filled.Delete"
-                                             IconColor="Color.Error"
-                                             OnClick="@(async () =>
-                                             {
-                                                 if (await ConfirmAsync("Remove movie?", $"Remove {item.Movie.Title} from this wheel?"))
-                                                 {
-                                                     await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id);
-                                                 }
-                                             })">
-                                    Remove Movie
-                                </MudMenuItem>
-                            </MudMenu>
-                        }
-                    </RightActions>
-                </MovieCard>
+                <button class="action-btn action-btn-danger" @onclick="ExecuteMassRemove">
+                    <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" />
+                    REMOVE (@_selectedForRemoval.Count)
+                </button>
             }
 
-            @* TODO: Make this a proper functioning component *@
-            <div class="add-movie-btn mt-3" @onclick="() => _isSearchDrawerOpen = true">
-                <MudIcon Icon="@Icons.Material.Filled.AddCircleOutline" Class="mr-2" />
-                <span>ADD MOVIE</span>
-                @* Useful MudIcons: @Icons.Material.Filled.Bookmark, BookmarkAdd, BookmarkAdded, BookmarkRemove *@
-            </div>
         </div>
     </div>
 
-    <div class="section-container mt-8">
-        <div class="section-title mb-3">
-            <MudIcon Icon="@Icons.Material.Outlined.History" Size="Size.Small" Class="mr-2" />
-            <span>WATCHED MOVIES</span>
-        </div>
+    <!-- ACTIVE MOVIES PANEL -->
+    <MudExpansionPanels Class="mt-2" Elevation="0">
+        <MudExpansionPanel Expanded="true">
+            <TitleContent>
+                <div class="d-flex align-center w-100">
+                    <MudIcon Icon="@Icons.Material.Filled.PlayCircleOutline" Size="Size.Small" Color="Color.Primary" Class="mr-2" />
+                    <span class="panel-header-text">
+                        ACTIVE MOVIES
+                    </span>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <div class="movie-list">
+                    @foreach (WheelMovieItem item in ActiveMovies)
+                    {
+                        <MovieCard Title="@item.Movie.Title"
+                                   Year="@item.Movie.Year.ToString()"
+                                   Director="@item.Movie.Director"
+                                   PosterUrl="@item.Movie.PosterUrl"
+                                   IsSelected="@_selectedForRemoval.Contains(item)"
+                                   OnCardClick="@(() => { if (_isMassRemoveMode) ToggleMovieSelection(item); })">
+                            <RightActions>
+                                @if (_isMassRemoveMode)
+                                {
+                                    <MudIcon Icon="@(_selectedForRemoval.Contains(item)
+                                                        ? Icons.Material.Filled.CheckCircle
+                                                        : Icons.Material.Filled.RadioButtonUnchecked)"
+                                             Color="@(_selectedForRemoval.Contains(item) ? Color.Error : Color.Default)" />
+                                }
+                                else
+                                {
+                                    <MudMenu Icon="@Icons.Material.Rounded.MoreVert"
+                                             AnchorOrigin="Origin.BottomRight"
+                                             TransformOrigin="Origin.TopRight">
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Info"
+                                                     IconColor="Color.Primary"
+                                                     OnClick="() => { /* TODO: Show movie details */ }">
+                                            View Details
+                                        </MudMenuItem>
+                                        <MudDivider />
+                                        <MudMenuItem Icon="@Icons.Material.Outlined.RemoveRedEye"
+                                                     OnClick="@(async () => { await Task.Delay(50); await ViewModel.ToggleMovieWatchedStatusAsync(item.WheelMovie.Id, true); })">
+                                            Mark as Watched
+                                        </MudMenuItem>
+                                        <MudDivider />
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Delete"
+                                                     IconColor="Color.Error"
+                                                     OnClick="@(async () =>
+                                                     {
+                                                         if (await ConfirmAsync("Remove movie?", $"Remove {item.Movie.Title} from this wheel?"))
+                                                         {
+                                                             await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id);
+                                                         }
+                                                     })">
+                                            Remove Movie
+                                        </MudMenuItem>
+                                    </MudMenu>
+                                }
+                            </RightActions>
+                        </MovieCard>
+                    }
+                </div>
+            </ChildContent>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
 
-        <div class="movie-list">
-            @foreach (WheelMovieItem item in WatchedMovies)
-            {
-                <MovieCard Title="@item.Movie.Title"
-                           Year="@item.Movie.Year.ToString()"
-                           Director="@item.Movie.Director"
-                           PosterUrl="@item.Movie.PosterUrl"
-                           IsWatched="true"
-                           IsSelected="@_selectedForRemoval.Contains(item)"
-                           OnCardClick="@(() => { if (_isMassRemoveMode) ToggleMovieSelection(item); })">
-                    <RightActions>
-                        @if (_isMassRemoveMode)
-                        {
-                            <MudIcon Icon="@(_selectedForRemoval.Contains(item)
-                                                ? Icons.Material.Filled.CheckCircle
-                                                : Icons.Material.Filled.RadioButtonUnchecked)"
-                                     Color="@(_selectedForRemoval.Contains(item) ? Color.Error : Color.Default)" />
-                        }
-                        else
-                        {
-                            <MudMenu Icon="@Icons.Material.Rounded.MoreVert"
-                                     AnchorOrigin="Origin.BottomRight"
-                                     TransformOrigin="Origin.TopRight">
-                                <MudMenuItem Icon="@Icons.Material.Filled.RemoveRedEye"
-                                             OnClick="@(async () => { await Task.Delay(50); await ViewModel.ToggleMovieWatchedStatusAsync(item.WheelMovie.Id, false); })">
-                                    Unmark as Watched
-                                </MudMenuItem>
-                                <MudDivider />
-                                <MudMenuItem Icon="@Icons.Material.Filled.Delete"
-                                            IconColor="Color.Error"
-                                            OnClick="@(async () =>
-                                            {
-                                                if (await ConfirmAsync("Remove movie?", $"Remove \"{item.Movie.Title}\" from this wheel?"))
-                                                {
-                                                    await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id);
-                                                }
-                                            })">
-                                    Remove Movie
-                                </MudMenuItem>
-                            </MudMenu>
-                        }
-                    </RightActions>
-                </MovieCard>
-            }
-        </div>
+    <!-- ADD MOVIE BUTTON (Sandwiched) -->
+    <div class="add-movie-btn mt-3 mb-3" @onclick="() => _isSearchDrawerOpen = true">
+        <MudIcon Icon="@Icons.Material.Filled.AddCircleOutline" Class="mr-2" />
+        <span>ADD MOVIE</span>
     </div>
+
+    <!-- WATCHED MOVIES PANEL -->
+    <MudExpansionPanels Class="mb-4" Elevation="0">
+        <MudExpansionPanel Expanded="false">
+            <TitleContent>
+                <div class="d-flex align-center w-100">
+                    <MudIcon Icon="@Icons.Material.Outlined.History" Size="Size.Small" Color="Color.Primary" Class="mr-2" />
+                    <span class="panel-header-text">
+                        WATCHED MOVIES (@WatchedMovies.Count())
+                    </span>
+                </div>
+            </TitleContent>
+            <ChildContent>
+                <div class="movie-list">
+                    @foreach (WheelMovieItem item in WatchedMovies)
+                    {
+                        <MovieCard Title="@item.Movie.Title"
+                                   Year="@item.Movie.Year.ToString()"
+                                   Director="@item.Movie.Director"
+                                   PosterUrl="@item.Movie.PosterUrl"
+                                   IsWatched="true"
+                                   IsSelected="@_selectedForRemoval.Contains(item)"
+                                   OnCardClick="@(() => { if (_isMassRemoveMode) ToggleMovieSelection(item); })">
+                            <RightActions>
+                                @if (_isMassRemoveMode)
+                                {
+                                    <MudIcon Icon="@(_selectedForRemoval.Contains(item)
+                                                        ? Icons.Material.Filled.CheckCircle
+                                                        : Icons.Material.Filled.RadioButtonUnchecked)"
+                                             Color="@(_selectedForRemoval.Contains(item) ? Color.Error : Color.Default)" />
+                                }
+                                else
+                                {
+                                    <MudMenu Icon="@Icons.Material.Rounded.MoreVert"
+                                             AnchorOrigin="Origin.BottomRight"
+                                             TransformOrigin="Origin.TopRight">
+                                        <MudMenuItem Icon="@Icons.Material.Filled.RemoveRedEye"
+                                                     OnClick="@(async () => { await Task.Delay(50); await ViewModel.ToggleMovieWatchedStatusAsync(item.WheelMovie.Id, false); })">
+                                            Unmark as Watched
+                                        </MudMenuItem>
+                                        <MudDivider />
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Delete"
+                                                    IconColor="Color.Error"
+                                                    OnClick="@(async () =>
+                                                    {
+                                                        if (await ConfirmAsync("Remove movie?", $"Remove \"{item.Movie.Title}\" from this wheel?"))
+                                                        {
+                                                            await ViewModel.RemoveWheelMovieAsync(item.WheelMovie.Id);
+                                                        }
+                                                    })">
+                                            Remove Movie
+                                        </MudMenuItem>
+                                    </MudMenu>
+                                }
+                            </RightActions>
+                        </MovieCard>
+                    }
+                </div>
+            </ChildContent>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
 </div>
 
 @if (_isSearchDrawerOpen)
@@ -160,8 +172,8 @@
         Variant="DrawerVariant.Temporary"
         Elevation="24"
         Height="80%"
-        Class="search-drawer"
-        Style="bottom: 57px; border-top-left-radius: 24px; border-top-right-radius: 24px; overflow: hidden;">
+        Class="search-drawer custom-bottom-drawer">
+        
         <div class="drawer-handle"
              @ontouchstart="HandleTouchStart"
              @ontouchmove="HandleTouchMove"
@@ -170,14 +182,14 @@
         </div>
 
         <MudDrawerHeader Class="search-drawer-header">
-            <MudText Typo="Typo.h5" Class="search-drawer-title" Style="color: var(--primary);">
+            <MudText Typo="Typo.h5" Class="search-drawer-title">
                 Search Movies
             </MudText>
             <MudSpacer />
             <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="CloseSearchDrawer" />
         </MudDrawerHeader>
 
-        <div class="pa-4" style="overflow-y: auto; height: 100%;">
+        <div class="pa-4 drawer-scroll-area">
             <SharedMovieSearch TargetWheelId="ViewModel.CurrentWheel?.Id" />
         </div>
     </MudDrawer>
@@ -328,5 +340,14 @@
     {
         _isSearchDrawerOpen = false;
         StateHasChanged();
+    }
+
+    private void OnMassRemoveModeChanged(bool value)
+    {
+        _isMassRemoveMode = value;
+        if (!_isMassRemoveMode)
+        {
+            _selectedForRemoval.Clear();
+        }
     }
 }

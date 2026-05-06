@@ -28,7 +28,7 @@
             <h1>Your Wheels</h1>
         </div>
         <div class="wheel-list-count">
-            @(ViewModel.Wheels?.Count() ?? 0) Collections
+            @(ViewModel.Wheels?.Sum(w => w.ActiveMovies) ?? 0) Active Movies
         </div>
     </div>
 

@@ -20,6 +20,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <EnableDefaultCssItems>false</EnableDefaultCssItems>
         <Nullable>enable</Nullable>
+        <DefaultItemExcludes>$(DefaultItemExcludes);bin\**;obj\**;**\*.WebView2\**</DefaultItemExcludes>
 
         <!-- Display name -->
         <ApplicationTitle>TheUsualWheelProject</ApplicationTitle>
@@ -75,5 +76,12 @@
 		<PackageReference Include="Dapper" Version="2.1.72" />
 		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
     </ItemGroup>
+
+    <ItemGroup>
+        <Watch Remove="bin\**" />
+        <Watch Remove="obj\**" />
+        <Watch Remove="**\*.WebView2\**" />
+    </ItemGroup>
+
 
 </Project>
