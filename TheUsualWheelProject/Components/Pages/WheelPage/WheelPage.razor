@@ -71,7 +71,8 @@ else
                 </div>
             </div>
 
-            <!-- Color Picker Panel -->
+            <!-- Color Picker Sub Panel -->
+            @* Should probably be a separate component again *@
             @if (_editingColorIndex.HasValue && _editingColorIndex.Value < ViewModel.CurrentWheel.Configuration.SliceColors.Count)
             {
                 <MudPaper Class="pa-4 mt-2" Elevation="3" Style="width: fit-content;">
@@ -119,7 +120,20 @@ else
                 <MudSlider @bind-Value="ViewModel.CurrentWheel.Configuration.SpinDurationSeconds" Min="2" Max="10" Step="1" Color="Color.Info" />
                 
                 <MudTextField @bind-Value="ViewModel.CurrentWheel.Configuration.AudioTrack" Label="Audio Track" Variant="Variant.Outlined" />
-            *@
+            *@              <!-- The Switch -->
+            <MudSwitch 
+                @bind-Value="ViewModel.CurrentWheel.Configuration.IsLastMovieStanding" 
+                @bind-Value:after="() => ViewModel.SaveWheelConfigAsync()" 
+                Label="Last Movie Standing Mode" 
+                Color="Color.Success" />
+            
+            <!-- The Slider -->
+            <MudText>Spin Duration (@ViewModel.CurrentWheel.Configuration.SpinDurationSeconds sec)</MudText>
+            <MudSlider 
+                @bind-Value="ViewModel.CurrentWheel.Configuration.SpinDurationSeconds" 
+                @bind-Value:after="() => ViewModel.SaveWheelConfigAsync()" 
+                Min="2" Max="10" Step="1" 
+                Color="Color.Info" />
 
         </MudExpansionPanel>
 

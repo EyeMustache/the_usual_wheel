@@ -372,6 +372,7 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         return null;
     }
 
+    // This lowkey is just a normal update wheel method, but whatever.
     [RelayCommand]
     public async Task SaveWheelConfigAsync()
     {
@@ -390,7 +391,7 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         if (CurrentWheel == null) return;
         
         // Add a default color, then trigger save
-        CurrentWheel.Configuration.SliceColors.Add("#ffffff");
+        CurrentWheel.Configuration.SliceColors.Add("#ffa400");
         _ = SaveWheelConfigAsync();
     }
 

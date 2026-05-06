@@ -21,7 +21,8 @@ The mudexpansionpanels are flexible, would like for them to be static
                 AnimatedRotation="AnimatedRotation"
                 BaseRotation="ViewModel.CurrentRotation"
                 IsAnimating="IsAnimating"
-                IsPreviewMode="false" />
+                IsPreviewMode="false"
+                SlicePalette="ViewModel.CurrentWheel?.Configuration.SliceColors ?? new()" />
 
             @* Session Controls & Timeline *@
             <MudExpansionPanels MultiExpansion="true" Class="mt-4 session-controls">

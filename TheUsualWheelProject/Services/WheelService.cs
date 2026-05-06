@@ -40,35 +40,50 @@ public class WheelService : LoggingBase<WheelService>
         return await _wheelRepository.GetById(wheel.Id);
     }
 
+    // public async Task UpdateWheelAsync(Models.Wheel wheel)
+    // {
+    //     Logger.LogInformation($"Updating wheel with ID {wheel.Id}.");
+    //     Models.Wheel? existingWheel = await _wheelRepository.GetById(wheel.Id);
+    //     if (existingWheel == null)
+    //     {
+    //         Logger.LogWarning($"Wheel with ID {wheel.Id} does not exist.");
+    //         throw new InvalidOperationException("Wheel does not exist.");
+    //     }
+
+    //     string incomingName = wheel.Name.Trim();
+    //     string existingName = existingWheel.Name.Trim();
+    //     string incomingDescription = (wheel.Description ?? string.Empty).Trim();
+    //     string existingDescription = (existingWheel.Description ?? string.Empty).Trim();
+
+    //     bool isUnchanged =
+    //         string.Equals(incomingName, existingName, StringComparison.Ordinal) &&
+    //         string.Equals(incomingDescription, existingDescription, StringComparison.Ordinal);
+
+    //     if (isUnchanged)
+    //     {
+    //         Logger.LogInformation($"No changes detected for wheel with ID {wheel.Id}. Skipping update.");
+    //         return;
+    //     }
+
+    //     wheel.Name = incomingName;
+    //     wheel.Description = string.IsNullOrWhiteSpace(incomingDescription) ? null : incomingDescription;
+
+    //     Logger.LogInformation($"Changes detected for wheel with ID {wheel.Id}. Proceeding with update.");
+    //     await _wheelRepository.Update(wheel);
+    //    }
+
     public async Task UpdateWheelAsync(Models.Wheel wheel)
     {
         Logger.LogInformation($"Updating wheel with ID {wheel.Id}.");
-        Models.Wheel? existingWheel = await _wheelRepository.GetById(wheel.Id);
+
+        Wheel? existingWheel = await _wheelRepository.GetById(wheel.Id);
         if (existingWheel == null)
-        {
-            Logger.LogWarning($"Wheel with ID {wheel.Id} does not exist.");
             throw new InvalidOperationException("Wheel does not exist.");
-        }
 
-        string incomingName = wheel.Name.Trim();
-        string existingName = existingWheel.Name.Trim();
-        string incomingDescription = (wheel.Description ?? string.Empty).Trim();
-        string existingDescription = (existingWheel.Description ?? string.Empty).Trim();
+        wheel.Name = wheel.Name.Trim();
+        wheel.Description = string.IsNullOrWhiteSpace(wheel.Description) ? null : wheel.Description.Trim();
 
-        bool isUnchanged =
-            string.Equals(incomingName, existingName, StringComparison.Ordinal) &&
-            string.Equals(incomingDescription, existingDescription, StringComparison.Ordinal);
-
-        if (isUnchanged)
-        {
-            Logger.LogInformation($"No changes detected for wheel with ID {wheel.Id}. Skipping update.");
-            return;
-        }
-
-        wheel.Name = incomingName;
-        wheel.Description = string.IsNullOrWhiteSpace(incomingDescription) ? null : incomingDescription;
-
-        Logger.LogInformation($"Changes detected for wheel with ID {wheel.Id}. Proceeding with update.");
+        Logger.LogInformation($"Proceeding with update for wheel ID {wheel.Id}.");
         await _wheelRepository.Update(wheel);
     }
 
