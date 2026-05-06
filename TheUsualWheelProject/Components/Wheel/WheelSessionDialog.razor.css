@@ -1,0 +1,58 @@
+.session-label {
+    margin-bottom: 0.25rem;
+}
+
+.session-volume-value {
+    margin-top: 0.25rem;
+}
+
+.session-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 16px;
+    position: relative;
+}
+
+.session-controls {
+    width: 100%;
+    max-width: 420px;
+}
+
+.timeline-scroll-container {
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.eliminated-movie-title {
+    font-weight: 500;
+    color: var(--mud-palette-text-primary);
+}
+
+.empty-history {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: var(--mud-palette-text-disabled);
+}
+
+.action-footer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 16px;
+}
+
+/* Custom Scrollbar for the timeline */
+.timeline-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+.timeline-scroll-container::-webkit-scrollbar-thumb {
+    background-color: var(--mud-palette-primary);
+    border-radius: 10px;
+}

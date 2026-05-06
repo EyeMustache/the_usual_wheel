@@ -7,11 +7,12 @@
     padding: 1rem 1.1rem;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(90deg, var(--secondary), var(--primary));
+    background: var(--secondary);
+    background: radial-gradient(circle, var(--secondary) 50%, var(--primary) 100%);
     color: var(--button-text-contrast);
-    font-weight: 700;
+    font-weight: 650;
     font-size: 1rem;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     cursor: pointer;
     transition: transform 0.15s ease, opacity 0.15s ease;

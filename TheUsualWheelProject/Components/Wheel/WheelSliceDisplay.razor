@@ -5,7 +5,7 @@
     [Parameter] public WheelSlice Slice { get; set; }
 }
 <g>
-    <path d="@Slice.PathData" fill="@Slice.FillColor" stroke="black" stroke-width="1" />
+    <path d="@Slice.PathData" fill="@Slice.FillColor" stroke="#0b0b0b" stroke-width="2" />
     <g transform="rotate(@Slice.TextRotation, @Slice.LabelX, @Slice.LabelY)">
         <text
             x="@Slice.LabelX"

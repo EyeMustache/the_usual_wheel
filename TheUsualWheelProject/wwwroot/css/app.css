@@ -15,6 +15,8 @@
     --text-main: #e3e3e3;
     --text-muted: #a0a0a0;
 }
+/* background: #FFA400;
+background: linear-gradient(90deg, var(--primary 0%, var(--secondary) 50%, var(--primary) 100%); */
 
 html, body {
     font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
@@ -44,11 +46,15 @@ main {
 }
 
 /* Base text overrides */
-h1, p, span, .mud-paper, .mud-list-item {
+/* h1, p, span, .mud-paper, .mud-list-item {
   color: var(--text-main) !important;
-}
+} */
 
 /* --- MUDBLAZOR CINEMATIC POLISH --- */
+
+.mud-icon-button {
+    color: unset !important;
+}
 
 /* 1. Expansion Panel Structure & Typography */
 .mud-expand-panel {

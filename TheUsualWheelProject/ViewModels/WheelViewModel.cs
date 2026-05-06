@@ -318,6 +318,20 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         await LoadWheelAsync(CurrentWheel.Id);
     }
 
+    public void RestoreSessionMovies()
+    {
+        if (AllWheelMovies == null) return;
+        
+        ActiveSessionMovies.Clear();
+        foreach (var item in AllWheelMovies.Where(x => x.IsActive))
+        {
+            ActiveSessionMovies.Add(item);
+        }
+        
+        CurrentRotation = 0;
+        DataUpdated?.Invoke();
+    }
+
     public (double finalRotation, int selectedIndex) GetSpinResult(double currentRotation)
     {
         int count = ActiveSessionMovies.Count;
@@ -356,5 +370,37 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         if (index >= 0 && index < ActiveSessionMovies.Count)
             return ActiveSessionMovies[index];
         return null;
+    }
+
+    // This lowkey is just a normal update wheel method, but whatever.
+    [RelayCommand]
+    public async Task SaveWheelConfigAsync()
+    {
+        if (CurrentWheel == null) return;
+
+        Logger.LogInformation($"Saving configuration for Wheel {CurrentWheel.Id}");
+        await _wheelService.UpdateWheelAsync(CurrentWheel);
+
+        DataUpdated?.Invoke();
+    }
+
+
+    [RelayCommand]
+    public void AddSliceColor()
+    {
+        if (CurrentWheel == null) return;
+        
+        // Add a default color, then trigger save
+        CurrentWheel.Configuration.SliceColors.Add("#ffa400");
+        _ = SaveWheelConfigAsync();
+    }
+
+     [RelayCommand]
+    public void RemoveSliceColor(string colorValue)
+    {
+        if (CurrentWheel == null || CurrentWheel.Configuration.SliceColors.Count <= 2) return; // Prevent removing all colors
+        
+        CurrentWheel.Configuration.SliceColors.Remove(colorValue);
+        _ = SaveWheelConfigAsync();
     }
 }

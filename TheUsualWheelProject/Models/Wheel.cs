@@ -9,7 +9,8 @@ public class Wheel : IModel, IComparable<Wheel>
     public int Id { get; set; }
     public required string Name { get; set; }
     public string? Description { get; set; }
-
+    public WheelConfig Configuration { get; set; } = new WheelConfig(); 
+    
     public int CompareTo(Wheel? other)
     {
         if (other == null) return 1;

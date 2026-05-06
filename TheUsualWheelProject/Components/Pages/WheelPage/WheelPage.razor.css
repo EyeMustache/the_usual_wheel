@@ -1,5 +1,138 @@
+/* Container for the whole settings area */
+.settings-container {
+    background-color: var(--bg-surface);
+    padding: 1.5rem;
+    border-radius: 8px;
+    color: var(--text-main);
+}
+
+/* Headers */
+.settings-header {
+    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Base formatting for field labels */
+.settings-field label,
+.settings-row label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+/* Rows for toggles */
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Accent text for values and links */
+.accent-text {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Override MudTextField to look like a dark, flat box */
+::deep .sleek-input .mud-input-control-input-container {
+    background-color: var(--bg-surface-elevated);
+    border-radius: 6px;
+    border: 1px solid var(--bg-surface-elevated-2);
+}
+::deep .sleek-input .mud-input {
+    color: var(--text-main);
+}
+::deep .sleek-input .mud-input.mud-input-outlined fieldset {
+    border: none !important; /* Remove MudBlazor default border */
+}
+
+/* Subtle divider matching the theme */
+.subtle-divider {
+    border-color: var(--bg-surface-elevated-2);
+}
+
+/* Color palettes */
+.color-palette-box {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    border: 2px solid var(--bg-surface-elevated-2);
+}
+
+.add-color-box {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    border: 2px dashed var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+.add-color-box:hover {
+    background-color: rgba(255, 164, 0, 0.1); /* Uses the RGB of --primary */
+}
+
+.color-picker-panel {
+    background-color: var(--bg-surface-elevated) !important;
+    border: 1px solid var(--bg-surface-elevated-2);
+    width: fit-content;
+}
+
+/* Audio boxes */
+.audio-selection-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-surface-elevated);
+    border: 1px solid var(--bg-surface-elevated-2);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+}
+
+/* Keep the existing expand panel and start session button rules untouched */
 .mud-expand-panel-text {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-main);
+}
+
+.wheel-settings-overview {
+    background: var(--bg-surface);
+    color: var(--text-main);
+    border: 1px solid var(--bg-surface-elevated-2);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.start-session-button {
+    border-radius: 12px;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--secondary);
+    background: radial-gradient(circle, var(--secondary) 50%, var(--primary) 100%);
+    color: var(--button-text-contrast) !important;
+    font-weight: 650;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 300px;
 }

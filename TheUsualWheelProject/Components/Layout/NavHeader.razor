@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject WheelService WheelService
 
 <MudAppBar Fixed="true" Elevation="1" Style="background: var(--bg-navbar); border-bottom: 1px solid rgba(255, 164, 0, 0.18);">
     <MudIconButton Icon="@Icons.Material.Filled.ArrowBackIos" Color="Color.Primary" OnClick="GoBack" />
@@ -8,7 +9,6 @@
     <MudSpacer />
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Primary" OnClick="ToggleMenu" />
 </MudAppBar>
-@* https://mudblazor.com/components/drawer, Could be useful replacement for nav sidebar *@
 
 @if (isMenuOpen)
 {
@@ -16,35 +16,52 @@
 }
 
 @code {
-    private string PageTitle => GetPageTitle(Navigation.Uri);
-
-    private string GetPageTitle(string uri)
-    {
-        string? path = Navigation.ToBaseRelativePath(uri).TrimEnd(trimChar: '/');
-
-        return path switch
-        {
-            string p when p.StartsWith("add-wheel") => "Add New Wheel",
-            string p when p.StartsWith("edit-wheel") => "Edit Wheel",
-            string p when p.StartsWith("movies") => "Movies",
-            string p when p.StartsWith("actors") => "Actors",
-            string p when p.StartsWith("settings") => "Settings",
-            string p when p.StartsWith("about") => "About",
-            string p when p.StartsWith("wheel") => "Wheel Page",@* Should be the title of the wheel page but for now just generic wheel page *@
-            _ => "The Usual Wheel"
-        };
-    }
-
+    private string PageTitle { get; set; } = "The Usual Wheel";
     private bool isMenuOpen = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         Navigation.LocationChanged += HandleLocationChanged;
+        await UpdatePageTitleAsync(Navigation.Uri);
     }
 
-    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        InvokeAsync(StateHasChanged);
+        await UpdatePageTitleAsync(e.Location);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task UpdatePageTitleAsync(string uri)
+    {
+        string path = Navigation.ToBaseRelativePath(uri).TrimEnd(trimChar: '/');
+
+        if (path.StartsWith("wheel/", StringComparison.OrdinalIgnoreCase))
+        {
+            string[]? segments = path.Split(separator: '/');
+            if (segments.Length >= 2 && int.TryParse(segments[1], out int wheelId))
+            {
+                Models.Wheel? wheel = await WheelService.GetWheelByIdAsync(wheelId);
+                PageTitle = wheel?.Name ?? "Wheel Page";
+                return;
+            }
+        }
+
+        PageTitle = GetPageTitleFromPath(path);
+    }
+
+    private string GetPageTitleFromPath(string path)
+    {
+        return path switch
+        {
+            string p when p.StartsWith("add-wheel", StringComparison.OrdinalIgnoreCase) => "Add New Wheel",
+            string p when p.StartsWith("edit-wheel", StringComparison.OrdinalIgnoreCase) => "Edit Wheel",
+            string p when p.StartsWith("movies", StringComparison.OrdinalIgnoreCase) => "Movies",
+            string p when p.StartsWith("actors", StringComparison.OrdinalIgnoreCase) => "Actors",
+            string p when p.StartsWith("settings", StringComparison.OrdinalIgnoreCase) => "Settings",
+            string p when p.StartsWith("about", StringComparison.OrdinalIgnoreCase) => "About",
+            string p when p.StartsWith("wheel", StringComparison.OrdinalIgnoreCase) => "Wheel Page",
+            _ => "The Usual Wheel"
+        };
     }
 
     public void Dispose()

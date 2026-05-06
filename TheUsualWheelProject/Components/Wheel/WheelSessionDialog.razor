@@ -1,0 +1,236 @@
+@inject TheUsualWheelProject.ViewModels.WheelViewModel ViewModel
+@inject NavigationManager Navigation
+@implements IDisposable
+
+@* 
+KNOWN ISSUES:
+The elimination dialog cancel completely breaks the session
+Ignoring the pop up and pressing outside to close also breaks the session,  you can't spin anywhere anymore.
+You can press X to back out of the session but the wheelpage isnt refreshed
+The mudexpansionpanels are flexible, would like for them to be static
+
+
+*@
+
+<MudDialog Title="Wheel Session" MaxWidth="MaxWidth.Medium" FullWidth="true" Class="wheel-session-dialog">
+    <DialogContent>
+        <div class="session-layout">
+            
+            <WheelVisualizer
+                Items="ViewModel.ActiveSessionMovies.ToList()"
+                AnimatedRotation="AnimatedRotation"
+                BaseRotation="ViewModel.CurrentRotation"
+                IsAnimating="IsAnimating"
+                IsPreviewMode="false"
+                SlicePalette="ViewModel.CurrentWheel?.Configuration.SliceColors ?? new()" />
+
+            @* Session Controls & Timeline *@
+            <MudExpansionPanels MultiExpansion="true" Class="mt-4 session-controls">
+                
+
+                @* Timeline panel *@
+                <MudExpansionPanel Text="Elimination Timeline" Expanded="true" Icon="@Icons.Material.Filled.History">
+                    <div class="timeline-scroll-container">
+                        <MudTimeline TimelinePosition=TimelinePosition.Alternate TimelineOrientation=TimelineOrientation.Vertical Reverse="false">
+                            @for (int i = 0; i < _eliminationHistory.Count; i++)
+                            {
+                                WheelMovieItem? item = _eliminationHistory[i];
+                                
+                                // The most recent item is the last one in the list
+                                bool isLatest = i == _eliminationHistory.Count - 1;
+                                
+                                // Make the latest item "Warning" (lit up), others "Dark"
+                                Color itemColor = isLatest ? Color.Warning : Color.Dark;
+                                
+                                // Even items go right (default text align), odd items go left (push text to the end)
+                                Align textAlign = i % 2 == 0 ? Align.Start : Align.End;
+
+                                <MudTimelineItem Color="@itemColor" Size="Size.Small" Variant="Variant.Filled">
+                                    <ItemContent>
+                                        <MudText Typo="Typo.body2" Align="@textAlign">
+                                            @item.Movie.Title
+                                        </MudText>
+                                    </ItemContent>
+                                </MudTimelineItem>
+                            }
+                        </MudTimeline>
+                    </div>
+                </MudExpansionPanel>
+
+                @* Volume panel *@
+                <MudExpansionPanel Text="Audio Settings" Icon="@Icons.Material.Filled.VolumeUp">
+                    <div class="px-2">
+                        <MudSlider @bind-Value="_volume" Min="0" Max="1" Step="0.05" Color="Color.Primary" />
+                        <MudText Typo="Typo.caption" Class="mt-1">@($"{_volume:P0}")</MudText>
+                    </div>
+                </MudExpansionPanel>
+
+            </MudExpansionPanels>
+
+            @* Elimination Confirmation Dialog *@
+            <MudDialog @bind-Visible="_showEliminationDialog">
+                <TitleContent>
+                    <MudText Typo="Typo.h6">Movie Eliminated</MudText>
+                </TitleContent>
+                <DialogContent>
+                    <MudText>@_selectedMovie?.Movie.Title</MudText>
+                    <MudText Typo="Typo.body2" Class="mt-2">
+                        This movie will not be watched today.
+                    </MudText>
+                </DialogContent>
+                <DialogActions>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="ConfirmRemoval">Confirm</MudButton>
+                    <MudButton Color="Color.Secondary" Variant="Variant.Outlined" OnClick="CancelRemoval">Cancel</MudButton>
+                </DialogActions>
+            </MudDialog>
+
+            @* Winner Dialog *@
+            <MudDialog @bind-Visible="_showWinnerDialog">
+                <TitleContent>
+                    <MudText Typo="Typo.h6">Winner!</MudText>
+                </TitleContent>
+                <DialogContent>
+                    <MudText>@_selectedMovie?.Movie.Title</MudText>
+                    <MudText Typo="Typo.body2" Class="mt-2">
+                        The wheel has spoken!
+                    </MudText>
+                </DialogContent>
+                <DialogActions>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="FinishSessionAsync">Mark as Watched & View Details</MudButton>
+                    <MudButton Color="Color.Secondary" Variant="Variant.Outlined" OnClick="ResetAndClose">Keep Unwatched & Reset Session</MudButton>
+                </DialogActions>
+            </MudDialog>
+        </div>
+    </DialogContent>
+
+    <DialogActions>
+        <div class="action-footer">
+            @if (ViewModel.ActiveSessionMovies.Count > 1)
+            {
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="Spin" Disabled="@IsAnimating">
+                    @(IsAnimating ? "SPINNING..." : "SPIN THE WHEEL")
+                </MudButton>
+            }
+            else if (ViewModel.ActiveSessionMovies.Count == 1)
+            {
+                <MudText Typo="Typo.h5" Color="Color.Success">
+                    Winner: @ViewModel.ActiveSessionMovies[0].Movie.Title!
+                </MudText>
+            }
+        </div>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private double AnimatedRotation = 0;
+    private double _volume = 0.75;
+    private bool IsAnimating = false;
+    private bool IsSpinPendingConfirmation = false;
+    private int? pendingRemovalIndex = null;
+    private double pendingFinalRotation = 0;
+    private bool _showEliminationDialog;
+    private bool _showWinnerDialog;
+    private WheelMovieItem? _selectedMovie;
+    private readonly List<WheelMovieItem> _eliminationHistory = new();
+
+    protected override void OnInitialized()
+    {
+        ViewModel.DataUpdated += RefreshWheel;
+        ViewModel.PropertyChanged += HandlePropertyChanged;
+    }
+
+    public void Dispose()
+    {
+        ViewModel.DataUpdated -= RefreshWheel;
+        ViewModel.PropertyChanged -= HandlePropertyChanged;
+    }
+
+    private void RefreshWheel() => InvokeAsync(StateHasChanged);
+    private void HandlePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e) => RefreshWheel();
+
+    private async Task Spin()
+    {
+        int count = ViewModel.ActiveSessionMovies.Count;
+        if (ViewModel.IsSpinning || count <= 1 || ViewModel.CurrentWheel == null) return;
+
+        ViewModel.IsSpinning = true;
+        var (finalRotation, selectedIndex) = ViewModel.GetSpinResult(AnimatedRotation);
+
+        pendingRemovalIndex = selectedIndex;
+        pendingFinalRotation = finalRotation;
+        IsSpinPendingConfirmation = true;
+        _selectedMovie = ViewModel.ActiveSessionMovies[selectedIndex];
+
+        double startRotation = AnimatedRotation;
+        double endRotation = startRotation + finalRotation;
+        IsAnimating = true;
+        AnimatedRotation = endRotation;
+        StateHasChanged();
+
+        // Let the animation finish before showing the removal dialog
+        await Task.Delay(8000);
+        // Should be variable setting by user
+
+        IsAnimating = false;
+        _showEliminationDialog = true;
+        StateHasChanged();
+    }
+
+    private void ConfirmRemoval()
+    {
+        if (!pendingRemovalIndex.HasValue) return;
+
+        if (_selectedMovie != null)
+        {
+            _eliminationHistory.Add(_selectedMovie);
+        }
+
+        ViewModel.RemoveMovieAt(pendingRemovalIndex.Value, pendingFinalRotation);
+        pendingRemovalIndex = null;
+        IsSpinPendingConfirmation = false;
+        _showEliminationDialog = false;
+
+        if (ViewModel.ActiveSessionMovies.Count == 1)
+        {
+            _selectedMovie = ViewModel.ActiveSessionMovies.FirstOrDefault();
+            _showWinnerDialog = true;
+        }
+
+        AnimatedRotation = ViewModel.CurrentRotation;
+        StateHasChanged();
+    }
+
+    private void CancelRemoval()
+    {
+        _showEliminationDialog = false;
+        IsSpinPendingConfirmation = false;
+        pendingRemovalIndex = null;
+        _selectedMovie = null;
+    }
+
+    private async Task FinishSessionAsync()
+    {
+        if (_selectedMovie != null)
+        {
+            await ViewModel.ToggleMovieWatchedStatusAsync(_selectedMovie.WheelMovie.Id, true);
+        }
+
+        ViewModel.RestoreSessionMovies();
+        _showWinnerDialog = false;
+        MudDialog.Close();
+
+        if (_selectedMovie != null)
+        {
+            Navigation.NavigateTo($"/movie/{_selectedMovie.Movie.TmdbId}");
+        }
+    }
+
+    private void ResetAndClose()
+    {
+        ViewModel.RestoreSessionMovies();
+        _showWinnerDialog = false;
+        MudDialog.Close();
+    }
+}
