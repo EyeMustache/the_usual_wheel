@@ -6,5 +6,6 @@
 
 // internal static class TmdbApiKey
 // {
-//     public const string APIKEY = "ENTER_YOUR_API_KEY_HERE";
+//     public const string APIKEY = "ENTER KEY HERE";
 // }
+ 
