@@ -1,4 +1,5 @@
 @inject TheUsualWheelProject.ViewModels.WheelViewModel ViewModel
+@inject TheUsualWheelProject.Services.AudioService AudioService
 @inject NavigationManager Navigation
 @implements IDisposable
 
@@ -60,8 +61,12 @@ The mudexpansionpanels are flexible, would like for them to be static
                 @* Volume panel *@
                 <MudExpansionPanel Text="Audio Settings" Icon="@Icons.Material.Filled.VolumeUp">
                     <div class="px-2">
-                        <MudSlider @bind-Value="_volume" Min="0" Max="1" Step="0.05" Color="Color.Primary" />
-                        <MudText Typo="Typo.caption" Class="mt-1">@($"{_volume:P0}")</MudText>
+                        <MudSlider @bind-Value="Volume"
+                                   Min="0"
+                                   Max="1"
+                                   Step="0.05"
+                                   Color="Color.Primary" />
+                        <MudText Typo="Typo.caption" Class="mt-1">@($"{Volume:P0}")</MudText>
                     </div>
                 </MudExpansionPanel>
 
@@ -126,6 +131,16 @@ The mudexpansionpanels are flexible, would like for them to be static
 
     private double AnimatedRotation = 0;
     private double _volume = 0.75;
+    private double Volume
+    {
+        get => _volume;
+        set
+        {
+            if (_volume == value) return;
+            _volume = value;
+            AudioService.SetVolume(value);
+        }
+    }
     private bool IsAnimating = false;
     private bool IsSpinPendingConfirmation = false;
     private int? pendingRemovalIndex = null;
@@ -139,10 +154,22 @@ The mudexpansionpanels are flexible, would like for them to be static
     {
         ViewModel.DataUpdated += RefreshWheel;
         ViewModel.PropertyChanged += HandlePropertyChanged;
+
+        _ = StartSessionAudioAsync();
+    }
+
+    private async Task StartSessionAudioAsync()
+    {
+        if (ViewModel.CurrentWheel == null) return;
+        AudioService.SetVolume(_volume);
+        string bgmTrack = ViewModel.CurrentWheel.Configuration.AudioTrack;
+        await AudioService.PlayBgmAsync(bgmTrack, loop: true);
     }
 
     public void Dispose()
     {
+
+        AudioService.StopBgm();
         ViewModel.DataUpdated -= RefreshWheel;
         ViewModel.PropertyChanged -= HandlePropertyChanged;
     }
@@ -156,7 +183,8 @@ The mudexpansionpanels are flexible, would like for them to be static
         if (ViewModel.IsSpinning || count <= 1 || ViewModel.CurrentWheel == null) return;
 
         ViewModel.IsSpinning = true;
-        var (finalRotation, selectedIndex) = ViewModel.GetSpinResult(AnimatedRotation);
+
+        (double finalRotation, int selectedIndex) = ViewModel.GetSpinResult(AnimatedRotation);
 
         pendingRemovalIndex = selectedIndex;
         pendingFinalRotation = finalRotation;
@@ -169,12 +197,12 @@ The mudexpansionpanels are flexible, would like for them to be static
         AnimatedRotation = endRotation;
         StateHasChanged();
 
-        // Let the animation finish before showing the removal dialog
-        await Task.Delay(8000);
-        // Should be variable setting by user
+        // The duration here should tie into your wheel spin duration.
+        await Task.Delay(ViewModel.CurrentWheel.Configuration.SpinDurationSeconds * 1000); 
 
         IsAnimating = false;
         _showEliminationDialog = true;
+        
         StateHasChanged();
     }
 
@@ -217,6 +245,7 @@ The mudexpansionpanels are flexible, would like for them to be static
             await ViewModel.ToggleMovieWatchedStatusAsync(_selectedMovie.WheelMovie.Id, true);
         }
 
+        AudioService.StopBgm();
         ViewModel.RestoreSessionMovies();
         _showWinnerDialog = false;
         MudDialog.Close();
@@ -229,8 +258,14 @@ The mudexpansionpanels are flexible, would like for them to be static
 
     private void ResetAndClose()
     {
+        AudioService.StopBgm();
         ViewModel.RestoreSessionMovies();
         _showWinnerDialog = false;
         MudDialog.Close();
+    }
+
+    private void OnVolumeChanged(double value)
+    {
+        _volume = value;
     }
 }

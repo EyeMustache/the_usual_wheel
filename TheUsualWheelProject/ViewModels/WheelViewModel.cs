@@ -294,9 +294,9 @@ public partial class WheelViewModel : LoggingBase<WheelViewModel>
         if (IsSpinning || ActiveSessionMovies.Count <= 1 || CurrentWheel == null) return;
         IsSpinning = true;
 
-        var result = GetSpinResult(CurrentRotation);
-        CurrentRotation += result.Item1;
-        LastRemovedMovie = ActiveSessionMovies[result.Item2];
+        (double finalRotation, int selectedIndex)  = GetSpinResult(CurrentRotation);
+        CurrentRotation += finalRotation;
+        LastRemovedMovie = ActiveSessionMovies[selectedIndex];
 
         IsSpinning = false;
         DataUpdated?.Invoke();
