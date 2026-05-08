@@ -11,8 +11,8 @@ public class AudioService
     private IAudioPlayer? _tickPlayer;
     private bool _isTickInitialized = false;
     
-    public double BgmVolume { get; private set; } = 0.75;
-    public double TickVolume { get; private set; } = 0.75;
+    public double BgmVolume { get; private set; } = 0.50;
+    public double TickVolume { get; private set; } = 0.50;
 
     public AudioService(IAudioManager audioManager)
     {

@@ -140,7 +140,7 @@ The mudexpansionpanels are flexible, would like for them to be static
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
 
     private double AnimatedRotation = 0;
-    private double _bgmVolume = 0.75;
+    private double _bgmVolume = 0.50;
     private double BgmVolume
     {
         get => _bgmVolume;
@@ -152,7 +152,7 @@ The mudexpansionpanels are flexible, would like for them to be static
         }
     }
     
-    private double _tickVolume = 0.75;
+    private double _tickVolume = 0.50;
     private double TickVolume
     {
         get => _tickVolume;
@@ -223,8 +223,8 @@ The mudexpansionpanels are flexible, would like for them to be static
 
         double durationMs = ViewModel.CurrentWheel.Configuration.SpinDurationSeconds * 1000;
 
-
-        _ = StartTickSequence(startRotation, finalRotation, durationMs, count);
+        // Temporarily turned off for demo prep sake.
+        @* _ = StartTickSequence(startRotation, finalRotation, durationMs, count); *@
 
         await Task.Delay((int)durationMs); 
 
@@ -332,7 +332,8 @@ The mudexpansionpanels are flexible, would like for them to be static
                 // Only play if they didn't skip ahead or cancel
                 if (!IsAnimating) break; 
 
-                _ = AudioService.PlayTickAsync("tick.mp3");
+                // Temporarily turned off for demo deadline's sake.
+                @* _ = AudioService.PlayTickAsync("tick.mp3"); *@
             }
         }
     }
