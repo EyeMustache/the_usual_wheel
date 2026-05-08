@@ -1,8 +1,13 @@
 @* Should have wheel preview (maybe slightly spinning) *@
 <div class="wheel-container">
     @* Center Pin *@
-    <div class="wheel-pointer"></div>
-
+    <svg class="wheel-pointer" viewBox="0 0 40 50">
+        <polygon points="5,5 35,5 20,45" 
+                fill="rgb(81, 43, 212)" 
+                stroke="black" 
+                stroke-width="4" 
+                stroke-linejoin="round" />
+    </svg>
 
     <svg viewBox="0 0 320 320"
          class="wheel-svg @(IsAnimating ? "spinning" : "") @(IsPreviewMode ? "preview-spin" : "")"

@@ -1,11 +1,4 @@
-.session-label {
-    margin-bottom: 0.25rem;
-}
-
-.session-volume-value {
-    margin-top: 0.25rem;
-}
-
+/* --- Core Layout --- */
 .session-layout {
     display: flex;
     flex-direction: column;
@@ -15,17 +8,31 @@
     position: relative;
 }
 
-.session-controls {
-    width: 100%;
-    max-width: 420px;
+/* --- The Magic Fix: Targeted Expansion Panels --- */
+/* Using ::deep ensures we pierce the MudBlazor shadow DOM */
+/* Using .session-controls ensures we ONLY affect this specific page */
+
+::deep .session-controls {
+    width: 350px; /* Adjust this to match your Wheel's SVG width */
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
+::deep .session-controls .mud-expand-panel,
+::deep .session-controls .mud-expand-panel-header {
+    width: 100% !important; /* Forces the internal library divs to fill the 350px */
+    min-width: 100% !important;
+}
+
+/* --- Timeline Styling --- */
 .timeline-scroll-container {
     max-height: 200px;
     overflow-y: auto;
     background-color: rgba(0,0,0,0.05);
     border-radius: 8px;
     padding: 8px;
+    width: 100%;
 }
 
 .eliminated-movie-title {
@@ -41,18 +48,28 @@
     color: var(--mud-palette-text-disabled);
 }
 
+/* --- Scrollbars --- */
+.timeline-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.timeline-scroll-container::-webkit-scrollbar-thumb {
+    background-color: var(--mud-palette-primary);
+    border-radius: 10px;
+}
+
+/* --- Utility --- */
+.session-label {
+    margin-bottom: 0.25rem;
+}
+
+.session-volume-value {
+    margin-top: 0.25rem;
+}
+
 .action-footer {
     width: 100%;
     display: flex;
     justify-content: center;
     padding-bottom: 16px;
-}
-
-/* Custom Scrollbar for the timeline */
-.timeline-scroll-container::-webkit-scrollbar {
-    width: 6px;
-}
-.timeline-scroll-container::-webkit-scrollbar-thumb {
-    background-color: var(--mud-palette-primary);
-    border-radius: 10px;
 }

@@ -7,19 +7,14 @@
 
 .wheel-pointer {
     position: absolute;
-    top: -10px;
+    top: -15px;
     left: 50%;
     transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-top: 40px solid #512bd4;
+    width: 40px;  /* Similar to your original 15+15 border width */
+    height: 55px; /* Similar to your original 40 border height */
     z-index: 10;
-    filter: drop-shadow(0px 2px 0px black) 
-        drop-shadow(2px 0px 0px black) 
-        drop-shadow(-2px 0px 0px black);
 }
+
 
 .wheel-svg {
     width: 100%;

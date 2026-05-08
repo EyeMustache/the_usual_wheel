@@ -13,7 +13,13 @@ The mudexpansionpanels are flexible, would like for them to be static
 
 *@
 
-<MudDialog Title="Wheel Session" MaxWidth="MaxWidth.Medium" FullWidth="true" Class="wheel-session-dialog">
+<MudDialog MaxWidth="MaxWidth.Medium" FullWidth="true" Class="wheel-session-dialog">
+    <TitleContent>
+        <div class="d-flex justify-space-between align-center">
+            <MudText Typo="Typo.h6">Wheel Session</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Inherit" OnClick="OnCloseClicked" />
+        </div>
+    </TitleContent>
     <DialogContent>
         <div class="session-layout">
             
@@ -27,63 +33,72 @@ The mudexpansionpanels are flexible, would like for them to be static
                 SlicePalette="ViewModel.CurrentWheel?.Configuration.SliceColors ?? new()" />
 
             @* Session Controls & Timeline *@
+            @* Note: 'session-controls' is the anchor for our CSS ::deep rules *@
             <MudExpansionPanels MultiExpansion="true" Class="mt-4 session-controls">
-                
 
                 @* Timeline panel *@
-                <MudExpansionPanel Text="Elimination Timeline" Expanded="true" Icon="@Icons.Material.Filled.History">
-                    <div class="timeline-scroll-container">
-                        <MudTimeline TimelinePosition=TimelinePosition.Alternate TimelineOrientation=TimelineOrientation.Vertical Reverse="false">
-                            @for (int i = 0; i < _eliminationHistory.Count; i++)
-                            {
-                                WheelMovieItem? item = _eliminationHistory[i];
-                                
-                                // The most recent item is the last one in the list
-                                bool isLatest = i == _eliminationHistory.Count - 1;
-                                
-                                // Make the latest item "Warning" (lit up), others "Dark"
-                                Color itemColor = isLatest ? Color.Warning : Color.Dark;
-                                
-                                // Even items go right (default text align), odd items go left (push text to the end)
-                                Align textAlign = i % 2 == 0 ? Align.Start : Align.End;
+                <MudExpansionPanel Expanded="true">
+                    <TitleContent>
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.History" Color="Color.Primary" Class="mr-2" />
+                            <MudText>Elimination Timeline</MudText>
+                        </div>
+                    </TitleContent>
+                    <ChildContent>
+                        <div class="timeline-scroll-container">
+                            <MudTimeline TimelinePosition=TimelinePosition.Start TimelineOrientation=TimelineOrientation.Vertical Reverse="false">
+                                @for (int i = _eliminationHistory.Count - 1; i >= 0; i--)
+                                {
+                                    WheelMovieItem? item = _eliminationHistory[i];
+                                    bool isLatest = i == _eliminationHistory.Count - 1;
+                                    Color itemColor = isLatest ? Color.Warning : Color.Dark;
 
-                                <MudTimelineItem Color="@itemColor" Size="Size.Small" Variant="Variant.Filled">
-                                    <ItemContent>
-                                        <MudText Typo="Typo.body2" Align="@textAlign">
-                                            @item.Movie.Title
-                                        </MudText>
-                                    </ItemContent>
-                                </MudTimelineItem>
-                            }
-                        </MudTimeline>
-                    </div>
+                                    <MudTimelineItem Color="@itemColor" Size="Size.Small" Variant="Variant.Filled">
+                                        <ItemContent>
+                                            <MudText Typo="Typo.body2" Align=Align.Start Class="eliminated-movie-title">
+                                                @item.Movie.Title
+                                            </MudText>
+                                        </ItemContent>
+                                    </MudTimelineItem>
+                                }
+                            </MudTimeline>
+                        </div>
+                    </ChildContent>
                 </MudExpansionPanel>
 
                 @* Volume panel *@
-                <MudExpansionPanel Text="Audio Settings" Icon="@Icons.Material.Filled.VolumeUp">
-                    <div class="px-2">
-                        <MudText Typo="Typo.subtitle2">Music Volume</MudText>
-                        <MudSlider @bind-Value="BgmVolume"
-                                   Min="0"
-                                   Max="1"
-                                   Step="0.05"
-                                   Color="Color.Primary" />
-                        <MudText Typo="Typo.caption" Class="mt-1 mb-2 d-block">@($"{BgmVolume:P0}")</MudText>
+                <MudExpansionPanel>
+                    <TitleContent>
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.VolumeUp" Color="Color.Primary" Class="mr-2" />
+                            <MudText>Audio Settings</MudText>
+                        </div>
+                    </TitleContent>
+                    <ChildContent>
+                        <div class="px-2">
+                            <MudText Typo="Typo.subtitle2">Music Volume</MudText>
+                            <MudSlider @bind-Value="BgmVolume"
+                                    Min="0"
+                                    Max="1"
+                                    Step="0.05"
+                                    Color="Color.Primary" />
+                            <MudText Typo="Typo.caption" Class="mt-1 mb-2 d-block session-volume-value">@($"{BgmVolume:P0}")</MudText>
 
-                        <MudText Typo="Typo.subtitle2" Class="mt-2">Tick Volume</MudText>
-                        <MudSlider @bind-Value="TickVolume"
-                                   Min="0"
-                                   Max="1"
-                                   Step="0.05"
-                                   Color="Color.Secondary" />
-                        <MudText Typo="Typo.caption" Class="mt-1 d-block">@($"{TickVolume:P0}")</MudText>
-                    </div>
+                            <MudText Typo="Typo.subtitle2" Class="mt-2">Tick Volume</MudText>
+                            <MudSlider @bind-Value="TickVolume"
+                                    Min="0"
+                                    Max="1"
+                                    Step="0.05"
+                                    Color="Color.Secondary" />
+                            <MudText Typo="Typo.caption" Class="mt-1 d-block session-volume-value">@($"{TickVolume:P0}")</MudText>
+                        </div>
+                    </ChildContent>
                 </MudExpansionPanel>
 
             </MudExpansionPanels>
 
             @* Elimination Confirmation Dialog *@
-            <MudDialog @bind-Visible="_showEliminationDialog">
+            <MudDialog @bind-Visible="_showEliminationDialog" Options="_dialogOptions" Class="elimination-dialog">
                 <TitleContent>
                     <MudText Typo="Typo.h6">Movie Eliminated</MudText>
                 </TitleContent>
@@ -94,13 +109,12 @@ The mudexpansionpanels are flexible, would like for them to be static
                     </MudText>
                 </DialogContent>
                 <DialogActions>
-                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="ConfirmRemoval">Confirm</MudButton>
-                    <MudButton Color="Color.Secondary" Variant="Variant.Outlined" OnClick="CancelRemoval">Cancel</MudButton>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="AcknowledgeElim">Acknowledge</MudButton>
                 </DialogActions>
             </MudDialog>
 
             @* Winner Dialog *@
-            <MudDialog @bind-Visible="_showWinnerDialog">
+            <MudDialog @bind-Visible="_showWinnerDialog" Options="_dialogOptions">
                 <TitleContent>
                     <MudText Typo="Typo.h6">Winner!</MudText>
                 </TitleContent>
@@ -113,6 +127,20 @@ The mudexpansionpanels are flexible, would like for them to be static
                 <DialogActions>
                     <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="FinishSessionAsync">Mark as Watched & View Details</MudButton>
                     <MudButton Color="Color.Secondary" Variant="Variant.Outlined" OnClick="ResetAndClose">Keep Unwatched & Reset Session</MudButton>
+                </DialogActions>
+            </MudDialog>
+
+            @* Abandon Confirmation Dialog *@
+            <MudDialog @bind-Visible="_showAbandonDialog" Options="_dialogOptions">
+                <TitleContent>
+                    <MudText Typo="Typo.h6">Abandon Session?</MudText>
+                </TitleContent>
+                <DialogContent>
+                    <MudText>Are you sure you want to abandon this session? Progress will be lost.</MudText>
+                </DialogContent>
+                <DialogActions>
+                    <MudButton OnClick="@(() => _showAbandonDialog = false)">Resume</MudButton>
+                    <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="ConfirmAbandon">Abandon</MudButton>
                 </DialogActions>
             </MudDialog>
         </div>
@@ -140,7 +168,7 @@ The mudexpansionpanels are flexible, would like for them to be static
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
 
     private double AnimatedRotation = 0;
-    private double _bgmVolume = 0.50;
+    private double _bgmVolume = 0.50; // Temp as not to get tired of the sound
     private double BgmVolume
     {
         get => _bgmVolume;
@@ -164,11 +192,12 @@ The mudexpansionpanels are flexible, would like for them to be static
         }
     }
     private bool IsAnimating = false;
-    private bool IsSpinPendingConfirmation = false;
     private int? pendingRemovalIndex = null;
     private double pendingFinalRotation = 0;
     private bool _showEliminationDialog;
     private bool _showWinnerDialog;
+    private bool _showAbandonDialog;
+    private DialogOptions _dialogOptions = new() { BackdropClick = false, CloseOnEscapeKey = false };
     private WheelMovieItem? _selectedMovie;
     private readonly List<WheelMovieItem> _eliminationHistory = new();
 
@@ -211,7 +240,6 @@ The mudexpansionpanels are flexible, would like for them to be static
 
         pendingRemovalIndex = selectedIndex;
         pendingFinalRotation = finalRotation;
-        IsSpinPendingConfirmation = true;
         _selectedMovie = ViewModel.ActiveSessionMovies[selectedIndex];
 
         double startRotation = AnimatedRotation;
@@ -233,7 +261,7 @@ The mudexpansionpanels are flexible, would like for them to be static
         StateHasChanged();
     }
 
-    private void ConfirmRemoval()
+    private void AcknowledgeElim()
     {
         if (!pendingRemovalIndex.HasValue) return;
 
@@ -244,7 +272,6 @@ The mudexpansionpanels are flexible, would like for them to be static
 
         ViewModel.RemoveMovieAt(pendingRemovalIndex.Value, pendingFinalRotation);
         pendingRemovalIndex = null;
-        IsSpinPendingConfirmation = false;
         _showEliminationDialog = false;
 
         if (ViewModel.ActiveSessionMovies.Count == 1)
@@ -257,12 +284,22 @@ The mudexpansionpanels are flexible, would like for them to be static
         StateHasChanged();
     }
 
-    private void CancelRemoval()
+    private void OnCloseClicked()
     {
-        _showEliminationDialog = false;
-        IsSpinPendingConfirmation = false;
-        pendingRemovalIndex = null;
-        _selectedMovie = null;
+        if (ViewModel.ActiveSessionMovies.Count > 1)
+        {
+            _showAbandonDialog = true;
+        }
+        else
+        {
+            ResetAndClose();
+        }
+    }
+
+    private void ConfirmAbandon()
+    {
+        _showAbandonDialog = false;
+        ResetAndClose();
     }
 
     private async Task FinishSessionAsync()
@@ -271,24 +308,19 @@ The mudexpansionpanels are flexible, would like for them to be static
         {
             await ViewModel.ToggleMovieWatchedStatusAsync(_selectedMovie.WheelMovie.Id, true);
         }
-
-        AudioService.StopBgm();
-        ViewModel.RestoreSessionMovies();
-        _showWinnerDialog = false;
-        MudDialog.Close();
-
-        if (_selectedMovie != null)
+    
+        int? tmdbId = _selectedMovie?.Movie.TmdbId;
+        await CloseSessionAsync();
+    
+        if (tmdbId != null)
         {
-            Navigation.NavigateTo($"/movie/{_selectedMovie.Movie.TmdbId}");
+            Navigation.NavigateTo($"/movie/{tmdbId}");
         }
     }
 
-    private void ResetAndClose()
+    private async void ResetAndClose()
     {
-        AudioService.StopBgm();
-        ViewModel.RestoreSessionMovies();
-        _showWinnerDialog = false;
-        MudDialog.Close();
+        await CloseSessionAsync();
     }
 
     private async Task StartTickSequence(double startRotation, double addedRotation, double totalDurationMs, int sliceCount)
@@ -336,5 +368,19 @@ The mudexpansionpanels are flexible, would like for them to be static
                 @* _ = AudioService.PlayTickAsync("tick.mp3"); *@
             }
         }
+    }
+
+    private async Task CloseSessionAsync()
+    {
+        _showEliminationDialog = false;
+        _showWinnerDialog = false;
+        _showAbandonDialog = false;
+
+        StateHasChanged();
+        await Task.Delay(50);
+
+        AudioService.StopBgm();
+        ViewModel.RestoreSessionMovies();
+        MudDialog.Close();
     }
 }
