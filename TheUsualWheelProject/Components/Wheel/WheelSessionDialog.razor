@@ -23,6 +23,7 @@ The mudexpansionpanels are flexible, would like for them to be static
                 BaseRotation="ViewModel.CurrentRotation"
                 IsAnimating="IsAnimating"
                 IsPreviewMode="false"
+                SpinDuration="ViewModel.CurrentWheel?.Configuration.SpinDurationSeconds ?? 5"
                 SlicePalette="ViewModel.CurrentWheel?.Configuration.SliceColors ?? new()" />
 
             @* Session Controls & Timeline *@
@@ -61,12 +62,21 @@ The mudexpansionpanels are flexible, would like for them to be static
                 @* Volume panel *@
                 <MudExpansionPanel Text="Audio Settings" Icon="@Icons.Material.Filled.VolumeUp">
                     <div class="px-2">
-                        <MudSlider @bind-Value="Volume"
+                        <MudText Typo="Typo.subtitle2">Music Volume</MudText>
+                        <MudSlider @bind-Value="BgmVolume"
                                    Min="0"
                                    Max="1"
                                    Step="0.05"
                                    Color="Color.Primary" />
-                        <MudText Typo="Typo.caption" Class="mt-1">@($"{Volume:P0}")</MudText>
+                        <MudText Typo="Typo.caption" Class="mt-1 mb-2 d-block">@($"{BgmVolume:P0}")</MudText>
+
+                        <MudText Typo="Typo.subtitle2" Class="mt-2">Tick Volume</MudText>
+                        <MudSlider @bind-Value="TickVolume"
+                                   Min="0"
+                                   Max="1"
+                                   Step="0.05"
+                                   Color="Color.Secondary" />
+                        <MudText Typo="Typo.caption" Class="mt-1 d-block">@($"{TickVolume:P0}")</MudText>
                     </div>
                 </MudExpansionPanel>
 
@@ -130,15 +140,27 @@ The mudexpansionpanels are flexible, would like for them to be static
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
 
     private double AnimatedRotation = 0;
-    private double _volume = 0.75;
-    private double Volume
+    private double _bgmVolume = 0.75;
+    private double BgmVolume
     {
-        get => _volume;
+        get => _bgmVolume;
         set
         {
-            if (_volume == value) return;
-            _volume = value;
-            AudioService.SetVolume(value);
+            if (_bgmVolume == value) return;
+            _bgmVolume = value;
+            AudioService.SetBgmVolume(value);
+        }
+    }
+    
+    private double _tickVolume = 0.75;
+    private double TickVolume
+    {
+        get => _tickVolume;
+        set
+        {
+            if (_tickVolume == value) return;
+            _tickVolume = value;
+            AudioService.SetTickVolume(value);
         }
     }
     private bool IsAnimating = false;
@@ -161,7 +183,8 @@ The mudexpansionpanels are flexible, would like for them to be static
     private async Task StartSessionAudioAsync()
     {
         if (ViewModel.CurrentWheel == null) return;
-        AudioService.SetVolume(_volume);
+        AudioService.SetBgmVolume(_bgmVolume);
+        AudioService.SetTickVolume(_tickVolume);
         string bgmTrack = ViewModel.CurrentWheel.Configuration.AudioTrack;
         await AudioService.PlayBgmAsync(bgmTrack, loop: true);
     }
@@ -193,16 +216,20 @@ The mudexpansionpanels are flexible, would like for them to be static
 
         double startRotation = AnimatedRotation;
         double endRotation = startRotation + finalRotation;
+        
         IsAnimating = true;
         AnimatedRotation = endRotation;
-        StateHasChanged();
+        StateHasChanged(); 
 
-        // The duration here should tie into your wheel spin duration.
-        await Task.Delay(ViewModel.CurrentWheel.Configuration.SpinDurationSeconds * 1000); 
+        double durationMs = ViewModel.CurrentWheel.Configuration.SpinDurationSeconds * 1000;
+
+
+        _ = StartTickSequence(startRotation, finalRotation, durationMs, count);
+
+        await Task.Delay((int)durationMs); 
 
         IsAnimating = false;
         _showEliminationDialog = true;
-        
         StateHasChanged();
     }
 
@@ -264,8 +291,49 @@ The mudexpansionpanels are flexible, would like for them to be static
         MudDialog.Close();
     }
 
-    private void OnVolumeChanged(double value)
+    private async Task StartTickSequence(double startRotation, double addedRotation, double totalDurationMs, int sliceCount)
     {
-        _volume = value;
+        // A single slice is 360 / count
+        double sliceAngle = 360.0 / sliceCount;
+        
+        // Total final angle
+        double endRotation = startRotation + addedRotation;
+
+        // Calculate all boundaries between startRotation and endRotation
+        // Because standard CSS rotates modulo 360, every time the total rotation passes a multiple of sliceAngle, it's a boundary.
+        
+        // We want the smallest multiple of sliceAngle that is greater than startRotation:
+        double nextBoundary = Math.Ceiling(startRotation / sliceAngle) * sliceAngle;
+        
+        List<int> tickDelays = new List<int>();
+
+        while (nextBoundary < endRotation)
+        {
+            double progress = (nextBoundary - startRotation) / addedRotation;
+            
+            // Using cubic ease-out inverse: t = duration * (1 - (1 - progress)^(1/3))
+            double timeFraction = 1.0 - Math.Pow(1.0 - progress, 1.0 / 3.0);
+            int timeMs = (int)(totalDurationMs * timeFraction);
+            
+            tickDelays.Add(timeMs);
+            nextBoundary += sliceAngle;
+        }
+
+        // Now wait and play
+        int accumulatedTime = 0;
+        foreach (var targetTime in tickDelays)
+        {
+            int delay = targetTime - accumulatedTime;
+            if (delay > 0)
+            {
+                await Task.Delay(delay);
+                accumulatedTime += delay;
+                
+                // Only play if they didn't skip ahead or cancel
+                if (!IsAnimating) break; 
+
+                _ = AudioService.PlayTickAsync("tick.mp3");
+            }
+        }
     }
 }

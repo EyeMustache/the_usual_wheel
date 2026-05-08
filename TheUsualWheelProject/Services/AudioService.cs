@@ -10,8 +10,9 @@ public class AudioService
     private IAudioPlayer? _bgmPlayer;
     private IAudioPlayer? _tickPlayer;
     private bool _isTickInitialized = false;
-    public double Volume { get; private set; } = 0.75;
-
+    
+    public double BgmVolume { get; private set; } = 0.75;
+    public double TickVolume { get; private set; } = 0.75;
 
     public AudioService(IAudioManager audioManager)
     {
@@ -36,7 +37,7 @@ public class AudioService
         Stream stream = await GetAudioStreamAsync(fileName);
         _bgmPlayer = _audioManager.CreatePlayer(stream);
         _bgmPlayer.Loop = loop;
-        _bgmPlayer.Volume = Volume;
+        _bgmPlayer.Volume = BgmVolume;
         _bgmPlayer.Play();
     }
 
@@ -59,11 +60,11 @@ public class AudioService
         {
             Stream stream = await GetAudioStreamAsync(fileName);
             _tickPlayer = _audioManager.CreatePlayer(stream);
-            _tickPlayer.Volume = Volume;
+            _tickPlayer.Volume = TickVolume;
             _isTickInitialized = true;
         }
 
-        _tickPlayer.Volume = Volume;
+        _tickPlayer.Volume = TickVolume;
         if (_tickPlayer.IsPlaying)
             _tickPlayer.Pause();
 
@@ -71,10 +72,15 @@ public class AudioService
         _tickPlayer.Play();
     }
 
-    public void SetVolume(double volume)
+    public void SetBgmVolume(double volume)
     {
-        Volume = Math.Clamp(volume, 0.0, 1.0);
-        if (_bgmPlayer != null) _bgmPlayer.Volume = Volume;
-        if (_tickPlayer != null) _tickPlayer.Volume = Volume;
+        BgmVolume = Math.Clamp(volume, 0.0, 1.0);
+        if (_bgmPlayer != null) _bgmPlayer.Volume = BgmVolume;
+    }
+
+    public void SetTickVolume(double volume)
+    {
+        TickVolume = Math.Clamp(volume, 0.0, 1.0);
+        if (_tickPlayer != null) _tickPlayer.Volume = TickVolume;
     }
 }

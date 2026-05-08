@@ -6,7 +6,7 @@
 
     <svg viewBox="0 0 320 320"
          class="wheel-svg @(IsAnimating ? "spinning" : "") @(IsPreviewMode ? "preview-spin" : "")"
-         style="transform: rotate(@(AnimatedRotation)deg);">
+         style="transform: rotate(@(AnimatedRotation)deg); transition: transform @(SpinDuration)s cubic-bezier(0.1, 0.9, 0.1, 1);">
         <circle cx="160" cy="160" r="154" fill="#111" />
 
         @{
@@ -63,6 +63,8 @@
     }; *@
     [Parameter] public List<string> SlicePalette { get; set; } = new List<string>();
 
+
+    [Parameter] public int SpinDuration { get; set; } = 5;
 
     private List<WheelSlice> GetWheelSlices()
     {
