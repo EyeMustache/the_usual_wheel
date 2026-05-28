@@ -36,6 +36,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IWheelRepository>(_ => new WheelRepository(DatabaseConfig.ConnectionString));
 		builder.Services.AddSingleton<IWatchProviderRepository>(_ => new WatchProviderRepository(DatabaseConfig.ConnectionString));
 		builder.Services.AddSingleton<IMovieProviderRepository>(_ => new MovieProviderRepository(DatabaseConfig.ConnectionString));
+		builder.Services.AddSingleton<IBreakRepository>(_ => new BreakRepository(DatabaseConfig.ConnectionString));
 		// Services
         builder.Services.AddSingleton<MovieService>();
         builder.Services.AddSingleton<WheelService>();
@@ -45,6 +46,7 @@ public static class MauiProgram
 			new DatabaseService(DatabaseConfig.ConnectionString, new WheelRepository(DatabaseConfig.ConnectionString), new MovieRepository(DatabaseConfig.ConnectionString), new LoggerFactory().CreateLogger<DatabaseService>()));
         builder.Services.AddSingleton(AudioManager.Current);
         builder.Services.AddSingleton<AudioService>();
+		builder.Services.AddHttpClient<BreakService>();
 		// ViewModels
 		builder.Services.AddSingleton<MainPageViewModel>();
 		builder.Services.AddSingleton<WheelViewModel>();

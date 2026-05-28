@@ -77,6 +77,18 @@ public class DatabaseService : LoggingBase<DatabaseService>
             ON MovieProvider(MovieId);
             CREATE INDEX IF NOT EXISTS IX_MovieProvider_ProviderId
             ON MovieProvider(ProviderId);
+            );
+            CREATE TABLE IF NOT EXISTS Break (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                MovieId INTEGER NOT NULL,
+                BreakNumber INTEGER NOT NULL,
+                Timestamp TEXT NOT NULL,
+                VibeCheck TEXT NOT NULL,
+                Recap TEXT NOT NULL,
+                FOREIGN KEY (MovieId) REFERENCES Movie(Id)
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS IX_Break_MovieId_BreakNumber
+            ON Break(MovieId, BreakNumber);
         ");
         // Temp to add it to existing DB
         // await connection.ExecuteAsync(@"ALTER TABLE Wheel ADD COLUMN Configuration TEXT;");

@@ -38,12 +38,17 @@ appsettings.Development.json
 # Hide docs
 docs/
 
-# Random files idk
+# Others
 .idea/
 .idea/workspace.xml
 .__override__/
+.continue
+.github/agents/
+/TheUsualWheelProject/graphify-out
+.venv
+graphify_mcp.py
 
-#Hide API key
+
+#Hide API keys
 TheUsualWheelProject/TmdbApiKey.cs
-
-.github/agents/ask-wheel.agent.md
+TheUsualWheelProject/GeminiApiKey.cs

@@ -9,3 +9,7 @@
 //     public const string APIKEY = "ENTER KEY HERE";
 // }
  
+// internal static class GeminiApiKey
+// {
+//     public const string APIKEY = "ENTER KEY HERE";
+// }
